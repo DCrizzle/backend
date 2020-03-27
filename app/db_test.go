@@ -25,10 +25,16 @@ func Test_new(t *testing.T) {
 type mockTransaction struct {
 	mutateResp *api.Response
 	mutateErr  error
+	queryResp  *api.Response
+	queryErr   error
 }
 
 func (mt *mockTransaction) Mutate(context.Context, *api.Mutation) (*api.Response, error) {
 	return mt.mutateResp, mt.mutateErr
+}
+
+func (mt *mockTransaction) QueryWithVars(context.Context, string, map[string]string) (*api.Response, error) {
+	return mt.queryResp, mt.queryErr
 }
 
 type mockDgraph struct {
@@ -73,6 +79,52 @@ func Test_mutate(t *testing.T) {
 		}
 
 		err := db.mutate(specimen)
+		if err != nil && err.Error() != test.err.Error() {
+			t.Errorf("description: %s, expected: %v, received: %v", test.desc, test.err, err)
+		}
+	}
+}
+
+func Test_query(t *testing.T) {
+	tests := []struct {
+		desc      string
+		queryResp *api.Response
+		queryErr  error
+		err       error
+	}{
+		{
+			desc:      "dgraph query method error",
+			queryResp: nil,
+			queryErr:  errors.New("mock query error"),
+			err:       errors.New("query execution error: mock query error"),
+		},
+		{
+			desc: "successful invocation",
+			queryResp: &api.Response{
+				Json: []byte(`{"response":"data"}`),
+			},
+			queryErr: nil,
+			err:      nil,
+		},
+	}
+
+	query := `
+		specimens(func: has(name)) {
+			name
+		}
+	`
+
+	for _, test := range tests {
+		db := &db{
+			dgraph: &mockDgraph{
+				mockTransaction: &mockTransaction{
+					queryResp: test.queryResp,
+					queryErr:  test.queryErr,
+				},
+			},
+		}
+
+		_, err := db.query(query, nil)
 		if err != nil && err.Error() != test.err.Error() {
 			t.Errorf("description: %s, expected: %v, received: %v", test.desc, test.err, err)
 		}

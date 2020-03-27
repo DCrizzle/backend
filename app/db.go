@@ -13,10 +13,12 @@ const (
 	errNewClient = "new client error"
 	errNewDB     = "new db instance error"
 	errMutate    = "mutate execution error"
+	errQuery     = "query execution error"
 )
 
 type transaction interface {
 	Mutate(context.Context, *api.Mutation) (*api.Response, error)
+	QueryWithVars(context.Context, string, map[string]string) (*api.Response, error)
 }
 
 type dgraph interface {
@@ -26,7 +28,7 @@ type dgraph interface {
 func newClient(target string) (*dgo.Dgraph, error) {
 	conn, err := grpc.Dial(target, grpc.WithInsecure())
 	if err != nil {
-		return nil, fmt.Errorf("%s: %s", errNewClient, err.Error())
+		return nil, fmt.Errorf("%s: %v", errNewClient, err)
 	}
 
 	return dgo.NewDgraphClient(
@@ -68,13 +70,19 @@ func (db *db) mutate(input []byte) error {
 	mu.SetJson = input
 	resp, err := db.dgraph.transaction().Mutate(ctx, mu)
 	if err != nil {
-		return fmt.Errorf("%s: %s", errMutate, err.Error())
+		return fmt.Errorf("%s: %v", errMutate, err)
 	}
 	_ = resp
 
 	return nil
 }
 
-func (db *db) query(input []byte) (interface{}, error) {
-	return nil, nil
+func (db *db) query(query string, vars map[string]string) ([]byte, error) {
+	ctx := context.Background()
+	resp, err := db.dgraph.transaction().QueryWithVars(ctx, query, vars)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %v", errQuery, err)
+	}
+
+	return resp.Json, nil
 }
