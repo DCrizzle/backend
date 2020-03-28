@@ -39,10 +39,54 @@ func (mt *mockTransaction) QueryWithVars(context.Context, string, map[string]str
 
 type mockDgraph struct {
 	mockTransaction *mockTransaction
+	setSchemaErr    error
 }
 
 func (md *mockDgraph) transaction() transaction {
 	return md.mockTransaction
+}
+
+func (md *mockDgraph) setSchema(string) error {
+	return md.setSchemaErr
+}
+
+func Test_setSchema(t *testing.T) {
+
+	tests := []struct {
+		desc         string
+		setSchemaErr error
+		err          error
+	}{
+		{
+			desc:         "degraph set schema error",
+			setSchemaErr: errors.New("mock set schema error"),
+			err:          errors.New("set schema error: mock set schema error"),
+		},
+		{
+			desc:         "successful invocation",
+			setSchemaErr: nil,
+			err:          nil,
+		},
+	}
+
+	for _, test := range tests {
+		db := &db{
+			dgraph: &mockDgraph{
+				setSchemaErr: test.setSchemaErr,
+			},
+		}
+
+		err := db.setSchema(`
+			name: string
+
+			type Specimen {
+				name: string
+			}
+		`)
+		if err != nil && err.Error() != test.err.Error() {
+			t.Errorf("description: %s, expected: %v, received: %v", test.desc, test.err, err)
+		}
+	}
 }
 
 func Test_mutate(t *testing.T) {

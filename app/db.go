@@ -14,6 +14,7 @@ const (
 	errNewDB     = "new db instance error"
 	errMutate    = "mutate execution error"
 	errQuery     = "query execution error"
+	errSetSchema = "set schema error"
 )
 
 type transaction interface {
@@ -23,6 +24,7 @@ type transaction interface {
 
 type dgraph interface {
 	transaction() transaction
+	setSchema(string) error
 }
 
 func newClient(target string) (*dgo.Dgraph, error) {
@@ -44,6 +46,15 @@ func (dg *dg) transaction() transaction {
 	return dg.client.NewTxn()
 }
 
+func (dg *dg) setSchema(schema string) error {
+	ctx := context.Background()
+	op := &api.Operation{
+		Schema: schema,
+	}
+
+	return dg.client.Alter(ctx, op)
+}
+
 type db struct {
 	dgraph dgraph
 }
@@ -59,6 +70,14 @@ func newDB() (*db, error) {
 			client: client,
 		},
 	}, nil
+}
+
+func (db *db) setSchema(schema string) error {
+	if err := db.dgraph.setSchema(schema); err != nil {
+		return fmt.Errorf("%s: %v", errSetSchema, err)
+	}
+
+	return nil
 }
 
 func (db *db) mutate(input []byte) error {
