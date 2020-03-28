@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	// "errors"
 	"fmt"
 
 	"github.com/dgraph-io/dgo/v2"
@@ -12,9 +13,9 @@ import (
 const (
 	errNewClient = "new client error"
 	errNewDB     = "new db instance error"
+	errSetSchema = "set schema error"
 	errMutate    = "mutate execution error"
 	errQuery     = "query execution error"
-	errSetSchema = "set schema error"
 )
 
 type transaction interface {
@@ -74,7 +75,7 @@ func newDB() (*db, error) {
 
 func (db *db) setSchema(schema string) error {
 	if err := db.dgraph.setSchema(schema); err != nil {
-		return fmt.Errorf("%s: %v", errSetSchema, err)
+		return fmt.Errorf("%s: %w", errSetSchema, err)
 	}
 
 	return nil
@@ -89,7 +90,7 @@ func (db *db) mutate(input []byte) error {
 	mu.SetJson = input
 	resp, err := db.dgraph.transaction().Mutate(ctx, mu)
 	if err != nil {
-		return fmt.Errorf("%s: %v", errMutate, err)
+		return fmt.Errorf("%s: %w", errMutate, err)
 	}
 	_ = resp
 

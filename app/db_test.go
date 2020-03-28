@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/dgraph-io/dgo/v2/protos/api"
@@ -51,21 +52,17 @@ func (md *mockDgraph) setSchema(string) error {
 }
 
 func Test_setSchema(t *testing.T) {
-
 	tests := []struct {
 		desc         string
 		setSchemaErr error
-		err          error
 	}{
 		{
-			desc:         "degraph set schema error",
+			desc:         "dgraph set schema error",
 			setSchemaErr: errors.New("mock set schema error"),
-			err:          errors.New("set schema error: mock set schema error"),
 		},
 		{
 			desc:         "successful invocation",
 			setSchemaErr: nil,
-			err:          nil,
 		},
 	}
 
@@ -76,6 +73,8 @@ func Test_setSchema(t *testing.T) {
 			},
 		}
 
+		testErr := fmt.Errorf("%s: %w", errSetSchema, test.setSchemaErr)
+
 		err := db.setSchema(`
 			name: string
 
@@ -83,8 +82,8 @@ func Test_setSchema(t *testing.T) {
 				name: string
 			}
 		`)
-		if err != nil && err.Error() != test.err.Error() {
-			t.Errorf("description: %s, expected: %v, received: %v", test.desc, test.err, err)
+		if err != nil && errors.Is(err, testErr) {
+			t.Errorf("description: %s, expected: %v, received: %v", test.desc, testErr, err)
 		}
 	}
 }
@@ -94,19 +93,16 @@ func Test_mutate(t *testing.T) {
 		desc       string
 		mutateResp *api.Response
 		mutateErr  error
-		err        error
 	}{
 		{
 			desc:       "dgraph mutate method error",
 			mutateResp: nil,
 			mutateErr:  errors.New("mock mutate error"),
-			err:        errors.New("mutate execution error: mock mutate error"),
 		},
 		{
 			desc:       "successful invocation",
 			mutateResp: &api.Response{},
 			mutateErr:  nil,
-			err:        nil,
 		},
 	}
 
@@ -122,9 +118,11 @@ func Test_mutate(t *testing.T) {
 			},
 		}
 
+		testErr := fmt.Errorf("%s: %w", errMutate, test.mutateErr)
+
 		err := db.mutate(specimen)
-		if err != nil && err.Error() != test.err.Error() {
-			t.Errorf("description: %s, expected: %v, received: %v", test.desc, test.err, err)
+		if err != nil && errors.Is(err, testErr) {
+			t.Errorf("description: %s, expected: %v, received: %v", test.desc, testErr, err)
 		}
 	}
 }
@@ -134,13 +132,11 @@ func Test_query(t *testing.T) {
 		desc      string
 		queryResp *api.Response
 		queryErr  error
-		err       error
 	}{
 		{
 			desc:      "dgraph query method error",
 			queryResp: nil,
 			queryErr:  errors.New("mock query error"),
-			err:       errors.New("query execution error: mock query error"),
 		},
 		{
 			desc: "successful invocation",
@@ -148,7 +144,6 @@ func Test_query(t *testing.T) {
 				Json: []byte(`{"response":"data"}`),
 			},
 			queryErr: nil,
-			err:      nil,
 		},
 	}
 
@@ -168,9 +163,11 @@ func Test_query(t *testing.T) {
 			},
 		}
 
+		testErr := fmt.Errorf("%s: %w", errQuery, test.queryErr)
+
 		_, err := db.query(query, nil)
-		if err != nil && err.Error() != test.err.Error() {
-			t.Errorf("description: %s, expected: %v, received: %v", test.desc, test.err, err)
+		if err != nil && errors.Is(err, testErr) {
+			t.Errorf("description: %s, expected: %v, received: %v", test.desc, testErr, err)
 		}
 	}
 }
