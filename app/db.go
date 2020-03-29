@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	// "errors"
 	"fmt"
 
 	"github.com/dgraph-io/dgo/v2"
