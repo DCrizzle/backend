@@ -7,8 +7,9 @@
 		- [ ] variable in schema.go
 	- [x] encrypt data received from api (not encrypted by api)
 	- [ ] obfuscate dgraph/graphql implementation
+		- [ ] include user/session/datetime/etc for operations
 		- [ ] NOTE: unsure on this; app might be encrypted/secure dgraph
-		- [ ] activity logging output
+	- [ ] activity logging output
 	- [ ] generate backups at specified frequency
 - [ ] api
 	- [ ] objects
@@ -16,4 +17,11 @@
 		- [ ] user(s)
 - [ ] ui
 	- [ ] storage (storage companies)
+		- [ ] specimen
+			- [ ] add multi
+			- [ ] add single
+			- [ ] delete multi
+			- [ ] delete single
+			- [ ] list all
+			- [ ] list filter
 	- [ ] search (laboratories/researchers)
