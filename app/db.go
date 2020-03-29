@@ -86,14 +86,14 @@ func (db *db) alter(schema string) error {
 	return nil
 }
 
-func (db *db) mutate(input []byte) error {
-	mu := &api.Mutation{
+func (db *db) mutate(input *mutation) error {
+	ctx := context.Background()
+	m := &api.Mutation{
 		CommitNow: true,
+		SetJson:   input.Content,
 	}
 
-	ctx := context.Background()
-	mu.SetJson = input
-	resp, err := db.dgraph.getTransaction().Mutate(ctx, mu)
+	resp, err := db.dgraph.getTransaction().Mutate(ctx, m)
 	if err != nil {
 		return fmt.Errorf("%s: %w", errMutate, err)
 	}
@@ -102,11 +102,11 @@ func (db *db) mutate(input []byte) error {
 	return nil
 }
 
-func (db *db) query(query string, vars map[string]string) ([]byte, error) {
+func (db *db) query(input *query) ([]byte, error) {
 	ctx := context.Background()
-	resp, err := db.dgraph.getTransaction().QueryWithVars(ctx, query, vars)
+	resp, err := db.dgraph.getTransaction().QueryWithVars(ctx, *input.Content, input.Variables)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %v", errQuery, err)
+		return nil, fmt.Errorf("%s: %w", errQuery, err)
 	}
 
 	return resp.Json, nil

@@ -12,6 +12,10 @@ import (
 	"github.com/dgraph-io/dgo/v2/protos/api"
 )
 
+func stringPtr(input string) *string {
+	return &input
+}
+
 func TestMain(m *testing.M) {
 	log.SetOutput(ioutil.Discard)
 	os.Exit(m.Run())
@@ -115,7 +119,9 @@ func Test_mutate(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		specimen := []byte(`{"type":"blood"}`)
+		m := &mutation{
+			Content: []byte(`{"type":"blood"}`),
+		}
 
 		db := &db{
 			dgraph: &mockDgraph{
@@ -128,7 +134,7 @@ func Test_mutate(t *testing.T) {
 
 		testErr := fmt.Errorf("%s: %w", errMutate, test.mutateErr)
 
-		err := db.mutate(specimen)
+		err := db.mutate(m)
 		if err != nil && errors.Is(err, testErr) {
 			t.Errorf("description: %s, expected: %v, received: %v", test.desc, testErr, err)
 		}
@@ -155,11 +161,13 @@ func Test_query(t *testing.T) {
 		},
 	}
 
-	query := `
-		specimens(func: has(name)) {
-			name
-		}
-	`
+	q := &query{
+		Content: stringPtr(`
+			specimens(func: has(name)) {
+				name
+			}
+		`),
+	}
 
 	for _, test := range tests {
 		db := &db{
@@ -173,7 +181,7 @@ func Test_query(t *testing.T) {
 
 		testErr := fmt.Errorf("%s: %w", errQuery, test.queryErr)
 
-		_, err := db.query(query, nil)
+		_, err := db.query(q)
 		if err != nil && errors.Is(err, testErr) {
 			t.Errorf("description: %s, expected: %v, received: %v", test.desc, testErr, err)
 		}

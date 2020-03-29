@@ -8,6 +8,7 @@
 	- [x] encrypt data received from api (not encrypted by api)
 	- [ ] obfuscate dgraph/graphql implementation
 		- [ ] include user/session/datetime/etc for operations
+		- [ ] NOTE: possibly restructure to interface (operation) w/ sub interface (mutation/query)
 		- [ ] NOTE: unsure on this; app might be encrypted/secure dgraph
 	- [ ] activity logging output
 	- [ ] generate backups at specified frequency
