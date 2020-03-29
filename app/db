@@ -3,3 +3,6 @@
 set -e
 
 docker run --rm -it -p 8000:8000 -p 8080:8080 -p 9080:9080 dgraph/standalone:latest # TEMP
+
+# outline:
+# [ ] add --encryption_key_file flag for encryption at rest

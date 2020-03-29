@@ -4,10 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/dgraph-io/dgo/v2/protos/api"
 )
+
+func TestMain(m *testing.M) {
+	log.SetOutput(ioutil.Discard)
+	os.Exit(m.Run())
+}
 
 func Test_newClient(t *testing.T) {
 	client, err := newClient("localhost:8000")
@@ -17,7 +25,7 @@ func Test_newClient(t *testing.T) {
 }
 
 func Test_new(t *testing.T) {
-	db, err := newDB()
+	db, err := newDB("localhost:8000")
 	if db == nil || err != nil {
 		t.Errorf("description: error creating db, db: %+v, error: %s", db, err.Error())
 	}
@@ -43,7 +51,7 @@ type mockDgraph struct {
 	setSchemaErr    error
 }
 
-func (md *mockDgraph) transaction() transaction {
+func (md *mockDgraph) getTransaction() transaction {
 	return md.mockTransaction
 }
 
@@ -51,7 +59,7 @@ func (md *mockDgraph) setSchema(string) error {
 	return md.setSchemaErr
 }
 
-func Test_setSchema(t *testing.T) {
+func Test_alter(t *testing.T) {
 	tests := []struct {
 		desc         string
 		setSchemaErr error
@@ -73,9 +81,9 @@ func Test_setSchema(t *testing.T) {
 			},
 		}
 
-		testErr := fmt.Errorf("%s: %w", errSetSchema, test.setSchemaErr)
+		testErr := fmt.Errorf("%s: %w", erralter, test.setSchemaErr)
 
-		err := db.setSchema(`
+		err := db.alter(`
 			name: string
 
 			type Specimen {

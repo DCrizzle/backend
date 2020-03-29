@@ -9,10 +9,10 @@ import (
 	"google.golang.org/grpc"
 )
 
-const (
+const ( // NOTE: error generating/processing may need updating
 	errNewClient = "new client error"
 	errNewDB     = "new db instance error"
-	errSetSchema = "set schema error"
+	erralter     = "set schema error"
 	errMutate    = "mutate execution error"
 	errQuery     = "query execution error"
 )
@@ -20,11 +20,6 @@ const (
 type transaction interface {
 	Mutate(context.Context, *api.Mutation) (*api.Response, error)
 	QueryWithVars(context.Context, string, map[string]string) (*api.Response, error)
-}
-
-type dgraph interface {
-	transaction() transaction
-	setSchema(string) error
 }
 
 func newClient(target string) (*dgo.Dgraph, error) {
@@ -38,11 +33,16 @@ func newClient(target string) (*dgo.Dgraph, error) {
 	), nil
 }
 
+type dgraph interface {
+	getTransaction() transaction
+	setSchema(string) error
+}
+
 type dg struct {
 	client *dgo.Dgraph
 }
 
-func (dg *dg) transaction() transaction {
+func (dg *dg) getTransaction() transaction {
 	return dg.client.NewTxn()
 }
 
@@ -52,18 +52,24 @@ func (dg *dg) setSchema(schema string) error {
 		Schema: schema,
 	}
 
-	return dg.client.Alter(ctx, op)
+	return dg.client.Alter(ctx, op) // NOTE: add logic to wait/block until updated completes
 }
+
+type logger interface{}
 
 type db struct {
 	dgraph dgraph
+	logger logger
 }
 
-func newDB() (*db, error) {
-	client, err := newClient("localhost:9080")
+func newDB(host string) (*db, error) {
+	client, err := newClient(host)
 	if err != nil {
 		return nil, err
 	}
+
+	// outline:
+	// [ ] set schema w/ required indices
 
 	return &db{
 		dgraph: &dg{
@@ -72,9 +78,9 @@ func newDB() (*db, error) {
 	}, nil
 }
 
-func (db *db) setSchema(schema string) error {
+func (db *db) alter(schema string) error {
 	if err := db.dgraph.setSchema(schema); err != nil {
-		return fmt.Errorf("%s: %w", errSetSchema, err)
+		return fmt.Errorf("%s: %w", erralter, err)
 	}
 
 	return nil
@@ -87,18 +93,18 @@ func (db *db) mutate(input []byte) error {
 
 	ctx := context.Background()
 	mu.SetJson = input
-	resp, err := db.dgraph.transaction().Mutate(ctx, mu)
+	resp, err := db.dgraph.getTransaction().Mutate(ctx, mu)
 	if err != nil {
 		return fmt.Errorf("%s: %w", errMutate, err)
 	}
-	_ = resp
+	_ = resp.Uids
 
 	return nil
 }
 
 func (db *db) query(query string, vars map[string]string) ([]byte, error) {
 	ctx := context.Background()
-	resp, err := db.dgraph.transaction().QueryWithVars(ctx, query, vars)
+	resp, err := db.dgraph.getTransaction().QueryWithVars(ctx, query, vars)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %v", errQuery, err)
 	}
