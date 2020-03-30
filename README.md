@@ -12,6 +12,7 @@
 		- [ ] NOTE: unsure on this; app might be encrypted/secure dgraph
 	- [ ] activity logging output
 	- [ ] generate backups at specified frequency
+	- [ ] NOTE: https://medstack.co/blog/hipaa-tips-2-hipaa-compliant-databases/
 - [ ] api
 	- [ ] objects
 		- [ ] org(s)
