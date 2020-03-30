@@ -15,8 +15,19 @@
 	- [ ] NOTE: https://medstack.co/blog/hipaa-tips-2-hipaa-compliant-databases/
 - [ ] api
 	- [ ] objects
-		- [ ] org(s)
-		- [ ] user(s)
+		- [ ] org
+		- [ ] user
+	- [ ] handlers
+		- [ ] "/" -> redirect to "/login"
+		- [ ] "/login" -> validate user login; redirect to "/org/{id}" (POST)
+		- [ ] "/org/{id}" -> render org (GET)
+		- [ ] "/org/{id}/db" -> execute mutations (POST)
+		- [ ] "/org/{id}/db" -> execute queries (GET)
+			- [ ] NOTE: https://graphql.org/learn/serving-over-http/
+		- [ ] "/org/{id}/admin" -> org settings (GET)
+		- [ ] "/org/{id}/admin/users" -> users settings (GET)
+		- [ ] "/org/{id}/admin/user/{id}" -> user settings (GET)
+	- [ ] NOTE: see heupr/core for CSRF example
 - [ ] ui
 	- [ ] storage (storage companies)
 		- [ ] specimen
