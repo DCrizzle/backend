@@ -3,11 +3,19 @@ package api
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
 
-func handleOrg(w http.ResponseWriter, r *http.Request) {}
+func handleOrg(w http.ResponseWriter, r *http.Request) {
+	pathSpit := strings.Split(r.URL.Path, "/")
+	_ = pathSpit
+
+	// outline:
+	// [ ] create database query + execute
+	// [ ] create return object + return
+}
 
 func handleMutation(w http.ResponseWriter, r *http.Request) {}
 
