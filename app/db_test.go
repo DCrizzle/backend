@@ -28,8 +28,8 @@ func Test_newClient(t *testing.T) {
 	}
 }
 
-func Test_new(t *testing.T) {
-	db, err := newDB("localhost:8000")
+func TestNewDB(t *testing.T) {
+	db, err := NewDB("localhost:8000")
 	if db == nil || err != nil {
 		t.Errorf("description: error creating db, db: %+v, error: %s", db, err.Error())
 	}
@@ -63,7 +63,7 @@ func (md *mockDgraph) setSchema(string) error {
 	return md.setSchemaErr
 }
 
-func Test_alter(t *testing.T) {
+func TestAlter(t *testing.T) {
 	tests := []struct {
 		desc         string
 		setSchemaErr error
@@ -79,15 +79,15 @@ func Test_alter(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		db := &db{
+		db := &DB{
 			dgraph: &mockDgraph{
 				setSchemaErr: test.setSchemaErr,
 			},
 		}
 
-		testErr := fmt.Errorf("%s: %w", erralter, test.setSchemaErr)
+		testErr := fmt.Errorf("%s: %w", errAlter, test.setSchemaErr)
 
-		err := db.alter(`
+		err := db.Alter(`
 			name: string
 
 			type Specimen {
@@ -100,7 +100,7 @@ func Test_alter(t *testing.T) {
 	}
 }
 
-func Test_mutate(t *testing.T) {
+func TestMutate(t *testing.T) {
 	tests := []struct {
 		desc       string
 		mutateResp *api.Response
@@ -119,11 +119,11 @@ func Test_mutate(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		m := &mutation{
+		m := &Mutation{
 			Content: []byte(`{"type":"blood"}`),
 		}
 
-		db := &db{
+		db := &DB{
 			dgraph: &mockDgraph{
 				mockTransaction: &mockTransaction{
 					mutateResp: test.mutateResp,
@@ -134,14 +134,14 @@ func Test_mutate(t *testing.T) {
 
 		testErr := fmt.Errorf("%s: %w", errMutate, test.mutateErr)
 
-		err := db.mutate(m)
+		err := db.Mutate(m)
 		if err != nil && errors.Is(err, testErr) {
 			t.Errorf("description: %s, expected: %v, received: %v", test.desc, testErr, err)
 		}
 	}
 }
 
-func Test_query(t *testing.T) {
+func TestQuery(t *testing.T) {
 	tests := []struct {
 		desc      string
 		queryResp *api.Response
@@ -161,7 +161,7 @@ func Test_query(t *testing.T) {
 		},
 	}
 
-	q := &query{
+	q := &Query{
 		Content: stringPtr(`
 			specimens(func: has(name)) {
 				name
@@ -170,7 +170,7 @@ func Test_query(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		db := &db{
+		db := &DB{
 			dgraph: &mockDgraph{
 				mockTransaction: &mockTransaction{
 					queryResp: test.queryResp,
@@ -181,7 +181,7 @@ func Test_query(t *testing.T) {
 
 		testErr := fmt.Errorf("%s: %w", errQuery, test.queryErr)
 
-		_, err := db.query(q)
+		_, err := db.Query(q)
 		if err != nil && errors.Is(err, testErr) {
 			t.Errorf("description: %s, expected: %v, received: %v", test.desc, testErr, err)
 		}

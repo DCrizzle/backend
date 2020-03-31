@@ -12,7 +12,7 @@ import (
 const ( // NOTE: error generating/processing may need updating
 	errNewClient = "new client error"
 	errNewDB     = "new db instance error"
-	erralter     = "set schema error"
+	errAlter     = "set schema error"
 	errMutate    = "mutate execution error"
 	errQuery     = "query execution error"
 )
@@ -55,14 +55,23 @@ func (dg *dg) setSchema(schema string) error {
 	return dg.client.Alter(ctx, op) // NOTE: add logic to wait/block until updated completes
 }
 
+// Database is the public interface for the Dgraph wrapper
+type Database interface {
+	Alter(schema string) error
+	Mutate(input *Mutation) error
+	Query(input *Query) ([]byte, error)
+}
+
 type logger interface{}
 
-type db struct {
+// DB implements the public Database interface
+type DB struct {
 	dgraph dgraph
 	logger logger
 }
 
-func newDB(host string) (*db, error) {
+// NewDB generates an implementation of the Database interface
+func NewDB(host string) (*DB, error) {
 	client, err := newClient(host)
 	if err != nil {
 		return nil, err
@@ -71,22 +80,24 @@ func newDB(host string) (*db, error) {
 	// outline:
 	// [ ] set schema w/ required indices
 
-	return &db{
+	return &DB{
 		dgraph: &dg{
 			client: client,
 		},
 	}, nil
 }
 
-func (db *db) alter(schema string) error {
+// Alter is a method for updating the Dgraph schema
+func (db *DB) Alter(schema string) error {
 	if err := db.dgraph.setSchema(schema); err != nil {
-		return fmt.Errorf("%s: %w", erralter, err)
+		return fmt.Errorf("%s: %w", errAlter, err)
 	}
 
 	return nil
 }
 
-func (db *db) mutate(input *mutation) error {
+// Mutate is a method for executing mutation operations on the Dgraph database
+func (db *DB) Mutate(input *Mutation) error {
 	ctx := context.Background()
 	m := &api.Mutation{
 		CommitNow: true,
@@ -102,7 +113,8 @@ func (db *db) mutate(input *mutation) error {
 	return nil
 }
 
-func (db *db) query(input *query) ([]byte, error) {
+// Query is a method for executing query operations on the Dgraph database
+func (db *DB) Query(input *Query) ([]byte, error) {
 	ctx := context.Background()
 	resp, err := db.dgraph.getTransaction().QueryWithVars(ctx, *input.Content, input.Variables)
 	if err != nil {

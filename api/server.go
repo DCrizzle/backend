@@ -2,48 +2,94 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
+
+	"github.com/forstmeier/tbd/app"
 )
 
-func handleOrg(w http.ResponseWriter, r *http.Request) {
-	pathSpit := strings.Split(r.URL.Path, "/")
-	_ = pathSpit
+const (
+	errNewDB = "error calling new db function"
+)
+
+func handleOrg(db app.Database) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		pathSplit := strings.Split(r.URL.Path, "/")
+		_ = pathSplit
+	}
 
 	// outline:
+	// [ ] get user from request
+	// - [ ] metadata (?)
+	// - [ ] url parameters
+	// [ ] validate user access
 	// [ ] create database query + execute
 	// [ ] create return object + return
 }
 
-func handleMutation(w http.ResponseWriter, r *http.Request) {}
+func handleMutation(db app.Database) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		pathSplit := strings.Split(r.URL.Path, "/")
+		_ = pathSplit
+	}
 
-func handleQuery(w http.ResponseWriter, r *http.Request) {}
+	// outline:
+	// [ ] get user from request
+	// - [ ] metadata (?)
+	// - [ ] url parameters
+	// [ ] validate user access
+	// [ ] create database query + execute
+	// [ ] create return object + return
+}
+
+func handleQuery(db app.Database) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		pathSplit := strings.Split(r.URL.Path, "/")
+		_ = pathSplit
+	}
+
+	// outline:
+	// [ ] get user from request
+	// - [ ] metadata (?)
+	// - [ ] url parameters
+	// [ ] validate user access
+	// [ ] create database query + execute
+	// [ ] create return object + return
+}
 
 type server struct {
 	httpServer http.Server
+	database   app.Database
 }
 
-func newServer(addr string) *server {
+func newServer(addr string) (*server, error) {
 
 	router := mux.NewRouter()
 
 	subrouter := router.Host(addr).Subrouter()
 
+	db, err := app.NewDB(addr)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errNewDB, err)
+	}
+
 	// NOTE: probably refactor these paths/subrouters
-	subrouter.HandleFunc("/org/{id}", handleOrg).Methods("GET")
+	subrouter.HandleFunc("/org/{id}", handleOrg(db)).Methods("GET")
 
-	subrouter.HandleFunc("/org/{id}/db", handleMutation).Methods("POST")
+	subrouter.HandleFunc("/org/{id}/db", handleMutation(db)).Methods("POST")
 
-	subrouter.HandleFunc("/org/{id}/db", handleQuery).Methods("GET")
+	subrouter.HandleFunc("/org/{id}/db", handleQuery(db)).Methods("GET")
 
 	return &server{
 		httpServer: http.Server{
 			Addr:    addr,
 			Handler: router,
 		},
-	}
+		database: db,
+	}, nil
 }
 
 func (s *server) start() error {
