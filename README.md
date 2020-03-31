@@ -13,6 +13,32 @@
 	- [ ] activity logging output
 	- [ ] generate backups at specified frequency
 	- [ ] NOTE: https://medstack.co/blog/hipaa-tips-2-hipaa-compliant-databases/
+	- [ ] database definition: [] - list, {} - select
+		- [ ] organization (1)
+			- [ ] uid -> uid
+			- [ ] name -> string
+			- [ ] users -> [user -> uid]
+			- [ ] items -> [item -> uid]
+			- [ ] collections -> [collection -> uid]
+			- [ ] type -> {string}
+		- [ ] user (1)
+			- [ ] uid -> uid
+			- [ ] fn/ln -> string/string
+			- [ ] email -> string
+			- [ ] organizations -> [organization -> uid]
+		- [ ] item (1)
+			- [ ] uid -> uid
+			- [ ] creator -> [user -> uid]
+			- [ ] created/updated -> date/date
+			- [ ] updates -> [update -> uid]
+		- [ ] update (2) # may be available natively in dgraph
+			- [ ] uid -> uid
+			- [ ] description -> string
+			- [ ] key -> string
+			- [ ] old/new value -> string/string
+ 		- [ ] collection (2) # saved filter query
+			- [ ] uid -> uid
+			- [ ] owner -> organization/user -> uid/uid
 - [ ] api
 	- [ ] objects
 		- [ ] org
