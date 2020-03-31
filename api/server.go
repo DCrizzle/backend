@@ -15,6 +15,18 @@ const (
 	errNewDB = "error calling new db function"
 )
 
+type apiHandler func(db app.Database) func(w http.ResponseWriter, r *http.Request)
+
+func contextWrap(handler func(db app.Database) func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+	// outline:
+	// [ ] create context
+	// [ ] validate user
+	// [ ] insert into context with values
+	// - [ ] handlers: handleOrg, handleMutation, handleQuery
+	// [ ] pass into received handler
+	// [ ] return/invoke handler
+})
+
 func handleOrg(db app.Database) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pathSplit := strings.Split(r.URL.Path, "/")
