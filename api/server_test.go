@@ -60,28 +60,30 @@ func Test_secure(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		h := &helper{
-			db: &testDB{
-				respQuery: test.respQuery,
-				errQuery:  test.errQuery,
-			},
-		}
+		t.Run(test.desc, func(t *testing.T) {
+			h := &helper{
+				db: &testDB{
+					respQuery: test.respQuery,
+					errQuery:  test.errQuery,
+				},
+			}
 
-		mh := &mockHandle{}
-		hdlr := h.secure(mh)
+			mh := &mockHandle{}
+			hdlr := h.secure(mh)
 
-		req, err := http.NewRequest("GET", "/user/123", nil)
-		if err != nil {
-			t.Fatal(err)
-		}
+			req, err := http.NewRequest("GET", "/user/123", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		rec := httptest.NewRecorder()
+			rec := httptest.NewRecorder()
 
-		hdlr.ServeHTTP(rec, req)
+			hdlr.ServeHTTP(rec, req)
 
-		if rec.Code != test.code {
-			t.Errorf("description: %s, received: %d, expected: %d", test.desc, rec.Code, test.code)
-		}
+			if rec.Code != test.code {
+				t.Errorf("code received: %d, expected: %d", rec.Code, test.code)
+			}
+		})
 	}
 }
 
@@ -101,20 +103,22 @@ func Test_handleOrg(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		req, err := http.NewRequest("GET", test.path, nil)
-		if err != nil {
-			t.Fatal(err)
-		}
+		t.Run(test.desc, func(t *testing.T) {
+			req, err := http.NewRequest("GET", test.path, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		rec := httptest.NewRecorder()
-		db := &testDB{}
-		handler := http.HandlerFunc(handleOrg(db))
+			rec := httptest.NewRecorder()
+			db := &testDB{}
+			handler := http.HandlerFunc(handleOrg(db))
 
-		handler.ServeHTTP(rec, req)
+			handler.ServeHTTP(rec, req)
 
-		if rec.Code != test.code {
-			t.Errorf("description: %s, received: %d, expected: %d", test.desc, rec.Code, test.code)
-		}
+			if rec.Code != test.code {
+				t.Errorf("code received: %d, expected: %d", rec.Code, test.code)
+			}
+		})
 	}
 }
 
@@ -134,20 +138,22 @@ func Test_handleMutation(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		req, err := http.NewRequest("POST", test.path, nil)
-		if err != nil {
-			t.Fatal(err)
-		}
+		t.Run(test.desc, func(t *testing.T) {
+			req, err := http.NewRequest("POST", test.path, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		rec := httptest.NewRecorder()
-		db := &testDB{}
-		handler := http.HandlerFunc(handleMutation(db))
+			rec := httptest.NewRecorder()
+			db := &testDB{}
+			handler := http.HandlerFunc(handleMutation(db))
 
-		handler.ServeHTTP(rec, req)
+			handler.ServeHTTP(rec, req)
 
-		if rec.Code != test.code {
-			t.Errorf("description: %s, received: %d, expected: %d", test.desc, rec.Code, test.code)
-		}
+			if rec.Code != test.code {
+				t.Errorf("code received: %d, expected: %d", rec.Code, test.code)
+			}
+		})
 	}
 }
 
@@ -167,26 +173,28 @@ func Test_handleQuery(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		req, err := http.NewRequest("GET", test.path, nil)
-		if err != nil {
-			t.Fatal(err)
-		}
+		t.Run(test.desc, func(t *testing.T) {
+			req, err := http.NewRequest("GET", test.path, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		rec := httptest.NewRecorder()
-		db := &testDB{}
-		handler := http.HandlerFunc(handleQuery(db))
+			rec := httptest.NewRecorder()
+			db := &testDB{}
+			handler := http.HandlerFunc(handleQuery(db))
 
-		handler.ServeHTTP(rec, req)
+			handler.ServeHTTP(rec, req)
 
-		if rec.Code != test.code {
-			t.Errorf("description: %s, received: %d, expected: %d", test.desc, rec.Code, test.code)
-		}
+			if rec.Code != test.code {
+				t.Errorf("code received: %d, expected: %d", rec.Code, test.code)
+			}
+		})
 	}
 }
 
 func Test_newServer(t *testing.T) {
 	s, err := newServer("127.0.0.1:8080")
 	if s == nil || err != nil {
-		t.Errorf("description: error creating server, received: %+v", s)
+		t.Errorf("error received: %+v", s)
 	}
 }
