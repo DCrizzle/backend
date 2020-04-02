@@ -39,6 +39,16 @@
  		- [ ] collection (2) # saved filter query
 			- [ ] uid -> uid
 			- [ ] owner -> organization/user -> uid/uid
+	- [ ] graph queries (and general flow)
+		- [ ] Fixed: predetermined, primarily CRUD, rarely change
+		- [ ] Dynamic: updated based on database contents/relationships, frequently change
+	    - [ ] API gets schema/index from graph database
+	    - [ ] API generate JSON relationship structure + send to caller (UI)
+	    - [ ] [UI renders received JSON as filter options]
+	    - [ ] [User selects options + submits filter request]
+	    - [ ] API parses filter option values + creates filter query
+	    - [ ] Database returns filtered selections to API
+	    - [ ] API returns selections to UI for full results rendering
 - [ ] api
 	- [ ] objects
 		- [ ] org
