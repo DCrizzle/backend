@@ -39,11 +39,17 @@
  		- [ ] collection (2) # saved filter query
 			- [ ] uid -> uid
 			- [ ] owner -> organization/user -> uid/uid
+	- graph structures ("design" not specific values like above)
+		- `org`: “root” structure, contains `user`(s) and `item`(s) → fixed queries
+		- `user`: sub-structure → fixed queries
+		- [`other`]: not yet defined, stuff like state laws/regulation/consent forms/etc. -> fixed queries
+		- `item`: sub-structure → dynamic queries
 	- [ ] graph queries (and general flow)
 		- [ ] Fixed: predetermined, primarily CRUD, rarely change
 		- [ ] Dynamic: updated based on database contents/relationships, frequently change
-	    - [ ] API gets schema/index from graph database
+	    - [ ] API gets schema/index from graph database (e.g. `schema(type: Item) {}`)
 	    - [ ] API generate JSON relationship structure + send to caller (UI)
+				- [ ] relationships determined by many fixed + single dynamic types (?)
 	    - [ ] [UI renders received JSON as filter options]
 	    - [ ] [User selects options + submits filter request]
 	    - [ ] API parses filter option values + creates filter query
