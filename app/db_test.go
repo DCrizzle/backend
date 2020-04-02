@@ -79,24 +79,26 @@ func TestAlter(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		db := &DB{
-			dgraph: &mockDgraph{
-				setSchemaErr: test.setSchemaErr,
-			},
-		}
-
-		testErr := fmt.Errorf("%s: %w", errAlter, test.setSchemaErr)
-
-		err := db.Alter(`
-			name: string
-
-			type Specimen {
-				name: string
+		t.Run(test.desc, func(t *testing.T) {
+			db := &DB{
+				dgraph: &mockDgraph{
+					setSchemaErr: test.setSchemaErr,
+				},
 			}
-		`)
-		if err != nil && errors.Is(err, testErr) {
-			t.Errorf("description: %s, expected: %v, received: %v", test.desc, testErr, err)
-		}
+
+			testErr := fmt.Errorf("%s: %w", errAlter, test.setSchemaErr)
+
+			err := db.Alter(`
+				name: string
+
+				type Specimen {
+					name: string
+				}
+			`)
+			if err != nil && errors.Is(err, testErr) {
+				t.Errorf("error expected: %v, received: %v", testErr, err)
+			}
+		})
 	}
 }
 
@@ -119,25 +121,27 @@ func TestMutate(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		m := &Mutation{
-			Content: []byte(`{"type":"blood"}`),
-		}
+		t.Run(test.desc, func(t *testing.T) {
+			m := &Mutation{
+				Content: []byte(`{"type":"blood"}`),
+			}
 
-		db := &DB{
-			dgraph: &mockDgraph{
-				mockTransaction: &mockTransaction{
-					mutateResp: test.mutateResp,
-					mutateErr:  test.mutateErr,
+			db := &DB{
+				dgraph: &mockDgraph{
+					mockTransaction: &mockTransaction{
+						mutateResp: test.mutateResp,
+						mutateErr:  test.mutateErr,
+					},
 				},
-			},
-		}
+			}
 
-		testErr := fmt.Errorf("%s: %w", errMutate, test.mutateErr)
+			testErr := fmt.Errorf("%s: %w", errMutate, test.mutateErr)
 
-		err := db.Mutate(m)
-		if err != nil && errors.Is(err, testErr) {
-			t.Errorf("description: %s, expected: %v, received: %v", test.desc, testErr, err)
-		}
+			err := db.Mutate(m)
+			if err != nil && errors.Is(err, testErr) {
+				t.Errorf("error expected: %v, received: %v", testErr, err)
+			}
+		})
 	}
 }
 
@@ -170,20 +174,22 @@ func TestQuery(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		db := &DB{
-			dgraph: &mockDgraph{
-				mockTransaction: &mockTransaction{
-					queryResp: test.queryResp,
-					queryErr:  test.queryErr,
+		t.Run(test.desc, func(t *testing.T) {
+			db := &DB{
+				dgraph: &mockDgraph{
+					mockTransaction: &mockTransaction{
+						queryResp: test.queryResp,
+						queryErr:  test.queryErr,
+					},
 				},
-			},
-		}
+			}
 
-		testErr := fmt.Errorf("%s: %w", errQuery, test.queryErr)
+			testErr := fmt.Errorf("%s: %w", errQuery, test.queryErr)
 
-		_, err := db.Query(q)
-		if err != nil && errors.Is(err, testErr) {
-			t.Errorf("description: %s, expected: %v, received: %v", test.desc, testErr, err)
-		}
+			_, err := db.Query(q)
+			if err != nil && errors.Is(err, testErr) {
+				t.Errorf("error expected: %v, received: %v", testErr, err)
+			}
+		})
 	}
 }
