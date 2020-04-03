@@ -1,0 +1,22 @@
+type Org {
+	id: ID!
+	name: String! @search(by: [term])
+	users: [User]! @hasInverse(field: orgs)
+}
+
+type User {
+	id: ID!
+	token: String! @search(by: [term])
+	first_name: String! @search(by: [term])
+	last_name: String! @search(by: [term])
+	email: [String]! @search(by: [term])
+	orgs: [Org]! @hasInverse(field: users)
+}
+
+interface Item {
+	id: ID!
+}
+
+interface Meta {
+ 	id: ID!
+}

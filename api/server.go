@@ -2,121 +2,63 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
-
-	"github.com/forstmeier/tbd/app"
 )
 
-const errNewDB = "error calling new db function"
-
-type helper struct {
-	db app.Database
-}
+type helper struct{}
 
 func (h *helper) secure(hdlr http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
-		content := fmt.Sprintf(`{"example": "%s"}`, token) // NOTE: this will be updated
-		query := &app.Query{
-			Content: &content,
-		}
+		_ = token
 
-		resp, err := h.db.Query(query)
-		if resp == nil || err != nil {
-			http.Error(w, "forbidden", http.StatusForbidden)
-		}
+		// outline:
+		// [ ] query database for user
+		// [ ] return success/error based on response
 
 		hdlr.ServeHTTP(w, r)
 	})
 }
 
-func handleOrg(db app.Database) func(w http.ResponseWriter, r *http.Request) {
+func mutate() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		pathSplit := strings.Split(r.URL.Path, "/")
-		_ = pathSplit
-	}
 
-	// outline:
-	// [ ] get user from request
-	// - [ ] metadata (?)
-	// - [ ] url parameters
-	// [ ] validate user access
-	// [ ] create database query + execute
-	// [ ] create return object + return
+	}
 }
 
-func handleMutation(db app.Database) func(w http.ResponseWriter, r *http.Request) {
+func query() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		pathSplit := strings.Split(r.URL.Path, "/")
-		_ = pathSplit
+
 	}
-
-	// outline:
-	// [ ] get user from request
-	// - [ ] metadata (?)
-	// - [ ] url parameters
-	// [ ] validate user access
-	// [ ] create database query + execute
-	// [ ] create return object + return
-}
-
-func handleQuery(db app.Database) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		pathSplit := strings.Split(r.URL.Path, "/")
-		_ = pathSplit
-	}
-
-	// outline:
-	// [ ] get user from request
-	// - [ ] metadata (?)
-	// - [ ] url parameters
-	// [ ] validate user access
-	// [ ] create database query + execute
-	// [ ] create return object + return
 }
 
 type server struct {
 	httpServer http.Server
-	database   app.Database
 }
 
 func newServer(addr string) (*server, error) {
-
 	router := mux.NewRouter()
 
-	// outline:
-	// [ ] add non-auth handlers here
+	// // outline:
+	// // [ ] add non-auth handlers here
 
 	subrouter := router.Host(addr).Subrouter()
 
-	db, err := app.NewDB(addr)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", errNewDB, err)
-	}
-
-	h := &helper{
-		db: db,
-	}
+	h := &helper{}
 
 	subrouter.Use(h.secure)
 
-	// NOTE: probably refactor these paths/subrouters
-	subrouter.HandleFunc("/org/{id}", handleOrg(db)).Methods("GET")
+	subrouter.HandleFunc("/graphql", mutate()).Methods("POST")
 
-	subrouter.HandleFunc("/org/{id}/db", handleMutation(db)).Methods("POST")
-
-	subrouter.HandleFunc("/org/{id}/db", handleQuery(db)).Methods("GET")
+	subrouter.HandleFunc("/graphql", query()).Methods("GET")
 
 	return &server{
 		httpServer: http.Server{
 			Addr:    addr,
 			Handler: router,
 		},
-		database: db,
 	}, nil
 }
 
