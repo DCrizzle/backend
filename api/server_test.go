@@ -54,6 +54,74 @@ func Test_secure(t *testing.T) {
 	}
 }
 
+func Test_mutate(t *testing.T) {
+	tests := []struct {
+		desc string
+		path string
+		code int
+		resp string
+	}{
+		{
+			desc: "successful invocation",
+			path: "/graphql",
+			code: 200,
+			resp: `{"data":"test"}`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.desc, func(t *testing.T) {
+			req, err := http.NewRequest("POST", test.path, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			rec := httptest.NewRecorder()
+			handler := http.HandlerFunc(mutate())
+
+			handler.ServeHTTP(rec, req)
+
+			if rec.Code != test.code {
+				t.Errorf("code received: %d, expected: %d", rec.Code, test.code)
+			}
+		})
+	}
+}
+
+func Test_query(t *testing.T) {
+	tests := []struct {
+		desc string
+		path string
+		code int
+		resp string
+	}{
+		{
+			desc: "successful invocation",
+			path: "/graphql",
+			code: 200,
+			resp: `{"data":"test"}`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.desc, func(t *testing.T) {
+			req, err := http.NewRequest("GET", test.path, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			rec := httptest.NewRecorder()
+			handler := http.HandlerFunc(query())
+
+			handler.ServeHTTP(rec, req)
+
+			if rec.Code != test.code {
+				t.Errorf("code received: %d, expected: %d", rec.Code, test.code)
+			}
+		})
+	}
+}
+
 func Test_newServer(t *testing.T) {
 	s, err := newServer("127.0.0.1:8080")
 	if s == nil || err != nil {
