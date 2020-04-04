@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -10,18 +11,23 @@ import (
 )
 
 const (
-	errPOST = "error invoking post request"
-	errGET  = "error invoking get request"
+	errPOST   = "error invoking post request"
+	errGET    = "error invoking get request"
+	errPOSTDB = "error invoking graphql database"
 )
 
 type httpHelper interface {
-	post(string, string, []byte) (*http.Response, error)
+	post(string, string, io.Reader) (*http.Response, error)
 	get(string) (*http.Response, error)
 }
 
 type httpHelp struct{}
 
 func (h *httpHelp) post(url, contentType string, payload io.Reader) (*http.Response, error) {
+
+	// outline:
+	// [ ] set headers/values in http post request
+
 	resp, err := http.Post(url, contentType, payload)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", errPOST, err)
@@ -30,6 +36,10 @@ func (h *httpHelp) post(url, contentType string, payload io.Reader) (*http.Respo
 }
 
 func (h *httpHelp) get(url string) (*http.Response, error) {
+
+	// outline:
+	// [ ] set headers/values in http post request
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", errGET, err)
@@ -39,6 +49,7 @@ func (h *httpHelp) get(url string) (*http.Response, error) {
 
 type help struct {
 	client httpHelper
+	addr   string
 }
 
 func (h *help) secure(hdlr http.Handler) http.Handler {
@@ -56,15 +67,20 @@ func (h *help) secure(hdlr http.Handler) http.Handler {
 
 func (h *help) mutate() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		dbURL := h.addr + "/graphql"
+		contentType := "application/json"
+		payload := r.Body
 
-		// outline:
-		// [ ] parse post request body
-		// [ ] create/clean mutation operation string
-		// [ ] set headers/values in http post request
-		// [ ] invoke post request
-		// [ ] parse received response
-		// [ ] create/send api response
+		resp, err := h.client.post(dbURL, contentType, payload)
+		if err != nil {
+			http.Error(w, errPOSTDB, http.StatusInternalServerError)
+			return
+		}
 
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+
+		w.Write(buf.Bytes())
 	}
 }
 

@@ -1,6 +1,9 @@
 package api
 
 import (
+	"errors"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -112,24 +115,60 @@ func Test_secure(t *testing.T) {
 	}
 }
 
+type testClient struct {
+	clientResp *http.Response
+	clientErr  error
+}
+
+func (tc *testClient) post(url, contentType string, payload io.Reader) (*http.Response, error) {
+	return tc.clientResp, tc.clientErr
+}
+
+func (tc *testClient) get(url string) (*http.Response, error) {
+	return tc.clientResp, tc.clientErr
+}
+
 func Test_mutate(t *testing.T) {
 	tests := []struct {
-		desc string
-		path string
-		code int
-		resp string
+		desc       string
+		path       string
+		clientResp *http.Response
+		clientErr  error
+		addr       string
+		code       int
+		resp       string
 	}{
+		{
+			desc:       "error invoking database endpoint",
+			path:       "/graphql",
+			clientResp: nil,
+			clientErr:  errors.New("mock post error"),
+			addr:       "test.com",
+			code:       500,
+			resp:       errPOSTDB + "\n",
+		},
 		{
 			desc: "successful invocation",
 			path: "/graphql",
-			code: http.StatusOK,
-			resp: `{"data":"test"}`,
+			clientResp: &http.Response{
+				Body: ioutil.NopCloser(strings.NewReader(`{"data":{"test":"data"}}`)),
+			},
+			clientErr: nil,
+			addr:      "test.com",
+			code:      http.StatusOK,
+			resp:      `{"data":{"test":"data"}}`,
 		},
 	}
 
-	h := new(help)
-
 	for _, test := range tests {
+		h := &help{
+			client: &testClient{
+				clientResp: test.clientResp,
+				clientErr:  test.clientErr,
+			},
+			addr: test.addr,
+		}
+
 		t.Run(test.desc, func(t *testing.T) {
 			req, err := http.NewRequest("POST", test.path, nil)
 			if err != nil {
@@ -143,6 +182,10 @@ func Test_mutate(t *testing.T) {
 
 			if rec.Code != test.code {
 				t.Errorf("code received: %d, expected: %d", rec.Code, test.code)
+			}
+
+			if rec.Body.String() != test.resp {
+				t.Errorf("body received: %s, expected: %s", rec.Body.String(), test.resp)
 			}
 		})
 	}
