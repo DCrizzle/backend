@@ -3,8 +3,66 @@ package api
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 )
+
+func Test_helper(t *testing.T) {
+	successPath := "org/1/graphql"
+	errorPath := "org/2/graphql"
+
+	tests := []struct {
+		desc string
+		path string
+		code int
+	}{
+		{
+			desc: "error invoking graphql database endpoint",
+			path: errorPath,
+			code: http.StatusBadRequest,
+		},
+		{
+			desc: "successful invocation",
+			path: successPath,
+			code: http.StatusOK,
+		},
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/"+successPath, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"data":{"test":"data"}}`))
+	})
+	mux.HandleFunc("/"+errorPath, func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "test error", http.StatusBadRequest)
+	})
+
+	h := new(httpHelp)
+
+	server := httptest.NewServer(mux)
+	serverURL, _ := url.Parse(server.URL + "/")
+
+	payload := strings.NewReader("test payload")
+
+	for _, test := range tests {
+		t.Run(test.desc, func(t *testing.T) {
+			resp, _ := h.post(serverURL.String()+test.path, "application/json", payload)
+
+			if resp.StatusCode != test.code {
+				t.Errorf("status received: %d, expected: %d", resp.StatusCode, test.code)
+			}
+		})
+
+		t.Run(test.desc, func(t *testing.T) {
+			resp, _ := h.get(serverURL.String() + test.path)
+
+			if resp.StatusCode != test.code {
+				t.Errorf("status received: %d, expected: %d", resp.StatusCode, test.code)
+			}
+		})
+	}
+}
 
 type mockHandle struct {
 	w http.ResponseWriter
@@ -27,13 +85,13 @@ func Test_secure(t *testing.T) {
 		// },
 		{
 			desc: "successful invocation",
-			code: 200,
+			code: http.StatusOK,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {
-			h := &helper{}
+			h := new(help)
 
 			mh := &mockHandle{}
 			hdlr := h.secure(mh)
@@ -64,10 +122,12 @@ func Test_mutate(t *testing.T) {
 		{
 			desc: "successful invocation",
 			path: "/graphql",
-			code: 200,
+			code: http.StatusOK,
 			resp: `{"data":"test"}`,
 		},
 	}
+
+	h := new(help)
 
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {
@@ -77,7 +137,7 @@ func Test_mutate(t *testing.T) {
 			}
 
 			rec := httptest.NewRecorder()
-			handler := http.HandlerFunc(mutate())
+			handler := http.HandlerFunc(h.mutate())
 
 			handler.ServeHTTP(rec, req)
 
@@ -98,10 +158,12 @@ func Test_query(t *testing.T) {
 		{
 			desc: "successful invocation",
 			path: "/graphql",
-			code: 200,
+			code: http.StatusOK,
 			resp: `{"data":"test"}`,
 		},
 	}
+
+	h := new(help)
 
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {
@@ -111,7 +173,7 @@ func Test_query(t *testing.T) {
 			}
 
 			rec := httptest.NewRecorder()
-			handler := http.HandlerFunc(query())
+			handler := http.HandlerFunc(h.query())
 
 			handler.ServeHTTP(rec, req)
 

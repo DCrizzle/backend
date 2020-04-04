@@ -2,14 +2,46 @@ package api
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-type helper struct{}
+const (
+	errPOST = "error invoking post request"
+	errGET  = "error invoking get request"
+)
 
-func (h *helper) secure(hdlr http.Handler) http.Handler {
+type httpHelper interface {
+	post(string, string, []byte) (*http.Response, error)
+	get(string) (*http.Response, error)
+}
+
+type httpHelp struct{}
+
+func (h *httpHelp) post(url, contentType string, payload io.Reader) (*http.Response, error) {
+	resp, err := http.Post(url, contentType, payload)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errPOST, err)
+	}
+	return resp, nil
+}
+
+func (h *httpHelp) get(url string) (*http.Response, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errGET, err)
+	}
+	return resp, nil
+}
+
+type help struct {
+	client httpHelper
+}
+
+func (h *help) secure(hdlr http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 		_ = token
@@ -22,14 +54,31 @@ func (h *helper) secure(hdlr http.Handler) http.Handler {
 	})
 }
 
-func mutate() func(http.ResponseWriter, *http.Request) {
+func (h *help) mutate() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		// outline:
+		// [ ] parse post request body
+		// [ ] create/clean mutation operation string
+		// [ ] set headers/values in http post request
+		// [ ] invoke post request
+		// [ ] parse received response
+		// [ ] create/send api response
 
 	}
 }
 
-func query() func(http.ResponseWriter, *http.Request) {
+func (h *help) query() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		// outline:
+		// [ ] parse get request query string
+		// [ ] create/clean query operation string
+		// [ ] set headers/values in http get request
+		// [ ] invoke get request
+		// [ ] parse received response
+		// [ ] assert/format type required
+		// [ ] create/send api response
 
 	}
 }
@@ -46,13 +95,13 @@ func newServer(addr string) (*server, error) {
 
 	subrouter := router.Host(addr).Subrouter()
 
-	h := &helper{}
+	h := new(help)
 
 	subrouter.Use(h.secure)
 
-	subrouter.HandleFunc("/graphql", mutate()).Methods("POST")
+	subrouter.HandleFunc("/org/{orgID}/graphql", h.mutate()).Methods("POST")
 
-	subrouter.HandleFunc("/graphql", query()).Methods("GET")
+	subrouter.HandleFunc("/org/{orgID}/graphql", h.query()).Methods("GET")
 
 	return &server{
 		httpServer: http.Server{
@@ -76,8 +125,8 @@ func (s *server) stop() error {
 // - [ ] "/" -> redirect to "/login"
 // - [ ] "/login" -> validate user login; redirect to "/org/{id}" (POST)
 // - [ ] "/org/{id}" -> render org (GET)
-// - [ ] "/org/{id}/db" -> execute mutations (POST)
-// - [ ] "/org/{id}/db" -> execute queries (GET)
+// - [x] "/org/{id}/db" -> execute mutations (POST)
+// - [x] "/org/{id}/db" -> execute queries (GET)
 // - [ ] "/org/{id}/admin" -> org settings (GET)
 // - [ ] "/org/{id}/admin/users" -> users settings (GET)
 // - [ ] "/org/{id}/admin/user/{id}" -> user settings (GET)
