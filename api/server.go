@@ -13,7 +13,8 @@ import (
 const (
 	errPOST   = "error invoking post request"
 	errGET    = "error invoking get request"
-	errPOSTDB = "error invoking graphql database"
+	errPOSTDB = "error invoking graphql database mutation"
+	errGETDB  = "error invoking graphql database query"
 )
 
 type httpHelper interface {
@@ -86,16 +87,19 @@ func (h *help) mutate() func(http.ResponseWriter, *http.Request) {
 
 func (h *help) query() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query()["query"][0]
+		dbURL := h.addr + "/graphql?" + query
 
-		// outline:
-		// [ ] parse get request query string
-		// [ ] create/clean query operation string
-		// [ ] set headers/values in http get request
-		// [ ] invoke get request
-		// [ ] parse received response
-		// [ ] assert/format type required
-		// [ ] create/send api response
+		resp, err := h.client.get(dbURL)
+		if err != nil {
+			http.Error(w, errGETDB, http.StatusInternalServerError)
+			return
+		}
 
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+
+		w.Write(buf.Bytes())
 	}
 }
 

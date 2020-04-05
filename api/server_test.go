@@ -144,7 +144,7 @@ func Test_mutate(t *testing.T) {
 			clientResp: nil,
 			clientErr:  errors.New("mock post error"),
 			addr:       "test.com",
-			code:       500,
+			code:       http.StatusInternalServerError,
 			resp:       errPOSTDB + "\n",
 		},
 		{
@@ -193,22 +193,44 @@ func Test_mutate(t *testing.T) {
 
 func Test_query(t *testing.T) {
 	tests := []struct {
-		desc string
-		path string
-		code int
-		resp string
+		desc       string
+		path       string
+		clientResp *http.Response
+		clientErr  error
+		addr       string
+		code       int
+		resp       string
 	}{
 		{
+			desc:       "error invoking database endpoint",
+			path:       "/graphql?query=test",
+			clientResp: nil,
+			clientErr:  errors.New("mock get error"),
+			addr:       "test.com",
+			code:       http.StatusInternalServerError,
+			resp:       errGETDB + "\n",
+		},
+		{
 			desc: "successful invocation",
-			path: "/graphql",
+			path: "/graphql?query=test",
+			clientResp: &http.Response{
+				Body: ioutil.NopCloser(strings.NewReader(`{"data":{"test":"data"}}`)),
+			},
+			addr: "test.com",
 			code: http.StatusOK,
-			resp: `{"data":"test"}`,
+			resp: `{"data":{"test":"data"}}`,
 		},
 	}
 
-	h := new(help)
-
 	for _, test := range tests {
+		h := &help{
+			client: &testClient{
+				clientResp: test.clientResp,
+				clientErr:  test.clientErr,
+			},
+			addr: test.addr,
+		}
+
 		t.Run(test.desc, func(t *testing.T) {
 			req, err := http.NewRequest("GET", test.path, nil)
 			if err != nil {
@@ -222,6 +244,10 @@ func Test_query(t *testing.T) {
 
 			if rec.Code != test.code {
 				t.Errorf("code received: %d, expected: %d", rec.Code, test.code)
+			}
+
+			if rec.Body.String() != test.resp {
+				t.Errorf("body received: %s, expected: %s", rec.Body.String(), test.resp)
 			}
 		})
 	}
