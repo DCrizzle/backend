@@ -15,8 +15,10 @@ type User {
 
 interface Item {
 	id: ID!
+	metas: [Meta] @hasInverse(field: items)
 }
 
 interface Meta {
  	id: ID!
+	items: [Item] @hasInverse(field: metas)
 }

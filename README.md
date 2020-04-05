@@ -1,15 +1,9 @@
 # tbd
 
 ## outline
-- [ ] app
+- [ ] api
 	- [ ] update schema while running app
-		- [ ] NOTE: may not really be needed since api/methods would need to be updated
-		- [ ] variable in schema.go
 	- [x] encrypt data received from api (not encrypted by api)
-	- [ ] obfuscate dgraph/graphql implementation
-		- [ ] include user/session/datetime/etc for operations
-		- [ ] NOTE: possibly restructure to interface (operation) w/ sub interface (mutation/query)
-		- [ ] NOTE: unsure on this; app might be encrypted/secure dgraph
 	- [ ] activity logging output
 	- [ ] generate backups at specified frequency
 	- [ ] NOTE: https://medstack.co/blog/hipaa-tips-2-hipaa-compliant-databases/
@@ -55,7 +49,6 @@
 	    - [ ] API parses filter option values + creates filter query
 	    - [ ] Database returns filtered selections to API
 	    - [ ] API returns selections to UI for full results rendering
-- [ ] api
 	- [ ] objects
 		- [ ] org
 		- [ ] user
@@ -71,12 +64,5 @@
 		- [ ] "/org/{id}/admin/user/{id}" -> user settings (GET)
 	- [ ] NOTE: see heupr/core for CSRF example
 - [ ] ui
-	- [ ] storage (storage companies)
-		- [ ] specimen
-			- [ ] add multi
-			- [ ] add single
-			- [ ] delete multi
-			- [ ] delete single
-			- [ ] list all
-			- [ ] list filter
-	- [ ] search (laboratories/researchers)
+	- [ ] member (owner/admin, "storage companies")
+	- [ ] visitor (user/searcher, "laboratory companies")

@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	errPOST   = "error invoking post request"
-	errGET    = "error invoking get request"
-	errPOSTDB = "error invoking graphql database mutation"
-	errGETDB  = "error invoking graphql database query"
+	errPOST     = "error invoking post request"
+	errGET      = "error invoking get request"
+	errMutateDB = "error invoking graphql database mutation"
+	errQueryDB  = "error invoking graphql database query"
 )
 
 type httpHelper interface {
@@ -74,7 +74,7 @@ func (h *help) mutate() func(http.ResponseWriter, *http.Request) {
 
 		resp, err := h.client.post(dbURL, contentType, payload)
 		if err != nil {
-			http.Error(w, errPOSTDB, http.StatusInternalServerError)
+			http.Error(w, errMutateDB, http.StatusInternalServerError)
 			return
 		}
 
@@ -92,7 +92,7 @@ func (h *help) query() func(http.ResponseWriter, *http.Request) {
 
 		resp, err := h.client.get(dbURL)
 		if err != nil {
-			http.Error(w, errGETDB, http.StatusInternalServerError)
+			http.Error(w, errQueryDB, http.StatusInternalServerError)
 			return
 		}
 
@@ -103,11 +103,13 @@ func (h *help) query() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-type server struct {
+// Server hosts the database API endpoints and application logic
+type Server struct {
 	httpServer http.Server
 }
 
-func newServer(addr string) (*server, error) {
+// NewServer generates a new Server instance
+func NewServer(addr string) (*Server, error) {
 	router := mux.NewRouter()
 
 	// // outline:
@@ -115,7 +117,10 @@ func newServer(addr string) (*server, error) {
 
 	subrouter := router.Host(addr).Subrouter()
 
-	h := new(help)
+	h := &help{
+		client: new(httpHelp),
+		addr:   addr + ":8080", // NOTE: change to environment variable (?)
+	}
 
 	subrouter.Use(h.secure)
 
@@ -123,7 +128,7 @@ func newServer(addr string) (*server, error) {
 
 	subrouter.HandleFunc("/org/{orgID}/graphql", h.query()).Methods("GET")
 
-	return &server{
+	return &Server{
 		httpServer: http.Server{
 			Addr:    addr,
 			Handler: router,
@@ -131,11 +136,13 @@ func newServer(addr string) (*server, error) {
 	}, nil
 }
 
-func (s *server) start() error {
+// Start serves the HTTP listener
+func (s *Server) Start() error {
 	return s.httpServer.ListenAndServe()
 }
 
-func (s *server) stop() error {
+// Stop shutsdown the HTTP listener
+func (s *Server) Stop() error {
 	ctx := context.Background()
 	return s.httpServer.Shutdown(ctx)
 }
@@ -150,6 +157,7 @@ func (s *server) stop() error {
 // - [ ] "/org/{id}/admin" -> org settings (GET)
 // - [ ] "/org/{id}/admin/users" -> users settings (GET)
 // - [ ] "/org/{id}/admin/user/{id}" -> user settings (GET)
-// [ ] new server method
-// [ ] start server method
-// [ ] stop server method
+// [x] new server method
+// [x] start server method
+// [x] stop server method
+// [ ] NOTE: possibly implement graphql-go to control possible graphql operations

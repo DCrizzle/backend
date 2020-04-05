@@ -145,7 +145,7 @@ func Test_mutate(t *testing.T) {
 			clientErr:  errors.New("mock post error"),
 			addr:       "test.com",
 			code:       http.StatusInternalServerError,
-			resp:       errPOSTDB + "\n",
+			resp:       errMutateDB + "\n",
 		},
 		{
 			desc: "successful invocation",
@@ -208,7 +208,7 @@ func Test_query(t *testing.T) {
 			clientErr:  errors.New("mock get error"),
 			addr:       "test.com",
 			code:       http.StatusInternalServerError,
-			resp:       errGETDB + "\n",
+			resp:       errQueryDB + "\n",
 		},
 		{
 			desc: "successful invocation",
@@ -253,8 +253,8 @@ func Test_query(t *testing.T) {
 	}
 }
 
-func Test_newServer(t *testing.T) {
-	s, err := newServer("127.0.0.1:8080")
+func TestNewServer(t *testing.T) {
+	s, err := NewServer("127.0.0.1:8080")
 	if s == nil || err != nil {
 		t.Errorf("error received: %+v", s)
 	}
