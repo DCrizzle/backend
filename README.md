@@ -3,66 +3,28 @@
 ## outline
 - [ ] api
 	- [ ] update schema while running app
-	- [x] encrypt data received from api (not encrypted by api)
+	- [ ] encrypt data received from api (not encrypted by api)
 	- [ ] activity logging output
 	- [ ] generate backups at specified frequency
-	- [ ] NOTE: https://medstack.co/blog/hipaa-tips-2-hipaa-compliant-databases/
-	- [ ] database definition: [] - list, {} - select
-		- [ ] organization (1)
-			- [ ] uid -> uid
-			- [ ] name -> string
-			- [ ] users -> [user -> uid]
-			- [ ] items -> [item -> uid]
-			- [ ] collections -> [collection -> uid]
-			- [ ] type -> {string}
-		- [ ] user (1)
-			- [ ] uid -> uid
-			- [ ] fn/ln -> string/string
-			- [ ] email -> string
-			- [ ] organizations -> [organization -> uid]
-		- [ ] item (1)
-			- [ ] uid -> uid
-			- [ ] creator -> [user -> uid]
-			- [ ] created/updated -> date/date
-			- [ ] updates -> [update -> uid]
-		- [ ] update (2) # may be available natively in dgraph
-			- [ ] uid -> uid
-			- [ ] description -> string
-			- [ ] key -> string
-			- [ ] old/new value -> string/string
- 		- [ ] collection (2) # saved filter query
-			- [ ] uid -> uid
-			- [ ] owner -> organization/user -> uid/uid
-	- graph structures ("design" not specific values like above)
-		- `org`: “root” structure, contains `user`(s) and `item`(s) → fixed queries
-		- `user`: sub-structure → fixed queries
-		- [`other`]: not yet defined, stuff like state laws/regulation/consent forms/etc. -> fixed queries
-		- `item`: sub-structure → dynamic queries
+		- [ ] NOTE: https://medstack.co/blog/hipaa-tips-2-hipaa-compliant-databases/
 	- [ ] graph queries (and general flow)
-		- [ ] Fixed: predetermined, primarily CRUD, rarely change
-		- [ ] Dynamic: updated based on database contents/relationships, frequently change
-	    - [ ] API gets schema/index from graph database (e.g. `schema(type: Item) {}`)
-	    - [ ] API generate JSON relationship structure + send to caller (UI)
-				- [ ] relationships determined by many fixed + single dynamic types (?)
-	    - [ ] [UI renders received JSON as filter options]
-	    - [ ] [User selects options + submits filter request]
-	    - [ ] API parses filter option values + creates filter query
-	    - [ ] Database returns filtered selections to API
-	    - [ ] API returns selections to UI for full results rendering
-	- [ ] objects
-		- [ ] org
-		- [ ] user
+		- [ ] fixed: predetermined, for organizations/users, fetching schema
+		- [ ] flexible: database query filter, changes based on schema fetches
 	- [ ] handlers
-		- [ ] "/" -> redirect to "/login"
-		- [ ] "/login" -> validate user login; redirect to "/org/{id}" (POST)
-		- [ ] "/org/{id}" -> render org (GET)
-		- [ ] "/org/{id}/db" -> execute mutations (POST)
-		- [ ] "/org/{id}/db" -> execute queries (GET)
-			- [ ] NOTE: https://graphql.org/learn/serving-over-http/
-		- [ ] "/org/{id}/admin" -> org settings (GET)
-		- [ ] "/org/{id}/admin/users" -> users settings (GET)
-		- [ ] "/org/{id}/admin/user/{id}" -> user settings (GET)
+		- [ ] "/org/{id}/graphql" -> execute mutations (POST)
+		- [ ] "/org/{id}/graphql" -> execute queries (GET)
+			- [ ] NOTE: both endpoints receive all object CRUD operations
 	- [ ] NOTE: see heupr/core for CSRF example
 - [ ] ui
-	- [ ] member (owner/admin, "storage companies")
-	- [ ] visitor (user/searcher, "laboratory companies")
+	- [ ] user types:
+		- [ ] member (owner/admin, "storage companies")
+		- [ ] visitor (user/searcher, "laboratory companies")
+	- [ ] architecture:
+		- [ ] "/" -> public landing page
+		- [ ] "/login" -> query backend w/ provided info/tokens, redirect to "/org/{id}"
+		- [ ] "/org/{id}" -> query org contents
+		- [ ] "/org/{id}/db/query" -> query schema, render filter page
+		- [ ] "/org/{id}/db/mutate" -> input new data (?)
+		- [ ] "/org/{id}/admin" -> query org, general org settings (maybe under "/settings")
+		- [ ] "/org/{id}/admin/users" -> query/list org users, send invites
+		- [ ] "/org/{id}/admin/users/{id}" -> query single user
