@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -142,10 +143,10 @@ func Test_mutate(t *testing.T) {
 			desc:       "error invoking database endpoint",
 			path:       "/graphql",
 			clientResp: nil,
-			clientErr:  errors.New("mock post error"),
+			clientErr:  fmt.Errorf("error: %w", errors.New("mock post error")),
 			addr:       "test.com",
 			code:       http.StatusInternalServerError,
-			resp:       errMutateDB + "\n",
+			resp:       errMutateDB + ": " + fmt.Errorf("error: %w", errors.New("mock post error")).Error() + "\n",
 		},
 		{
 			desc: "successful invocation",
@@ -205,10 +206,10 @@ func Test_query(t *testing.T) {
 			desc:       "error invoking database endpoint",
 			path:       "/graphql?query=test",
 			clientResp: nil,
-			clientErr:  errors.New("mock get error"),
+			clientErr:  fmt.Errorf("error: %w", errors.New("mock get error")),
 			addr:       "test.com",
 			code:       http.StatusInternalServerError,
-			resp:       errQueryDB + "\n",
+			resp:       errQueryDB + ": " + fmt.Errorf("error: %w", errors.New("mock get error")).Error() + "\n",
 		},
 		{
 			desc: "successful invocation",

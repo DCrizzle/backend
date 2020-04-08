@@ -1,7 +1,7 @@
 type Org {
 	id: ID!
 	name: String! @search(by: [term])
-	users: [User]! @hasInverse(field: orgs)
+	users: [User] @hasInverse(field: orgs)
 }
 
 type User {
@@ -10,7 +10,7 @@ type User {
 	first_name: String! @search(by: [term])
 	last_name: String! @search(by: [term])
 	email: [String]! @search(by: [term])
-	orgs: [Org]! @hasInverse(field: users)
+	orgs: [Org] @hasInverse(field: users)
 }
 
 interface Item {

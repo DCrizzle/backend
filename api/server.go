@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/gorilla/mux"
 )
@@ -74,7 +75,7 @@ func (h *help) mutate() func(http.ResponseWriter, *http.Request) {
 
 		resp, err := h.client.post(dbURL, contentType, payload)
 		if err != nil {
-			http.Error(w, errMutateDB, http.StatusInternalServerError)
+			http.Error(w, fmt.Errorf("%s: %w", errMutateDB, err).Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -88,11 +89,11 @@ func (h *help) mutate() func(http.ResponseWriter, *http.Request) {
 func (h *help) query() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query()["query"][0]
-		dbURL := h.addr + "/graphql?" + query
+		dbURL := h.addr + "/graphql?query=" + url.QueryEscape(query)
 
 		resp, err := h.client.get(dbURL)
 		if err != nil {
-			http.Error(w, errQueryDB, http.StatusInternalServerError)
+			http.Error(w, fmt.Errorf("%s: %w", errQueryDB, err).Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -119,7 +120,7 @@ func NewServer(addr string) (*Server, error) {
 
 	h := &help{
 		client: new(httpHelp),
-		addr:   addr + ":8080", // NOTE: change to environment variable (?)
+		addr:   "http://" + addr + ":8080", // NOTE: change to environment variable (?)
 	}
 
 	subrouter.Use(h.secure)
@@ -130,7 +131,7 @@ func NewServer(addr string) (*Server, error) {
 
 	return &Server{
 		httpServer: http.Server{
-			Addr:    addr,
+			Addr:    addr + ":8181",
 			Handler: router,
 		},
 	}, nil

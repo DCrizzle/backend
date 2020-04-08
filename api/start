@@ -6,10 +6,11 @@ set -e
 # [ ] change to full implementation
 # [ ] add --encryption_key_file flag for encryption at rest
 docker run --rm -it -p 8000:8000 -p 8080:8080 -p 9080:9080 dgraph/standalone:latest
+docker run -it -p 8080:8080 dgraph/standalone:v2.0.0-rc1
 
 curl -X POST localhost:8080/admin/schema -d '@schema.graphql'
 
-export OPENTORY_ADDR = "http://localhost"
+export OPENTORY_ADDR="localhost"
 
 GOARCH=amd64 GOOS=linux go build ../main.go -o ../main
 
