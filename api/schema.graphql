@@ -7,8 +7,8 @@ type Org {
 type User {
 	id: ID!
 	token: String! @search(by: [term])
-	first_name: String! @search(by: [term])
-	last_name: String! @search(by: [term])
+	firstName: String! @search(by: [term])
+	lastName: String! @search(by: [term])
 	email: [String]! @search(by: [term])
 	orgs: [Org] @hasInverse(field: users)
 }

@@ -1,0 +1,12 @@
+schema:
+  - api/schema.graphql
+exec:
+  filename: api/generated.go
+  package: api
+model:
+  filename: api/models_generated.go
+  package: api
+resolver:
+  layout: follow-schema
+  dir: api
+  package: api
