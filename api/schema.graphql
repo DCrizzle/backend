@@ -1,16 +1,16 @@
 type Org {
 	id: ID!
-	name: String! @search(by: [term])
-	users: [User] @hasInverse(field: orgs)
+	name: String!
+	users: [User]
 }
 
 type User {
 	id: ID!
-	token: String! @search(by: [term])
-	firstName: String! @search(by: [term])
-	lastName: String! @search(by: [term])
-	email: [String]! @search(by: [term])
-	orgs: [Org] @hasInverse(field: users)
+	token: String!
+	firstName: String!
+	lastName: String!
+	email: [String]!
+	orgs: [Org]
 }
 
 type Item {
@@ -18,14 +18,14 @@ type Item {
 	description: String
 	parent: Item # (?)
 	children: [Item]
-	metas: [Meta]
+	# metas: [Meta]
 }
 
-type Meta {
-	id: ID!
-	description: String
-	items: [Item!]!
-}
+# type Meta {
+# 	id: ID!
+# 	description: String
+# 	items: [Item!]!
+# }
 
 type Mutation {
 	createOrg(org: CreateOrgInput!, user: CreateUserInput!): Org
@@ -46,13 +46,13 @@ type Query {
 
 input CreateOrgInput {
 	name: String!
-	users: [User!]!
+	users: [CreateUserInput!]!
 }
 
 input UpdateOrgInput {
 	id: ID!
 	name: String
-	users: [User]
+	users: [UpdateUserInput]
 }
 
 input CreateUserInput {
@@ -60,7 +60,7 @@ input CreateUserInput {
 	firstName: String!
 	lastName: String!
 	email: [String!]!
-	orgs: [Org!]!
+	orgs: [CreateOrgInput!]!
 }
 
 input UpdateUserInput {
@@ -69,22 +69,25 @@ input UpdateUserInput {
 	firstName: String
 	lastName: String
 	email: [String]
-	orgs: [Org]
+	orgs: [UpdateOrgInput]
 }
 
 input CreateItemInput {
-	parent: Item
-	children: [Item]
-	metas: [Meta]
+	parent: CreateItemInput
+	children: [CreateItemInput]
+	# metas: [Meta]
 }
 
 input UpdateItemInput {
 	id: ID!
-	parent: Item
-	children: [Item]
-	metas: [Meta]
+	parent: UpdateItemInput
+	children: [UpdateItemInput]
+	# metas: [Meta]
 }
 
 input ListItemsInput {
 	id: ID
 }
+
+# outline:
+# [ ] add type/field comments/documentation
