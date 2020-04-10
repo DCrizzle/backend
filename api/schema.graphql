@@ -41,6 +41,7 @@ type Query {
 	readOrg(orgID: ID!): Org
 	readUser(userID: ID!): User
 	listUsers(orgID: ID!): [User!]
+	filterItems(name: String!): __Type! # NOTE: __type(name: String!): __Type
 	listItems(items: ListItemsInput!): [Item!]
 }
 
@@ -91,3 +92,8 @@ input ListItemsInput {
 
 # outline:
 # [ ] add type/field comments/documentation
+# - [ ] documentation fields will be exposed in the "item filter" query for ui tooltips
+# [ ] NOTE: https://graphql.org/learn/introspection/
+# [ ] NOTE: https://graphql-ruby.org/api-doc/1.10.6/GraphQL/Introspection/TypeType
+# [ ] NOTE: https://atheros.ai/blog/graphql-introspection-and-introspection-queries
+# [ ] add connection (pageination) support for item queries (possibly user queries as well)
