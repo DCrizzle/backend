@@ -19,12 +19,16 @@ type User struct {
 
 // Item is an item interface in the database
 type Item struct {
-	ID    string
-	Metas []Meta
+	ID          string
+	Description string
+	Parent      Item
+	Children    []Item
+	Metas       []Meta
 }
 
 // Meta is a meta interface in the database
 type Meta struct {
-	ID    string
-	Items []Item
+	ID          string
+	Description string
+	Items       []Item
 }

@@ -21,6 +21,12 @@ type Item {
 	metas: [Meta]
 }
 
+type Meta {
+	id: ID!
+	description: String
+	items: [Item!]!
+}
+
 type Mutation {
 	createOrg(org: CreateOrgInput!, user: CreateUserInput!): Org
 	updateOrg(org: UpdateOrgInput!): Org
