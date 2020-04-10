@@ -13,12 +13,72 @@ type User {
 	orgs: [Org] @hasInverse(field: users)
 }
 
-interface Item {
+type Item {
 	id: ID!
-	metas: [Meta] @hasInverse(field: items)
+	description: String
+	parent: Item # (?)
+	children: [Item]
+	metas: [Meta]
 }
 
-interface Meta {
- 	id: ID!
-	items: [Item] @hasInverse(field: metas)
+type Mutation {
+	createOrg(org: CreateOrgInput!, user: CreateUserInput!): Org
+	updateOrg(org: UpdateOrgInput!): Org
+	createUser(user: CreateUserInput!): User
+	updateUser(user: UpdateUserInput!): User
+	createItem(item: CreateItemInput!): Item
+	updateItem(item: UpdateItemInput!): Item
+	createItems(items: [CreateItemInput!]!): [Item!]!
+}
+
+type Query {
+	readOrg(orgID: ID!): Org
+	readUser(userID: ID!): User
+	listUsers(orgID: ID!): [User!]
+	listItems(items: ListItemsInput!): [Item!]
+}
+
+input CreateOrgInput {
+	name: String!
+	users: [User!]!
+}
+
+input UpdateOrgInput {
+	id: ID!
+	name: String
+	users: [User]
+}
+
+input CreateUserInput {
+	token: String
+	firstName: String!
+	lastName: String!
+	email: [String!]!
+	orgs: [Org!]!
+}
+
+input UpdateUserInput {
+	id: ID!
+	token: String
+	firstName: String
+	lastName: String
+	email: [String]
+	orgs: [Org]
+}
+
+input CreateItemInput {
+	parent: Item
+	children: [Item]
+	metas: [Meta]
+}
+
+input UpdateItemInput {
+	id: ID!
+	parent: Item
+	children: [Item]
+	metas: [Meta]
+}
+
+input ListItemsInput {
+	id: ID
 }
