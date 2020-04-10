@@ -11,6 +11,7 @@ type User {
 	lastName: String!
 	email: [String]!
 	orgs: [Org]
+	role: Role!
 }
 
 type Item {
@@ -62,6 +63,7 @@ input CreateUserInput {
 	lastName: String!
 	email: [String!]!
 	orgs: [CreateOrgInput!]!
+	role: Role!
 }
 
 input UpdateUserInput {
@@ -71,6 +73,7 @@ input UpdateUserInput {
 	lastName: String
 	email: [String]
 	orgs: [UpdateOrgInput]
+	role: Role
 }
 
 input CreateItemInput {
@@ -88,6 +91,12 @@ input UpdateItemInput {
 
 input ListItemsInput {
 	id: ID
+}
+
+enum Role {
+	ADMIN
+	USER_INT
+	USER_EXT
 }
 
 # outline:
