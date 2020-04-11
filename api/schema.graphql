@@ -1,25 +1,25 @@
 type Org {
 	id: ID!
 	name: String!
-	users: [User]
+	users: [User!]!
 }
 
 type User {
 	id: ID!
-	token: String!
+# 	token: String!
 	firstName: String!
 	lastName: String!
-	email: [String]!
-	orgs: [Org]
+	email: [String!]!
+	orgs: [Org!]!
 	role: Role!
 }
 
 type Item {
 	id: ID!
 	description: String
-	parent: Item # (?)
+	parent: Item
 	children: [Item]
-	# metas: [Meta]
+# 	# metas: [Meta]
 }
 
 # type Meta {
@@ -29,68 +29,47 @@ type Item {
 # }
 
 type Mutation {
-	createOrg(org: CreateOrgInput!, user: CreateUserInput!): Org
-	updateOrg(org: UpdateOrgInput!): Org
-	createUser(user: CreateUserInput!): User
-	updateUser(user: UpdateUserInput!): User
-	createItem(item: CreateItemInput!): Item
-	updateItem(item: UpdateItemInput!): Item
+	createOrg(name: String!, user: CreateUserInput!): Org
+  createUser(orgID: ID!, user: CreateUserInput!): User
+	updateUser(orgID: ID!, user: UpdateUserInput!): User
+	deleteUser(orgID: ID!, userID: ID!): User
+	createItem(orgID: ID!, item: CreateItemInput!): Item
 	createItems(items: [CreateItemInput!]!): [Item!]!
 }
 
 type Query {
-	readOrg(orgID: ID!): Org
-	readUser(userID: ID!): User
-	listUsers(orgID: ID!): [User!]
+	readOrg(orgID: ID!): Org # NOTE: should this output be required?
+	readUser(userID: ID!): User # NOTE: should this output be required?
+	listUsers(orgID: ID!): [User!] # NOTE: should this output be required?
 	filterItems(name: String!): __Type! # NOTE: __type(name: String!): __Type
-	listItems(items: ListItemsInput!): [Item!]
-}
-
-input CreateOrgInput {
-	name: String!
-	users: [CreateUserInput!]!
-}
-
-input UpdateOrgInput {
-	id: ID!
-	name: String
-	users: [UpdateUserInput]
+	listItems(items: ListItemsInput!): [Item!] # NOTE: should this output be required?
 }
 
 input CreateUserInput {
-	token: String
+	# token: String
 	firstName: String!
 	lastName: String!
 	email: [String!]!
-	orgs: [CreateOrgInput!]!
 	role: Role!
 }
 
 input UpdateUserInput {
-	id: ID!
-	token: String
 	firstName: String
 	lastName: String
 	email: [String]
-	orgs: [UpdateOrgInput]
 	role: Role
 }
 
 input CreateItemInput {
-	parent: CreateItemInput
-	children: [CreateItemInput]
-	# metas: [Meta]
+	description: String
+	parent: CreateItemInput # NOTE: is this correct input?
+	children: [CreateItemInput] # NOTE: is this correct input?
+# 	# metas: [Meta]
 }
 
-input UpdateItemInput {
-	id: ID!
-	parent: UpdateItemInput
-	children: [UpdateItemInput]
-	# metas: [Meta]
-}
-
+"""ListItemsInput is used to pass all filter query variables to backend database"""
 input ListItemsInput {
-	id: ID
+	description: String # NOTE: this will not be an actual input
 }
 
 enum Role {
