@@ -1,5 +1,5 @@
 package api
-// 
+
 // // Org is an organization node in the database
 // type Org struct {
 // 	ID    string

@@ -50,12 +50,16 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		AddUser     func(childComplexity int, orgID string, userID string) int
 		CreateItem  func(childComplexity int, orgID string, item CreateItemInput) int
-		CreateItems func(childComplexity int, items []*CreateItemInput) int
-		CreateOrg   func(childComplexity int, name string, user CreateUserInput) int
-		CreateUser  func(childComplexity int, orgID string, user CreateUserInput) int
-		DeleteUser  func(childComplexity int, orgID string, userID string) int
-		UpdateUser  func(childComplexity int, orgID string, user UpdateUserInput) int
+		CreateItems func(childComplexity int, orgID string, items []*CreateItemInput) int
+		CreateOrg   func(childComplexity int, name string) int
+		CreateUser  func(childComplexity int, user CreateUserInput) int
+		DeleteOrg   func(childComplexity int, orgID string) int
+		DeleteUser  func(childComplexity int, userID string) int
+		RemoveUser  func(childComplexity int, orgID string, userID string) int
+		UpdateOrg   func(childComplexity int, orgID string, name string) int
+		UpdateUser  func(childComplexity int, userID string, user UpdateUserInput) int
 	}
 
 	Org struct {
@@ -66,10 +70,10 @@ type ComplexityRoot struct {
 
 	Query struct {
 		FilterItems func(childComplexity int, name string) int
-		ListItems   func(childComplexity int, items ListItemsInput) int
-		ListUsers   func(childComplexity int, orgID string) int
+		ReadItems   func(childComplexity int, items ListItemsInput) int
 		ReadOrg     func(childComplexity int, orgID string) int
 		ReadUser    func(childComplexity int, userID string) int
+		ReadUsers   func(childComplexity int, orgID string) int
 	}
 
 	User struct {
@@ -83,19 +87,23 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateOrg(ctx context.Context, name string, user CreateUserInput) (*Org, error)
-	CreateUser(ctx context.Context, orgID string, user CreateUserInput) (*User, error)
-	UpdateUser(ctx context.Context, orgID string, user UpdateUserInput) (*User, error)
-	DeleteUser(ctx context.Context, orgID string, userID string) (*User, error)
+	CreateOrg(ctx context.Context, name string) (*Org, error)
+	DeleteOrg(ctx context.Context, orgID string) (*Org, error)
+	UpdateOrg(ctx context.Context, orgID string, name string) (*Org, error)
+	CreateUser(ctx context.Context, user CreateUserInput) (*User, error)
+	UpdateUser(ctx context.Context, userID string, user UpdateUserInput) (*User, error)
+	AddUser(ctx context.Context, orgID string, userID string) (*User, error)
+	RemoveUser(ctx context.Context, orgID string, userID string) (*User, error)
+	DeleteUser(ctx context.Context, userID string) (*User, error)
 	CreateItem(ctx context.Context, orgID string, item CreateItemInput) (*Item, error)
-	CreateItems(ctx context.Context, items []*CreateItemInput) ([]*Item, error)
+	CreateItems(ctx context.Context, orgID string, items []*CreateItemInput) ([]*Item, error)
 }
 type QueryResolver interface {
 	ReadOrg(ctx context.Context, orgID string) (*Org, error)
 	ReadUser(ctx context.Context, userID string) (*User, error)
-	ListUsers(ctx context.Context, orgID string) ([]*User, error)
+	ReadUsers(ctx context.Context, orgID string) ([]*User, error)
 	FilterItems(ctx context.Context, name string) (*introspection.Type, error)
-	ListItems(ctx context.Context, items ListItemsInput) ([]*Item, error)
+	ReadItems(ctx context.Context, items ListItemsInput) ([]*Item, error)
 }
 
 type executableSchema struct {
@@ -141,6 +149,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Item.Parent(childComplexity), true
 
+	case "Mutation.addUser":
+		if e.complexity.Mutation.AddUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddUser(childComplexity, args["orgID"].(string), args["userID"].(string)), true
+
 	case "Mutation.createItem":
 		if e.complexity.Mutation.CreateItem == nil {
 			break
@@ -163,7 +183,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateItems(childComplexity, args["items"].([]*CreateItemInput)), true
+		return e.complexity.Mutation.CreateItems(childComplexity, args["orgID"].(string), args["items"].([]*CreateItemInput)), true
 
 	case "Mutation.createOrg":
 		if e.complexity.Mutation.CreateOrg == nil {
@@ -175,7 +195,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateOrg(childComplexity, args["name"].(string), args["user"].(CreateUserInput)), true
+		return e.complexity.Mutation.CreateOrg(childComplexity, args["name"].(string)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -187,7 +207,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateUser(childComplexity, args["orgID"].(string), args["user"].(CreateUserInput)), true
+		return e.complexity.Mutation.CreateUser(childComplexity, args["user"].(CreateUserInput)), true
+
+	case "Mutation.deleteOrg":
+		if e.complexity.Mutation.DeleteOrg == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteOrg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteOrg(childComplexity, args["orgID"].(string)), true
 
 	case "Mutation.deleteUser":
 		if e.complexity.Mutation.DeleteUser == nil {
@@ -199,7 +231,31 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteUser(childComplexity, args["orgID"].(string), args["userID"].(string)), true
+		return e.complexity.Mutation.DeleteUser(childComplexity, args["userID"].(string)), true
+
+	case "Mutation.removeUser":
+		if e.complexity.Mutation.RemoveUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveUser(childComplexity, args["orgID"].(string), args["userID"].(string)), true
+
+	case "Mutation.updateOrg":
+		if e.complexity.Mutation.UpdateOrg == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateOrg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateOrg(childComplexity, args["orgID"].(string), args["name"].(string)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -211,7 +267,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["orgID"].(string), args["user"].(UpdateUserInput)), true
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["userID"].(string), args["user"].(UpdateUserInput)), true
 
 	case "Org.id":
 		if e.complexity.Org.ID == nil {
@@ -246,29 +302,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.FilterItems(childComplexity, args["name"].(string)), true
 
-	case "Query.listItems":
-		if e.complexity.Query.ListItems == nil {
+	case "Query.readItems":
+		if e.complexity.Query.ReadItems == nil {
 			break
 		}
 
-		args, err := ec.field_Query_listItems_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_readItems_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.ListItems(childComplexity, args["items"].(ListItemsInput)), true
-
-	case "Query.listUsers":
-		if e.complexity.Query.ListUsers == nil {
-			break
-		}
-
-		args, err := ec.field_Query_listUsers_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.ListUsers(childComplexity, args["orgID"].(string)), true
+		return e.complexity.Query.ReadItems(childComplexity, args["items"].(ListItemsInput)), true
 
 	case "Query.readOrg":
 		if e.complexity.Query.ReadOrg == nil {
@@ -293,6 +337,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.ReadUser(childComplexity, args["userID"].(string)), true
+
+	case "Query.readUsers":
+		if e.complexity.Query.ReadUsers == nil {
+			break
+		}
+
+		args, err := ec.field_Query_readUsers_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ReadUsers(childComplexity, args["orgID"].(string)), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -408,7 +464,6 @@ var sources = []*ast.Source{
 
 type User {
 	id: ID!
-# 	token: String!
 	firstName: String!
 	lastName: String!
 	email: [String!]!
@@ -421,34 +476,30 @@ type Item {
 	description: String
 	parent: Item
 	children: [Item]
-# 	# metas: [Meta]
 }
 
-# type Meta {
-# 	id: ID!
-# 	description: String
-# 	items: [Item!]!
-# }
-
 type Mutation {
-	createOrg(name: String!, user: CreateUserInput!): Org
-  createUser(orgID: ID!, user: CreateUserInput!): User
-	updateUser(orgID: ID!, user: UpdateUserInput!): User
-	deleteUser(orgID: ID!, userID: ID!): User
+	createOrg(name: String!): Org
+	deleteOrg(orgID: ID!): Org
+	updateOrg(orgID: ID!, name: String!): Org
+  createUser(user: CreateUserInput!): User
+	updateUser(userID: ID!, user: UpdateUserInput!): User
+	addUser(orgID: ID!, userID: ID!): User # NOTE: return Org instead?
+	removeUser(orgID: ID!, userID: ID!): User # NOTE: return Org instead?
+	deleteUser(userID: ID!): User
 	createItem(orgID: ID!, item: CreateItemInput!): Item
-	createItems(items: [CreateItemInput!]!): [Item!]!
+	createItems(orgID: ID!, items: [CreateItemInput!]!): [Item!]!
 }
 
 type Query {
 	readOrg(orgID: ID!): Org # NOTE: should this output be required?
 	readUser(userID: ID!): User # NOTE: should this output be required?
-	listUsers(orgID: ID!): [User!] # NOTE: should this output be required?
+	readUsers(orgID: ID!): [User!] # NOTE: should this output be required?
 	filterItems(name: String!): __Type! # NOTE: __type(name: String!): __Type
-	listItems(items: ListItemsInput!): [Item!] # NOTE: should this output be required?
+	readItems(items: ListItemsInput!): [Item!] # NOTE: should this output be required?
 }
 
 input CreateUserInput {
-	# token: String
 	firstName: String!
 	lastName: String!
 	email: [String!]!
@@ -466,7 +517,6 @@ input CreateItemInput {
 	description: String
 	parent: CreateItemInput # NOTE: is this correct input?
 	children: [CreateItemInput] # NOTE: is this correct input?
-# 	# metas: [Meta]
 }
 
 """ListItemsInput is used to pass all filter query variables to backend database"""
@@ -483,6 +533,7 @@ enum Role {
 # outline:
 # [ ] add type/field comments/documentation
 # - [ ] documentation fields will be exposed in the "item filter" query for ui tooltips
+# [ ] add meta types (for regulations, consents, etc)
 # [ ] NOTE: https://graphql.org/learn/introspection/
 # [ ] NOTE: https://graphql-ruby.org/api-doc/1.10.6/GraphQL/Introspection/TypeType
 # [ ] NOTE: https://atheros.ai/blog/graphql-introspection-and-introspection-queries
@@ -494,6 +545,28 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_addUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["orgID"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["orgID"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["userID"]; ok {
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userID"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createItem_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -520,14 +593,22 @@ func (ec *executionContext) field_Mutation_createItem_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_createItems_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*CreateItemInput
-	if tmp, ok := rawArgs["items"]; ok {
-		arg0, err = ec.unmarshalNCreateItemInput2ᚕᚖgithubᚗcomᚋforstmeierᚋtbdᚋapiᚐCreateItemInputᚄ(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["orgID"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["items"] = arg0
+	args["orgID"] = arg0
+	var arg1 []*CreateItemInput
+	if tmp, ok := rawArgs["items"]; ok {
+		arg1, err = ec.unmarshalNCreateItemInput2ᚕᚖgithubᚗcomᚋforstmeierᚋtbdᚋapiᚐCreateItemInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["items"] = arg1
 	return args, nil
 }
 
@@ -542,18 +623,24 @@ func (ec *executionContext) field_Mutation_createOrg_args(ctx context.Context, r
 		}
 	}
 	args["name"] = arg0
-	var arg1 CreateUserInput
-	if tmp, ok := rawArgs["user"]; ok {
-		arg1, err = ec.unmarshalNCreateUserInput2githubᚗcomᚋforstmeierᚋtbdᚋapiᚐCreateUserInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["user"] = arg1
 	return args, nil
 }
 
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 CreateUserInput
+	if tmp, ok := rawArgs["user"]; ok {
+		arg0, err = ec.unmarshalNCreateUserInput2githubᚗcomᚋforstmeierᚋtbdᚋapiᚐCreateUserInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["user"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteOrg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -564,18 +651,24 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 		}
 	}
 	args["orgID"] = arg0
-	var arg1 CreateUserInput
-	if tmp, ok := rawArgs["user"]; ok {
-		arg1, err = ec.unmarshalNCreateUserInput2githubᚗcomᚋforstmeierᚋtbdᚋapiᚐCreateUserInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["user"] = arg1
 	return args, nil
 }
 
 func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userID"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_removeUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -597,7 +690,7 @@ func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_updateOrg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -608,6 +701,28 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 		}
 	}
 	args["orgID"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userID"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userID"] = arg0
 	var arg1 UpdateUserInput
 	if tmp, ok := rawArgs["user"]; ok {
 		arg1, err = ec.unmarshalNUpdateUserInput2githubᚗcomᚋforstmeierᚋtbdᚋapiᚐUpdateUserInput(ctx, tmp)
@@ -647,7 +762,7 @@ func (ec *executionContext) field_Query_filterItems_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_listItems_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_readItems_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 ListItemsInput
@@ -658,20 +773,6 @@ func (ec *executionContext) field_Query_listItems_args(ctx context.Context, rawA
 		}
 	}
 	args["items"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_listUsers_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["orgID"]; ok {
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["orgID"] = arg0
 	return args, nil
 }
 
@@ -700,6 +801,20 @@ func (ec *executionContext) field_Query_readUser_args(ctx context.Context, rawAr
 		}
 	}
 	args["userID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_readUsers_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["orgID"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["orgID"] = arg0
 	return args, nil
 }
 
@@ -890,7 +1005,83 @@ func (ec *executionContext) _Mutation_createOrg(ctx context.Context, field graph
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateOrg(rctx, args["name"].(string), args["user"].(CreateUserInput))
+		return ec.resolvers.Mutation().CreateOrg(rctx, args["name"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Org)
+	fc.Result = res
+	return ec.marshalOOrg2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋapiᚐOrg(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteOrg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteOrg_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteOrg(rctx, args["orgID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Org)
+	fc.Result = res
+	return ec.marshalOOrg2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋapiᚐOrg(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateOrg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateOrg_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateOrg(rctx, args["orgID"].(string), args["name"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -928,7 +1119,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateUser(rctx, args["orgID"].(string), args["user"].(CreateUserInput))
+		return ec.resolvers.Mutation().CreateUser(rctx, args["user"].(CreateUserInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -966,7 +1157,83 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, args["orgID"].(string), args["user"].(UpdateUserInput))
+		return ec.resolvers.Mutation().UpdateUser(rctx, args["userID"].(string), args["user"].(UpdateUserInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋapiᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_addUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_addUser_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddUser(rctx, args["orgID"].(string), args["userID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋapiᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_removeUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_removeUser_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RemoveUser(rctx, args["orgID"].(string), args["userID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1004,7 +1271,7 @@ func (ec *executionContext) _Mutation_deleteUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteUser(rctx, args["orgID"].(string), args["userID"].(string))
+		return ec.resolvers.Mutation().DeleteUser(rctx, args["userID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1080,7 +1347,7 @@ func (ec *executionContext) _Mutation_createItems(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateItems(rctx, args["items"].([]*CreateItemInput))
+		return ec.resolvers.Mutation().CreateItems(rctx, args["orgID"].(string), args["items"].([]*CreateItemInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1275,7 +1542,7 @@ func (ec *executionContext) _Query_readUser(ctx context.Context, field graphql.C
 	return ec.marshalOUser2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋapiᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_listUsers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_readUsers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1291,7 +1558,7 @@ func (ec *executionContext) _Query_listUsers(ctx context.Context, field graphql.
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_listUsers_args(ctx, rawArgs)
+	args, err := ec.field_Query_readUsers_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1299,7 +1566,7 @@ func (ec *executionContext) _Query_listUsers(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ListUsers(rctx, args["orgID"].(string))
+		return ec.resolvers.Query().ReadUsers(rctx, args["orgID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1354,7 +1621,7 @@ func (ec *executionContext) _Query_filterItems(ctx context.Context, field graphq
 	return ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_listItems(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_readItems(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1370,7 +1637,7 @@ func (ec *executionContext) _Query_listItems(ctx context.Context, field graphql.
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_listItems_args(ctx, rawArgs)
+	args, err := ec.field_Query_readItems_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1378,7 +1645,7 @@ func (ec *executionContext) _Query_listItems(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ListItems(rctx, args["items"].(ListItemsInput))
+		return ec.resolvers.Query().ReadItems(rctx, args["items"].(ListItemsInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2898,10 +3165,18 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "createOrg":
 			out.Values[i] = ec._Mutation_createOrg(ctx, field)
+		case "deleteOrg":
+			out.Values[i] = ec._Mutation_deleteOrg(ctx, field)
+		case "updateOrg":
+			out.Values[i] = ec._Mutation_updateOrg(ctx, field)
 		case "createUser":
 			out.Values[i] = ec._Mutation_createUser(ctx, field)
 		case "updateUser":
 			out.Values[i] = ec._Mutation_updateUser(ctx, field)
+		case "addUser":
+			out.Values[i] = ec._Mutation_addUser(ctx, field)
+		case "removeUser":
+			out.Values[i] = ec._Mutation_removeUser(ctx, field)
 		case "deleteUser":
 			out.Values[i] = ec._Mutation_deleteUser(ctx, field)
 		case "createItem":
@@ -2996,7 +3271,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_readUser(ctx, field)
 				return res
 			})
-		case "listUsers":
+		case "readUsers":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -3004,7 +3279,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_listUsers(ctx, field)
+				res = ec._Query_readUsers(ctx, field)
 				return res
 			})
 		case "filterItems":
@@ -3021,7 +3296,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "listItems":
+		case "readItems":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -3029,7 +3304,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_listItems(ctx, field)
+				res = ec._Query_readItems(ctx, field)
 				return res
 			})
 		case "__type":

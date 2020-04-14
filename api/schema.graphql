@@ -6,7 +6,6 @@ type Org {
 
 type User {
 	id: ID!
-# 	token: String!
 	firstName: String!
 	lastName: String!
 	email: [String!]!
@@ -19,34 +18,30 @@ type Item {
 	description: String
 	parent: Item
 	children: [Item]
-# 	# metas: [Meta]
 }
 
-# type Meta {
-# 	id: ID!
-# 	description: String
-# 	items: [Item!]!
-# }
-
 type Mutation {
-	createOrg(name: String!, user: CreateUserInput!): Org
-  createUser(orgID: ID!, user: CreateUserInput!): User
-	updateUser(orgID: ID!, user: UpdateUserInput!): User
-	deleteUser(orgID: ID!, userID: ID!): User
+	createOrg(name: String!): Org
+	deleteOrg(orgID: ID!): Org
+	updateOrg(orgID: ID!, name: String!): Org
+  createUser(user: CreateUserInput!): User
+	updateUser(userID: ID!, user: UpdateUserInput!): User
+	addUser(orgID: ID!, userID: ID!): User # NOTE: return Org instead?
+	removeUser(orgID: ID!, userID: ID!): User # NOTE: return Org instead?
+	deleteUser(userID: ID!): User
 	createItem(orgID: ID!, item: CreateItemInput!): Item
-	createItems(items: [CreateItemInput!]!): [Item!]!
+	createItems(orgID: ID!, items: [CreateItemInput!]!): [Item!]!
 }
 
 type Query {
 	readOrg(orgID: ID!): Org # NOTE: should this output be required?
 	readUser(userID: ID!): User # NOTE: should this output be required?
-	listUsers(orgID: ID!): [User!] # NOTE: should this output be required?
+	readUsers(orgID: ID!): [User!] # NOTE: should this output be required?
 	filterItems(name: String!): __Type! # NOTE: __type(name: String!): __Type
-	listItems(items: ListItemsInput!): [Item!] # NOTE: should this output be required?
+	readItems(items: ListItemsInput!): [Item!] # NOTE: should this output be required?
 }
 
 input CreateUserInput {
-	# token: String
 	firstName: String!
 	lastName: String!
 	email: [String!]!
@@ -64,7 +59,6 @@ input CreateItemInput {
 	description: String
 	parent: CreateItemInput # NOTE: is this correct input?
 	children: [CreateItemInput] # NOTE: is this correct input?
-# 	# metas: [Meta]
 }
 
 """ListItemsInput is used to pass all filter query variables to backend database"""
@@ -81,6 +75,7 @@ enum Role {
 # outline:
 # [ ] add type/field comments/documentation
 # - [ ] documentation fields will be exposed in the "item filter" query for ui tooltips
+# [ ] add meta types (for regulations, consents, etc)
 # [ ] NOTE: https://graphql.org/learn/introspection/
 # [ ] NOTE: https://graphql-ruby.org/api-doc/1.10.6/GraphQL/Introspection/TypeType
 # [ ] NOTE: https://atheros.ai/blog/graphql-introspection-and-introspection-queries
