@@ -70,7 +70,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		FilterItems func(childComplexity int, name string) int
-		ReadItems   func(childComplexity int, items ListItemsInput) int
+		ReadItems   func(childComplexity int, items ReadItemsInput) int
 		ReadOrg     func(childComplexity int, orgID string) int
 		ReadUser    func(childComplexity int, userID string) int
 		ReadUsers   func(childComplexity int, orgID string) int
@@ -88,8 +88,8 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateOrg(ctx context.Context, name string) (*Org, error)
-	DeleteOrg(ctx context.Context, orgID string) (*Org, error)
 	UpdateOrg(ctx context.Context, orgID string, name string) (*Org, error)
+	DeleteOrg(ctx context.Context, orgID string) (*Org, error)
 	CreateUser(ctx context.Context, user CreateUserInput) (*User, error)
 	UpdateUser(ctx context.Context, userID string, user UpdateUserInput) (*User, error)
 	AddUser(ctx context.Context, orgID string, userID string) (*User, error)
@@ -103,7 +103,7 @@ type QueryResolver interface {
 	ReadUser(ctx context.Context, userID string) (*User, error)
 	ReadUsers(ctx context.Context, orgID string) ([]*User, error)
 	FilterItems(ctx context.Context, name string) (*introspection.Type, error)
-	ReadItems(ctx context.Context, items ListItemsInput) ([]*Item, error)
+	ReadItems(ctx context.Context, items ReadItemsInput) ([]*Item, error)
 }
 
 type executableSchema struct {
@@ -312,7 +312,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ReadItems(childComplexity, args["items"].(ListItemsInput)), true
+		return e.complexity.Query.ReadItems(childComplexity, args["items"].(ReadItemsInput)), true
 
 	case "Query.readOrg":
 		if e.complexity.Query.ReadOrg == nil {
@@ -480,8 +480,8 @@ type Item {
 
 type Mutation {
 	createOrg(name: String!): Org
-	deleteOrg(orgID: ID!): Org
 	updateOrg(orgID: ID!, name: String!): Org
+	deleteOrg(orgID: ID!): Org
   createUser(user: CreateUserInput!): User
 	updateUser(userID: ID!, user: UpdateUserInput!): User
 	addUser(orgID: ID!, userID: ID!): User # NOTE: return Org instead?
@@ -496,7 +496,7 @@ type Query {
 	readUser(userID: ID!): User # NOTE: should this output be required?
 	readUsers(orgID: ID!): [User!] # NOTE: should this output be required?
 	filterItems(name: String!): __Type! # NOTE: __type(name: String!): __Type
-	readItems(items: ListItemsInput!): [Item!] # NOTE: should this output be required?
+	readItems(items: ReadItemsInput!): [Item!] # NOTE: should this output be required?
 }
 
 input CreateUserInput {
@@ -519,8 +519,8 @@ input CreateItemInput {
 	children: [CreateItemInput] # NOTE: is this correct input?
 }
 
-"""ListItemsInput is used to pass all filter query variables to backend database"""
-input ListItemsInput {
+"""ReadItemsInput is used to pass all filter query variables to backend database"""
+input ReadItemsInput {
 	description: String # NOTE: this will not be an actual input
 }
 
@@ -765,9 +765,9 @@ func (ec *executionContext) field_Query_filterItems_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_readItems_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 ListItemsInput
+	var arg0 ReadItemsInput
 	if tmp, ok := rawArgs["items"]; ok {
-		arg0, err = ec.unmarshalNListItemsInput2githubᚗcomᚋforstmeierᚋtbdᚋapiᚐListItemsInput(ctx, tmp)
+		arg0, err = ec.unmarshalNReadItemsInput2githubᚗcomᚋforstmeierᚋtbdᚋapiᚐReadItemsInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1019,44 +1019,6 @@ func (ec *executionContext) _Mutation_createOrg(ctx context.Context, field graph
 	return ec.marshalOOrg2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋapiᚐOrg(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_deleteOrg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deleteOrg_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteOrg(rctx, args["orgID"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*Org)
-	fc.Result = res
-	return ec.marshalOOrg2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋapiᚐOrg(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_updateOrg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1082,6 +1044,44 @@ func (ec *executionContext) _Mutation_updateOrg(ctx context.Context, field graph
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().UpdateOrg(rctx, args["orgID"].(string), args["name"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Org)
+	fc.Result = res
+	return ec.marshalOOrg2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋapiᚐOrg(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteOrg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteOrg_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteOrg(rctx, args["orgID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1645,7 +1645,7 @@ func (ec *executionContext) _Query_readItems(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ReadItems(rctx, args["items"].(ListItemsInput))
+		return ec.resolvers.Query().ReadItems(rctx, args["items"].(ReadItemsInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3053,8 +3053,8 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputListItemsInput(ctx context.Context, obj interface{}) (ListItemsInput, error) {
-	var it ListItemsInput
+func (ec *executionContext) unmarshalInputReadItemsInput(ctx context.Context, obj interface{}) (ReadItemsInput, error) {
+	var it ReadItemsInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -3165,10 +3165,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "createOrg":
 			out.Values[i] = ec._Mutation_createOrg(ctx, field)
-		case "deleteOrg":
-			out.Values[i] = ec._Mutation_deleteOrg(ctx, field)
 		case "updateOrg":
 			out.Values[i] = ec._Mutation_updateOrg(ctx, field)
+		case "deleteOrg":
+			out.Values[i] = ec._Mutation_deleteOrg(ctx, field)
 		case "createUser":
 			out.Values[i] = ec._Mutation_createUser(ctx, field)
 		case "updateUser":
@@ -3734,10 +3734,6 @@ func (ec *executionContext) marshalNItem2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋap
 	return ec._Item(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNListItemsInput2githubᚗcomᚋforstmeierᚋtbdᚋapiᚐListItemsInput(ctx context.Context, v interface{}) (ListItemsInput, error) {
-	return ec.unmarshalInputListItemsInput(ctx, v)
-}
-
 func (ec *executionContext) marshalNOrg2githubᚗcomᚋforstmeierᚋtbdᚋapiᚐOrg(ctx context.Context, sel ast.SelectionSet, v Org) graphql.Marshaler {
 	return ec._Org(ctx, sel, &v)
 }
@@ -3787,6 +3783,10 @@ func (ec *executionContext) marshalNOrg2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋapi
 		return graphql.Null
 	}
 	return ec._Org(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNReadItemsInput2githubᚗcomᚋforstmeierᚋtbdᚋapiᚐReadItemsInput(ctx context.Context, v interface{}) (ReadItemsInput, error) {
+	return ec.unmarshalInputReadItemsInput(ctx, v)
 }
 
 func (ec *executionContext) unmarshalNRole2githubᚗcomᚋforstmeierᚋtbdᚋapiᚐRole(ctx context.Context, v interface{}) (Role, error) {

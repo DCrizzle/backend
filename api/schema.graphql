@@ -22,8 +22,8 @@ type Item {
 
 type Mutation {
 	createOrg(name: String!): Org
-	deleteOrg(orgID: ID!): Org
 	updateOrg(orgID: ID!, name: String!): Org
+	deleteOrg(orgID: ID!): Org
   createUser(user: CreateUserInput!): User
 	updateUser(userID: ID!, user: UpdateUserInput!): User
 	addUser(orgID: ID!, userID: ID!): User # NOTE: return Org instead?
@@ -38,7 +38,7 @@ type Query {
 	readUser(userID: ID!): User # NOTE: should this output be required?
 	readUsers(orgID: ID!): [User!] # NOTE: should this output be required?
 	filterItems(name: String!): __Type! # NOTE: __type(name: String!): __Type
-	readItems(items: ListItemsInput!): [Item!] # NOTE: should this output be required?
+	readItems(items: ReadItemsInput!): [Item!] # NOTE: should this output be required?
 }
 
 input CreateUserInput {
@@ -61,8 +61,8 @@ input CreateItemInput {
 	children: [CreateItemInput] # NOTE: is this correct input?
 }
 
-"""ListItemsInput is used to pass all filter query variables to backend database"""
-input ListItemsInput {
+"""ReadItemsInput is used to pass all filter query variables to backend database"""
+input ReadItemsInput {
 	description: String # NOTE: this will not be an actual input
 }
 

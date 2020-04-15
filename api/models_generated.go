@@ -28,15 +28,15 @@ type Item struct {
 	Children    []*Item `json:"children"`
 }
 
-// ListItemsInput is used to pass all filter query variables to backend database
-type ListItemsInput struct {
-	Description *string `json:"description"`
-}
-
 type Org struct {
 	ID    string  `json:"id"`
 	Name  string  `json:"name"`
 	Users []*User `json:"users"`
+}
+
+// ReadItemsInput is used to pass all filter query variables to backend database
+type ReadItemsInput struct {
+	Description *string `json:"description"`
 }
 
 type UpdateUserInput struct {
