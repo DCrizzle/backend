@@ -1,25 +1,27 @@
 package api
 
 import (
-	// "bytes"
 	"context"
-	// "encoding/json"
 	"fmt"
-	// "io"
 	"net/http"
 
 	"github.com/machinebox/graphql"
 )
 
 const (
+	errAddUser       = "error adding user"
+	errCreateItem    = "error creating item"
+	errCreateItems   = "error creating items"
 	errCreateOrg     = "error creating org"
 	errCreateRequest = "error creating dgraph request"
 	errCreateUser    = "error creating user"
 	errDecodeJSON    = "error decoding json"
 	errDeleteOrg     = "error deleting org"
+	errDeleteUser    = "error deleting user"
 	errEncodeJSON    = "error encoding json"
 	errPOSTRequest   = "error sending post request"
 	errReadBody      = "error reading response body"
+	errRemoveUser    = "error removing user"
 	errRunClient     = "error running graphql client"
 	errUpdateOrg     = "error updating org"
 	errUpdateUser    = "error updating user"

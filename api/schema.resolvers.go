@@ -139,23 +139,143 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, user U
 }
 
 func (r *mutationResolver) AddUser(ctx context.Context, orgID string, userID string) (*User, error) {
-	panic(fmt.Errorf("not implemented"))
+	mutation := `
+	mutation ($orgID: ID!, $userID: ID!) {
+		addUser(orgID: $orgID, userID: $userID) {
+			id
+			firstName
+			lastName
+			email
+			orgs
+			role
+		}
+	}
+	`
+
+	variables := map[string]interface{}{
+		"orgID":  orgID,
+		"userID": userID,
+	}
+
+	input := User{}
+
+	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errAddUser, err)
+	}
+
+	return org.(*User), nil
 }
 
 func (r *mutationResolver) RemoveUser(ctx context.Context, orgID string, userID string) (*User, error) {
-	panic(fmt.Errorf("not implemented"))
+	mutation := `
+	mutation ($orgID: ID!, $userID: ID!) {
+		removeUser(orgID: $orgID, userID: $userID) {
+			id
+			firstName
+			lastName
+			email
+			orgs
+			role
+		}
+	}
+	`
+
+	variables := map[string]interface{}{
+		"orgID":  orgID,
+		"userID": userID,
+	}
+
+	input := User{}
+
+	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errRemoveUser, err)
+	}
+
+	return org.(*User), nil
 }
 
 func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*User, error) {
-	panic(fmt.Errorf("not implemented"))
+	mutation := `
+	mutation ($userID: ID!) {
+		deleteUser(userID: $userID) {
+			id
+			firstName
+			lastName
+			email
+			orgs
+			role
+		}
+	}
+	`
+
+	variables := map[string]interface{}{
+		"userID": userID,
+	}
+
+	input := User{}
+
+	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errDeleteUser, err)
+	}
+
+	return org.(*User), nil
 }
 
 func (r *mutationResolver) CreateItem(ctx context.Context, orgID string, item CreateItemInput) (*Item, error) {
-	panic(fmt.Errorf("not implemented"))
+	mutation := `
+	mutation ($orgID: ID!, $item: CreateItemInput) {
+		createItem(orgID: $orgID, item: $item) {
+			id
+			description
+			parent
+			children
+		}
+	}
+	`
+
+	variables := map[string]interface{}{
+		"orgID": orgID,
+		"item":  item,
+	}
+
+	input := User{}
+
+	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errCreateItem, err)
+	}
+
+	return org.(*Item), nil
 }
 
 func (r *mutationResolver) CreateItems(ctx context.Context, orgID string, items []*CreateItemInput) ([]*Item, error) {
-	panic(fmt.Errorf("not implemented"))
+	mutation := `
+	mutation ($orgID: ID!, $items: CreateItemInput) {
+		createItems(orgID: $orgID, items: $items) {
+			id
+			description
+			parent
+			children
+		}
+	}
+	`
+
+	variables := map[string]interface{}{
+		"orgID": orgID,
+		"items": items,
+	}
+
+	input := User{}
+
+	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errCreateItems, err)
+	}
+
+	return org.([]*Item), nil
 }
 
 func (r *queryResolver) ReadOrg(ctx context.Context, orgID string) (*Org, error) {
