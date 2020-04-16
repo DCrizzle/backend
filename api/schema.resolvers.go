@@ -5,125 +5,129 @@ package api
 
 import (
 	"context"
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
+	// "io/ioutil"
+	// "net/http"
+	// "strings"
 
 	"github.com/99designs/gqlgen/graphql/introspection"
 )
 
 func (r *mutationResolver) CreateOrg(ctx context.Context, name string) (*Org, error) {
-	mutation := fmt.Sprintf(`
-	mutation {
-		createOrg(name: %s) {
-			id
-			name
-		}
-	}
-	`, name)
-
-	resp, err := r.httpClient.Post(r.dbURL, "application/json", strings.NewReader(mutation))
-	if err != nil || resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%s: %w", errCreateOrg, err)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", errReadBytes, err)
-	}
-
-	org := &Org{}
-	if err := json.Unmarshal(body, org); err != nil {
-		return nil, fmt.Errorf("%s: %w", errUnmarshalJSON, err)
-	}
-
-	return org, nil
+	// mutation := fmt.Sprintf(`
+	// mutation {
+	// 	createOrg(name: %s) {
+	// 		id
+	// 		name
+	// 	}
+	// }
+	// `, name)
+	//
+	// resp, err := r.httpClient.Post(r.dbURL, "application/json", strings.NewReader(mutation))
+	// if err != nil || resp.StatusCode != http.StatusOK {
+	// 	return nil, fmt.Errorf("%s: %w", errCreateOrg, err)
+	// }
+	//
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", errReadBytes, err)
+	// }
+	//
+	// org := &Org{}
+	// if err := json.Unmarshal(body, org); err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", errUnmarshalJSON, err)
+	// }
+	//
+	// return org, nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) UpdateOrg(ctx context.Context, orgID string, name string) (*Org, error) {
-	mutation := fmt.Sprintf(`
-	mutation {
-		updateOrg(orgID: %s, name: %s) {
-			id
-			name
-		}
-	}
-	`, orgID, name)
-
-	resp, err := r.httpClient.Post(r.dbURL, "application/json", strings.NewReader(mutation))
-	if err != nil || resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%s: %w", errDeleteOrg, err)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", errReadBytes, err)
-	}
-
-	org := &Org{}
-	if err := json.Unmarshal(body, org); err != nil {
-		return nil, fmt.Errorf("%s: %w", errUnmarshalJSON, err)
-	}
-
-	return org, nil
+	// mutation := fmt.Sprintf(`
+	// mutation {
+	// 	updateOrg(orgID: %s, name: %s) {
+	// 		id
+	// 		name
+	// 	}
+	// }
+	// `, orgID, name)
+	//
+	// resp, err := r.httpClient.Post(r.dbURL, "application/json", strings.NewReader(mutation))
+	// if err != nil || resp.StatusCode != http.StatusOK {
+	// 	return nil, fmt.Errorf("%s: %w", errDeleteOrg, err)
+	// }
+	//
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", errReadBytes, err)
+	// }
+	//
+	// org := &Org{}
+	// if err := json.Unmarshal(body, org); err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", errUnmarshalJSON, err)
+	// }
+	//
+	// return org, nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) DeleteOrg(ctx context.Context, orgID string) (*Org, error) {
-	mutation := fmt.Sprintf(`
-	mutation {
-		deleteOrg(orgID: %s) {
-			id
-			name
-		}
-	}
-	`, orgID)
-
-	resp, err := r.httpClient.Post(r.dbURL, "application/json", strings.NewReader(mutation))
-	if err != nil || resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%s: %w", errDeleteOrg, err)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", errReadBytes, err)
-	}
-
-	org := &Org{}
-	if err := json.Unmarshal(body, org); err != nil {
-		return nil, fmt.Errorf("%s: %w", errUnmarshalJSON, err)
-	}
-
-	return org, nil
+	// mutation := fmt.Sprintf(`
+	// mutation {
+	// 	deleteOrg(orgID: %s) {
+	// 		id
+	// 		name
+	// 	}
+	// }
+	// `, orgID)
+	//
+	// resp, err := r.httpClient.Post(r.dbURL, "application/json", strings.NewReader(mutation))
+	// if err != nil || resp.StatusCode != http.StatusOK {
+	// 	return nil, fmt.Errorf("%s: %w", errDeleteOrg, err)
+	// }
+	//
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", errReadBytes, err)
+	// }
+	//
+	// org := &Org{}
+	// if err := json.Unmarshal(body, org); err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", errUnmarshalJSON, err)
+	// }
+	//
+	// return org, nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, user CreateUserInput) (*User, error) {
-	mutation := fmt.Sprintf(`
-	mutation {
-		createUser(user: %v) {
-			id
-			name
-		}
-	}
-	`, user)
-
-	resp, err := r.httpClient.Post(r.dbURL, "application/json", strings.NewReader(mutation))
-	if err != nil || resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%s: %w", errCreateUser, err)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", errReadBytes, err)
-	}
-
-	newUser := &User{}
-	if err := json.Unmarshal(body, newUser); err != nil {
-		return nil, fmt.Errorf("%s: %w", errUnmarshalJSON, err)
-	}
-
-	return newUser, nil
+	// mutation := fmt.Sprintf(`
+	// mutation {
+	// 	createUser(user: %v) {
+	// 		id
+	// 		name
+	// 	}
+	// }
+	// `, user)
+	//
+	// resp, err := r.httpClient.Post(r.dbURL, "application/json", strings.NewReader(mutation))
+	// if err != nil || resp.StatusCode != http.StatusOK {
+	// 	return nil, fmt.Errorf("%s: %w", errCreateUser, err)
+	// }
+	//
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", errReadBytes, err)
+	// }
+	//
+	// newUser := &User{}
+	// if err := json.Unmarshal(body, newUser); err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", errUnmarshalJSON, err)
+	// }
+	//
+	// return newUser, nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, user UpdateUserInput) (*User, error) {
