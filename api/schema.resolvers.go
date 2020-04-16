@@ -241,7 +241,7 @@ func (r *mutationResolver) CreateItem(ctx context.Context, orgID string, item Cr
 		"item":  item,
 	}
 
-	input := User{}
+	input := Item{}
 
 	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
 	if err != nil {
@@ -268,7 +268,7 @@ func (r *mutationResolver) CreateItems(ctx context.Context, orgID string, items 
 		"items": items,
 	}
 
-	input := User{}
+	input := []Item{}
 
 	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
 	if err != nil {
@@ -279,31 +279,138 @@ func (r *mutationResolver) CreateItems(ctx context.Context, orgID string, items 
 }
 
 func (r *queryResolver) ReadOrg(ctx context.Context, orgID string) (*Org, error) {
-	// outline:
-	// [ ] create url query string
-	// [ ] pass id into string
-	// [ ] reference http client field
-	// [ ] execute get request
-	// [ ] create org object
-	// [ ] return org / nil
+	query := `
+	query ($orgID: ID!) {
+		readOrg(orgID: $orgID) {
+			id
+			name
+			users
+		}
+	}
+	`
 
-	panic(fmt.Errorf("not implemented")) // TEMP
+	variables := map[string]interface{}{
+		"orgID": orgID,
+	}
+
+	input := Org{}
+
+	org, err := r.Resolver.dgraph.mutate(ctx, query, variables, input)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errReadOrg, err)
+	}
+
+	return org.(*Org), nil
 }
 
 func (r *queryResolver) ReadUser(ctx context.Context, userID string) (*User, error) {
-	panic(fmt.Errorf("not implemented"))
+	query := `
+	query ($userID: ID!) {
+		readUser(userID: $userID) {
+			id
+			firstName
+			lastName
+			email
+			orgs
+			role
+		}
+	}
+	`
+
+	variables := map[string]interface{}{
+		"userID": userID,
+	}
+
+	input := User{}
+
+	org, err := r.Resolver.dgraph.mutate(ctx, query, variables, input)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errReadUser, err)
+	}
+
+	return org.(*User), nil
 }
 
 func (r *queryResolver) ReadUsers(ctx context.Context, orgID string) ([]*User, error) {
-	panic(fmt.Errorf("not implemented"))
+	query := `
+	query ($orgID: ID!) {
+		readUsers(orgID: $orgID) {
+			id
+			firstName
+			lastName
+			email
+			orgs
+			role
+		}
+	}
+	`
+
+	variables := map[string]interface{}{
+		"orgID": orgID,
+	}
+
+	input := []User{}
+
+	org, err := r.Resolver.dgraph.mutate(ctx, query, variables, input)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errReadUsers, err)
+	}
+
+	return org.([]*User), nil
 }
 
 func (r *queryResolver) FilterItems(ctx context.Context, name string) (*introspection.Type, error) {
-	panic(fmt.Errorf("not implemented"))
+	// NOTE: https://graphql.org/learn/introspection/
+	query := `
+	query ($name: String!) {
+		__type(name: $name) {
+			name
+			fields {
+				name
+				type
+			}
+		}
+	}
+	`
+
+	variables := map[string]interface{}{
+		"name": name,
+	}
+
+	input := introspection.Type{}
+
+	org, err := r.Resolver.dgraph.mutate(ctx, query, variables, input)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errFilterItems, err)
+	}
+
+	return org.(*introspection.Type), nil
 }
 
 func (r *queryResolver) ReadItems(ctx context.Context, items ReadItemsInput) ([]*Item, error) {
-	panic(fmt.Errorf("not implemented"))
+	query := `
+	query ($items: ReadItemsInput!) {
+		readItems(orgID: $orgID) {
+			id
+			description
+			parent
+			children
+		}
+	}
+	`
+
+	variables := map[string]interface{}{
+		"items": items,
+	}
+
+	input := []Item{}
+
+	org, err := r.Resolver.dgraph.mutate(ctx, query, variables, input)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errReadItems, err)
+	}
+
+	return org.([]*Item), nil
 }
 
 // Mutation returns MutationResolver implementation.
