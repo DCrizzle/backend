@@ -27,7 +27,7 @@ func (r *mutationResolver) CreateOrg(ctx context.Context, name string) (*Org, er
 	input := Org{}
 
 	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
-	if err != nil {
+	if err != nil || org == nil {
 		return nil, fmt.Errorf("%s: %w", errCreateOrg, err)
 	}
 
@@ -52,7 +52,7 @@ func (r *mutationResolver) UpdateOrg(ctx context.Context, orgID string, name str
 	input := Org{}
 
 	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
-	if err != nil {
+	if err != nil || org == nil {
 		return nil, fmt.Errorf("%s: %w", errUpdateOrg, err)
 	}
 
@@ -76,17 +76,17 @@ func (r *mutationResolver) DeleteOrg(ctx context.Context, orgID string) (*Org, e
 	input := Org{}
 
 	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
-	if err != nil {
+	if err != nil || org == nil {
 		return nil, fmt.Errorf("%s: %w", errDeleteOrg, err)
 	}
 
 	return org.(*Org), nil
 }
 
-func (r *mutationResolver) CreateUser(ctx context.Context, user CreateUserInput) (*User, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, userInput CreateUserInput) (*User, error) {
 	mutation := `
-	mutation ($user: CreateUserInput!) {
-		createUser(user: $user) {
+	mutation ($userInput: CreateUserInput!) {
+		createUser(user: $userInput) {
 			id
 			firstName
 			lastName
@@ -97,23 +97,23 @@ func (r *mutationResolver) CreateUser(ctx context.Context, user CreateUserInput)
 	`
 
 	variables := map[string]interface{}{
-		"user": user,
+		"userInput": userInput,
 	}
 
 	input := User{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
-	if err != nil {
+	user, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil || user == nil {
 		return nil, fmt.Errorf("%s: %w", errCreateUser, err)
 	}
 
-	return org.(*User), nil
+	return user.(*User), nil
 }
 
-func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, user UpdateUserInput) (*User, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, userInput UpdateUserInput) (*User, error) {
 	mutation := `
-	mutation ($userID: ID!, $user: UpdateUserInput!) {
-		updateUser(userID: $userID, user: $user) {
+	mutation ($userID: ID!, $userInput: UpdateUserInput!) {
+		updateUser(userID: $userID, user: $userInput) {
 			id
 			firstName
 			lastName
@@ -124,18 +124,18 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, user U
 	`
 
 	variables := map[string]interface{}{
-		"userID": userID,
-		"user":   user,
+		"userID":    userID,
+		"userInput": userInput,
 	}
 
 	input := User{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
-	if err != nil {
+	user, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil || user == nil {
 		return nil, fmt.Errorf("%s: %w", errUpdateUser, err)
 	}
 
-	return org.(*User), nil
+	return user.(*User), nil
 }
 
 func (r *mutationResolver) AddUser(ctx context.Context, orgID string, userID string) (*User, error) {
@@ -159,12 +159,12 @@ func (r *mutationResolver) AddUser(ctx context.Context, orgID string, userID str
 
 	input := User{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
-	if err != nil {
+	user, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil || user == nil {
 		return nil, fmt.Errorf("%s: %w", errAddUser, err)
 	}
 
-	return org.(*User), nil
+	return user.(*User), nil
 }
 
 func (r *mutationResolver) RemoveUser(ctx context.Context, orgID string, userID string) (*User, error) {
@@ -187,13 +187,12 @@ func (r *mutationResolver) RemoveUser(ctx context.Context, orgID string, userID 
 	}
 
 	input := User{}
-
-	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
-	if err != nil {
+	user, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil || user != nil {
 		return nil, fmt.Errorf("%s: %w", errRemoveUser, err)
 	}
 
-	return org.(*User), nil
+	return user.(*User), nil
 }
 
 func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*User, error) {
@@ -216,18 +215,18 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*User
 
 	input := User{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
-	if err != nil {
+	user, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil || user == nil {
 		return nil, fmt.Errorf("%s: %w", errDeleteUser, err)
 	}
 
-	return org.(*User), nil
+	return user.(*User), nil
 }
 
-func (r *mutationResolver) CreateItem(ctx context.Context, orgID string, item CreateItemInput) (*Item, error) {
+func (r *mutationResolver) CreateItem(ctx context.Context, orgID string, itemInput CreateItemInput) (*Item, error) {
 	mutation := `
-	mutation ($orgID: ID!, $item: CreateItemInput) {
-		createItem(orgID: $orgID, item: $item) {
+	mutation ($orgID: ID!, $itemInput: CreateItemInput) {
+		createItem(orgID: $orgID, item: $itemInput) {
 			id
 			description
 			parent
@@ -237,24 +236,24 @@ func (r *mutationResolver) CreateItem(ctx context.Context, orgID string, item Cr
 	`
 
 	variables := map[string]interface{}{
-		"orgID": orgID,
-		"item":  item,
+		"orgID":     orgID,
+		"itemInput": itemInput,
 	}
 
 	input := Item{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
-	if err != nil {
+	item, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil || item == nil {
 		return nil, fmt.Errorf("%s: %w", errCreateItem, err)
 	}
 
-	return org.(*Item), nil
+	return item.(*Item), nil
 }
 
-func (r *mutationResolver) CreateItems(ctx context.Context, orgID string, items []*CreateItemInput) ([]*Item, error) {
+func (r *mutationResolver) CreateItems(ctx context.Context, orgID string, itemsInput []*CreateItemInput) ([]*Item, error) {
 	mutation := `
-	mutation ($orgID: ID!, $items: CreateItemInput) {
-		createItems(orgID: $orgID, items: $items) {
+	mutation ($orgID: ID!, $itemsInput: CreateItemInput) {
+		createItems(orgID: $orgID, items: $itemsInput) {
 			id
 			description
 			parent
@@ -264,18 +263,18 @@ func (r *mutationResolver) CreateItems(ctx context.Context, orgID string, items 
 	`
 
 	variables := map[string]interface{}{
-		"orgID": orgID,
-		"items": items,
+		"orgID":      orgID,
+		"itemsInput": itemsInput,
 	}
 
 	input := []Item{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
-	if err != nil {
+	items, err := r.Resolver.dgraph.mutate(ctx, mutation, variables, input)
+	if err != nil || items == nil {
 		return nil, fmt.Errorf("%s: %w", errCreateItems, err)
 	}
 
-	return org.([]*Item), nil
+	return items.([]*Item), nil
 }
 
 func (r *queryResolver) ReadOrg(ctx context.Context, orgID string) (*Org, error) {
