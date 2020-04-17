@@ -294,8 +294,8 @@ func (r *queryResolver) ReadOrg(ctx context.Context, orgID string) (*Org, error)
 
 	input := Org{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, query, variables, input)
-	if err != nil {
+	org, err := r.Resolver.dgraph.query(ctx, query, variables, input)
+	if err != nil || org == nil {
 		return nil, fmt.Errorf("%s: %w", errReadOrg, err)
 	}
 
@@ -322,12 +322,12 @@ func (r *queryResolver) ReadUser(ctx context.Context, userID string) (*User, err
 
 	input := User{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, query, variables, input)
-	if err != nil {
+	user, err := r.Resolver.dgraph.query(ctx, query, variables, input)
+	if err != nil || user == nil {
 		return nil, fmt.Errorf("%s: %w", errReadUser, err)
 	}
 
-	return org.(*User), nil
+	return user.(*User), nil
 }
 
 func (r *queryResolver) ReadUsers(ctx context.Context, orgID string) ([]*User, error) {
@@ -350,12 +350,12 @@ func (r *queryResolver) ReadUsers(ctx context.Context, orgID string) ([]*User, e
 
 	input := []User{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, query, variables, input)
-	if err != nil {
+	users, err := r.Resolver.dgraph.query(ctx, query, variables, input)
+	if err != nil || users == nil {
 		return nil, fmt.Errorf("%s: %w", errReadUsers, err)
 	}
 
-	return org.([]*User), nil
+	return users.([]*User), nil
 }
 
 func (r *queryResolver) FilterItems(ctx context.Context, name string) (*introspection.Type, error) {
@@ -378,18 +378,18 @@ func (r *queryResolver) FilterItems(ctx context.Context, name string) (*introspe
 
 	input := introspection.Type{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, query, variables, input)
-	if err != nil {
+	introType, err := r.Resolver.dgraph.query(ctx, query, variables, input)
+	if err != nil || introType == nil {
 		return nil, fmt.Errorf("%s: %w", errFilterItems, err)
 	}
 
-	return org.(*introspection.Type), nil
+	return introType.(*introspection.Type), nil
 }
 
-func (r *queryResolver) ReadItems(ctx context.Context, items ReadItemsInput) ([]*Item, error) {
+func (r *queryResolver) ReadItems(ctx context.Context, itemsInput ReadItemsInput) ([]*Item, error) {
 	query := `
-	query ($items: ReadItemsInput!) {
-		readItems(orgID: $orgID) {
+	query ($itemsInput: ReadItemsInput!) {
+		readItems(items: $itemsInput) {
 			id
 			description
 			parent
@@ -399,17 +399,17 @@ func (r *queryResolver) ReadItems(ctx context.Context, items ReadItemsInput) ([]
 	`
 
 	variables := map[string]interface{}{
-		"items": items,
+		"itemsInput": itemsInput,
 	}
 
 	input := []Item{}
 
-	org, err := r.Resolver.dgraph.mutate(ctx, query, variables, input)
-	if err != nil {
+	items, err := r.Resolver.dgraph.query(ctx, query, variables, input)
+	if err != nil || items == nil {
 		return nil, fmt.Errorf("%s: %w", errReadItems, err)
 	}
 
-	return org.([]*Item), nil
+	return items.([]*Item), nil
 }
 
 // Mutation returns MutationResolver implementation.

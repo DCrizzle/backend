@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	"github.com/99designs/gqlgen/graphql/introspection"
 )
 
 type mockDgraph struct {
@@ -32,8 +34,25 @@ func (m *mockDgraph) mutate(ctx context.Context, mutation string, variables map[
 	}
 }
 
-func (m *mockDgraph) query(ctx context.Context, mutation string, variables map[string]interface{}, input interface{}) (interface{}, error) {
-	return m.queryResp, m.queryErr
+func (m *mockDgraph) query(ctx context.Context, query string, variables map[string]interface{}, input interface{}) (interface{}, error) {
+	if m.queryErr != nil {
+		return nil, m.queryErr
+	}
+
+	switch v := input.(type) {
+	case Org:
+		return &Org{}, nil
+	case User:
+		return &User{}, nil
+	case []User:
+		return []*User{}, nil
+	case introspection.Type:
+		return &introspection.Type{}, nil
+	case []Item:
+		return []*Item{}, nil
+	default:
+		return v, nil
+	}
 }
 
 func Test_mutationResolver(t *testing.T) {
@@ -131,4 +150,67 @@ func Test_mutationResolver(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_queryResolver(t *testing.T) {
+	tests := []struct {
+		desc     string
+		queryErr error
+	}{
+		{
+			desc:     "error executing dgraph query",
+			queryErr: errors.New("mock query error"),
+		},
+		{
+			desc:     "successful invocation",
+			queryErr: nil,
+		},
+	}
+
+	for _, test := range tests {
+		ctx := context.Background()
+		q := &queryResolver{
+			&Resolver{
+				dgraph: &mockDgraph{
+					queryErr: test.queryErr,
+				},
+			},
+		}
+
+		t.Run("read org:"+test.desc, func(t *testing.T) {
+			_, err := q.ReadOrg(ctx, "orgID")
+			if errors.Unwrap(err) != test.queryErr {
+				t.Errorf("error received: %v, expected: %v", err, test.queryErr)
+			}
+		})
+
+		t.Run("read user:"+test.desc, func(t *testing.T) {
+			_, err := q.ReadUser(ctx, "userID")
+			if errors.Unwrap(err) != test.queryErr {
+				t.Errorf("error received: %v, expected: %v", err, test.queryErr)
+			}
+		})
+
+		t.Run("read users:"+test.desc, func(t *testing.T) {
+			_, err := q.ReadUsers(ctx, "orgID")
+			if errors.Unwrap(err) != test.queryErr {
+				t.Errorf("error received: %v, expected: %v", err, test.queryErr)
+			}
+		})
+
+		t.Run("filter items:"+test.desc, func(t *testing.T) {
+			_, err := q.FilterItems(ctx, "type")
+			if errors.Unwrap(err) != test.queryErr {
+				t.Errorf("error received: %v, expected: %v", err, test.queryErr)
+			}
+		})
+
+		t.Run("read items:"+test.desc, func(t *testing.T) {
+			_, err := q.ReadItems(ctx, ReadItemsInput{})
+			if errors.Unwrap(err) != test.queryErr {
+				t.Errorf("error received: %v, expected: %v", err, test.queryErr)
+			}
+		})
+	}
+
 }
