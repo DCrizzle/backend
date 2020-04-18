@@ -3,42 +3,30 @@ package api
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/machinebox/graphql"
 )
 
 const (
-	errAddUser       = "error adding user"
-	errCreateItem    = "error creating item"
-	errCreateItems   = "error creating items"
-	errCreateOrg     = "error creating org"
-	errCreateRequest = "error creating dgraph request"
-	errCreateUser    = "error creating user"
-	errDecodeJSON    = "error decoding json"
-	errDeleteOrg     = "error deleting org"
-	errDeleteUser    = "error deleting user"
-	errEncodeJSON    = "error encoding json"
-	errFilterItems   = "error filtering items"
-	errPOSTRequest   = "error sending post request"
-	errReadBody      = "error reading response body"
-	errReadItems     = "error reading items"
-	errReadOrg       = "error reading org"
-	errReadUser      = "error reading user"
-	errReadUsers     = "error reading users"
-	errRemoveUser    = "error removing user"
-	errRunClient     = "error running graphql client"
-	errUpdateOrg     = "error updating org"
-	errUpdateUser    = "error updating user"
+	errAddUser     = "error adding user"
+	errCreateItem  = "error creating item"
+	errCreateItems = "error creating items"
+	errCreateOrg   = "error creating org"
+	errCreateUser  = "error creating user"
+	errDeleteOrg   = "error deleting org"
+	errDeleteUser  = "error deleting user"
+	errFilterItems = "error filtering items"
+	errReadItems   = "error reading items"
+	errReadOrg     = "error reading org"
+	errReadUser    = "error reading user"
+	errReadUsers   = "error reading users"
+	errRemoveUser  = "error removing user"
+	errRunClient   = "error running graphql client"
+	errUpdateOrg   = "error updating org"
+	errUpdateUser  = "error updating user"
 )
 
 const dgraphURL = "temporary"
-
-// NOTE: These interfaces/structs will be used in the permanent implementation thats
-// will eventually replace the quick-and-dirty version
-type httpClienter interface {
-	Do(req *http.Request) (*http.Response, error)
-}
 
 type dgrapher interface {
 	mutate(c context.Context, m string, v map[string]interface{}, t interface{}) (interface{}, error)
@@ -46,24 +34,13 @@ type dgrapher interface {
 }
 
 type dgraph struct {
-	httpClient    httpClienter
 	graphqlClient *graphql.Client // TEMP
-}
-
-type graphQLError struct {
-	Message string
-}
-
-type graphQLResponse struct {
-	Data   interface{} `json:"data"`
-	Errors []graphQLError
 }
 
 func (d *dgraph) mutate(ctx context.Context, mutation string, variables map[string]interface{}, input interface{}) (interface{}, error) {
 	// NOTE: This is a quick-and-dirty implementation that will likely be swapped out for
 	// a hand-written version (very similar to this client library) but with allowance for
 	// GET requests to be made
-	// NOTE: DO NOT DELETE COMMENTED CODE
 	request := graphql.NewRequest(mutation)
 	for key, value := range variables {
 		request.Var(key, value)
@@ -74,49 +51,6 @@ func (d *dgraph) mutate(ctx context.Context, mutation string, variables map[stri
 	}
 
 	return input, nil
-
-	// NOTE: DO NOT DELETE
-	// var bodyBuffer bytes.Buffer
-	// body := struct {
-	// 	Query     string                 `json:"query"`
-	// 	Variables map[string]interface{} `json:"variables"`
-	// }{
-	// 	Query:     mutation,
-	// 	Variables: variables,
-	// }
-	//
-	// if err := json.NewEncoder(&bodyBuffer).Encode(body); err != nil {
-	// 	return nil, fmt.Errorf("%s: %w", errEncodeJSON, err)
-	// }
-	//
-	// request, err := http.NewRequest(http.MethodPost, dgraphURL, &bodyBuffer)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("%s: %w", errCreateRequest, err)
-	// }
-	//
-	// request.Header.Set("Content-Type", "application/json; charset=utf-8")
-	// request.Header.Set("Accept", "application/json; charset=utf-8")
-	//
-	// response, err := d.httpClient.Do(request)
-	// if err != nil || response.StatusCode != http.StatusOK {
-	// 	return nil, fmt.Errorf("%s: %w", errPOSTRequest, err)
-	// }
-	// defer response.Body.Close()
-	//
-	// var buf bytes.Buffer
-	// if _, err := io.Copy(&buf, response.Body); err != nil {
-	// 	return nil, fmt.Errorf("%s: %w", errReadBody, err)
-	// }
-	//
-	// output := &graphQLResponse{
-	// 	Data: input,
-	// }
-	//
-	// if err := json.NewDecoder(&buf).Decode(&output); err != nil {
-	// 	return nil, fmt.Errorf("%s: %w", errDecodeJSON, err)
-	// }
-	//
-	// return output.Data, nil
 }
 
 func (d *dgraph) query(ctx context.Context, query string, variables map[string]interface{}, input interface{}) (interface{}, error) {
@@ -142,7 +76,6 @@ type Resolver struct {
 func NewResolver() *Resolver {
 	return &Resolver{
 		dgraph: &dgraph{
-			httpClient:    &http.Client{},
 			graphqlClient: graphql.NewClient(dgraphURL), // TEMP
 		},
 	}
