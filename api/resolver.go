@@ -28,25 +28,31 @@ const (
 
 const dgraphURL = "temporary"
 
+func newRequest(mutation string, variables map[string]interface{}) *graphql.Request {
+	request := graphql.NewRequest(mutation)
+	for key, value := range variables {
+		request.Var(key, value)
+	}
+
+	return request
+}
+
+type graphQLClienter interface {
+	Run(ctx context.Context, req *graphql.Request, resp interface{}) error
+}
+
 type dgrapher interface {
 	mutate(c context.Context, m string, v map[string]interface{}, t interface{}) (interface{}, error)
 	query(c context.Context, q string, v map[string]interface{}, t interface{}) (interface{}, error)
 }
 
 type dgraph struct {
-	graphqlClient *graphql.Client // TEMP
+	graphQLClient graphQLClienter
 }
 
 func (d *dgraph) mutate(ctx context.Context, mutation string, variables map[string]interface{}, input interface{}) (interface{}, error) {
-	// NOTE: This is a quick-and-dirty implementation that will likely be swapped out for
-	// a hand-written version (very similar to this client library) but with allowance for
-	// GET requests to be made
-	request := graphql.NewRequest(mutation)
-	for key, value := range variables {
-		request.Var(key, value)
-	}
-
-	if err := d.graphqlClient.Run(ctx, request, &input); err != nil {
+	request := newRequest(mutation, variables)
+	if err := d.graphQLClient.Run(ctx, request, &input); err != nil {
 		return nil, fmt.Errorf("%s: %w", errRunClient, err)
 	}
 
@@ -54,15 +60,8 @@ func (d *dgraph) mutate(ctx context.Context, mutation string, variables map[stri
 }
 
 func (d *dgraph) query(ctx context.Context, query string, variables map[string]interface{}, input interface{}) (interface{}, error) {
-	// NOTE: This is a quick-and-dirty implementation that will likely be swapped out for
-	// a hand-written version (very similar to this client library) but with allowance for
-	// GET requests to be made
-	request := graphql.NewRequest(query)
-	for key, value := range variables {
-		request.Var(key, value)
-	}
-
-	if err := d.graphqlClient.Run(ctx, request, &input); err != nil {
+	request := newRequest(query, variables)
+	if err := d.graphQLClient.Run(ctx, request, &input); err != nil {
 		return nil, fmt.Errorf("%s: %w", errRunClient, err)
 	}
 
@@ -76,7 +75,7 @@ type Resolver struct {
 func NewResolver() *Resolver {
 	return &Resolver{
 		dgraph: &dgraph{
-			graphqlClient: graphql.NewClient(dgraphURL), // TEMP
+			graphQLClient: graphql.NewClient(dgraphURL), // TEMP
 		},
 	}
 }
