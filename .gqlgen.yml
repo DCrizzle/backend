@@ -1,14 +1,12 @@
 schema:
-  - api/schema.graphql
+  - backend/schema/*.graphql
 exec:
-  filename: api/generated.go
-  package: api
+  filename: backend/generated/generated.go
+  package: generated
 model:
-  filename: api/models_generated.go
-  package: api
+  filename: backend/generated/models_generated.go
+  package: generated
 resolver:
   layout: follow-schema
-  dir: api
-  package: api
-# autobind:
-#   - "github.com/forstmeier/tbd/api"
+  dir: backend/resolver
+  package: resolver

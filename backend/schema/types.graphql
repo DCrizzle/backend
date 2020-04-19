@@ -1,0 +1,17 @@
+type User {
+	id: ID!
+}
+
+type Org {
+	id: ID!
+}
+
+enum Role {
+	USER_ADMIN
+	USER_INTERNAL
+	USER_EXTERNAL
+}
+
+type Membership {
+	id: ID!
+}
