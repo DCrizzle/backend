@@ -1,0 +1,76 @@
+type Consent {
+	id: ID!
+	text: String!
+}
+
+type Demographic {
+	id: ID!
+	race: String!
+}
+
+type Donor {
+	id: ID!
+	specimens: [Specimen!]!
+}
+
+type Lab {
+	id: ID!
+	name: String!
+}
+
+type Location {
+	id: ID!
+	lat: Float!
+	lon: Float!
+}
+
+type Org {
+	id: ID!
+	name: String!
+}
+
+type Plan {
+	id: ID!
+	title: String!
+}
+
+type Protocol {
+	id: ID!
+	title: String!
+}
+
+type Result {
+	id: ID!
+	datetime: DateTime
+}
+
+type Role {
+	id: ID!
+	permissions: [String!]!
+}
+
+type Specimen {
+	id: ID!
+	specimenType: SpecimenType!
+}
+
+type SpecimenType {
+	id: ID!
+	specimen: Specimen!
+}
+
+type Storage {
+	id: ID!
+	name: String!
+}
+
+type Test {
+	id: ID!
+	name: String!
+}
+
+type User {
+	id: ID!
+	firstName: String!
+	lastName: String!
+}
