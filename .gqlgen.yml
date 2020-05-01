@@ -1,12 +1,12 @@
 schema:
   - backend/schema/*.graphql
 exec:
-  filename: backend/generated/generated.go
+  filename: backend/generated/exec_generated.go
   package: generated
 model:
-  filename: backend/generated/models_generated.go
+  filename: backend/generated/model_generated.go
   package: generated
 resolver:
   layout: follow-schema
-  dir: backend/resolver
-  package: resolver
+  dir: backend/resolvers
+  package: resolvers
