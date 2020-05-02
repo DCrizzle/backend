@@ -24,8 +24,9 @@ type Demographic {
 
 type Donor {
 	id: ID!
+	temp: String! # TEMP
 	specimens: [Specimen!]! # not needed on "create"
-	demographic: Demographic!
+	demographic: Demographic! # should this be multiple in the event they donate at different ages (?)
 	consent: [Consent!]! # probably multiple
 }
 
@@ -109,6 +110,7 @@ type Specimen {
 	labs: [Lab!]! # should there be more than one (?)
 	tests: [Test!]!
 	location: Location! # current location (?)
+	temp: String!
 }
 
 type SpecimenType {
@@ -117,6 +119,7 @@ type SpecimenType {
 	protocols: [Protocol!]!
 	plans: [Plan!]!
 	consents: [Consent!]!
+	temp: String!
 }
 
 type Storage {
