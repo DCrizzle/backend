@@ -10,7 +10,7 @@ import (
 	"github.com/forstmeier/tbd/backend/generated"
 )
 
-func (r *mutationResolver) CreateUser(ctx context.Context, input *generated.UserInput) (*generated.User, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, input *generated.CreateUser) (*generated.User, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

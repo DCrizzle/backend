@@ -73,6 +73,7 @@ type ComplexityRoot struct {
 		Demographic func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Specimens   func(childComplexity int) int
+		Temp        func(childComplexity int) int
 	}
 
 	Lab struct {
@@ -99,7 +100,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateUser func(childComplexity int, input *UserInput) int
+		CreateUser func(childComplexity int, input *CreateUser) int
 	}
 
 	Org struct {
@@ -159,6 +160,7 @@ type ComplexityRoot struct {
 		Location     func(childComplexity int) int
 		SpecimenType func(childComplexity int) int
 		Storages     func(childComplexity int) int
+		Temp         func(childComplexity int) int
 		Tests        func(childComplexity int) int
 	}
 
@@ -168,6 +170,7 @@ type ComplexityRoot struct {
 		Plans     func(childComplexity int) int
 		Protocols func(childComplexity int) int
 		Specimen  func(childComplexity int) int
+		Temp      func(childComplexity int) int
 	}
 
 	Storage struct {
@@ -202,7 +205,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateUser(ctx context.Context, input *UserInput) (*User, error)
+	CreateUser(ctx context.Context, input *CreateUser) (*User, error)
 }
 type QueryResolver interface {
 	GetUser(ctx context.Context, id string) (*User, error)
@@ -377,6 +380,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Donor.Specimens(childComplexity), true
 
+	case "Donor.temp":
+		if e.complexity.Donor.Temp == nil {
+			break
+		}
+
+		return e.complexity.Donor.Temp(childComplexity), true
+
 	case "Lab.consent":
 		if e.complexity.Lab.Consent == nil {
 			break
@@ -506,7 +516,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(*UserInput)), true
+		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(*CreateUser)), true
 
 	case "Org.id":
 		if e.complexity.Org.ID == nil {
@@ -779,6 +789,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Specimen.Storages(childComplexity), true
 
+	case "Specimen.temp":
+		if e.complexity.Specimen.Temp == nil {
+			break
+		}
+
+		return e.complexity.Specimen.Temp(childComplexity), true
+
 	case "Specimen.tests":
 		if e.complexity.Specimen.Tests == nil {
 			break
@@ -820,6 +837,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SpecimenType.Specimen(childComplexity), true
+
+	case "SpecimenType.temp":
+		if e.complexity.SpecimenType.Temp == nil {
+			break
+		}
+
+		return e.complexity.SpecimenType.Temp(childComplexity), true
 
 	case "Storage.consent":
 		if e.complexity.Storage.Consent == nil {
@@ -1039,13 +1063,198 @@ var sources = []*ast.Source{
 	&ast.Source{Name: "backend/schema/directives.graphql", Input: `directive @isAuthenticated on MUTATION | QUERY
 directive @isAuthorized(permissions: [String!]!) on MUTATION | QUERY
 `, BuiltIn: false},
-	&ast.Source{Name: "backend/schema/inputs.graphql", Input: `input UserInput{
+	&ast.Source{Name: "backend/schema/inputs.graphql", Input: `# note: these names may change to better match dgraph
+
+# update consent is just id + specimen(s)
+input CreateConsent {
+	text: String! # a separate type may be needed to represent the "type" of consent agreed to
+	# donor: Donor!
+	# plan: Plan!
+	# protocol: Protocol!
+	# specimens: [Specimen!]! # not needed on "create"
+	# specimenTypes: [SpecimenType!]!
+	# storage: Storage! # maybe multiple storages (?)
+	# lab: Lab! # maybe multiple labs (?)
+	# test: [Test!]!
+	# location: [Location!]!
+}
+
+# update demographic is just id + protocol(s)
+input CreateDemographic {
+	race: String!
+	age: String!
+	sex: String!
+	# donors: [Donor!]!
+	# protocols: [Protocol!]!
+	# specimens: [Specimen!]!
+}
+
+input CreateDonor {
+	temp: String!
+	# demographic: Demographic!
+	# consent: [Consent!]! # probably multiple
+}
+
+input UpdateDonor {
+	id: ID!
+	# specimens: [Specimen!] # optional
+	# consent: [Consent!] # optional
+}
+
+input CreateLab {
+	name: String! # required
+	# tests: [Test!]
+	# location: Location! # required
+	# users: [User!]
+	# consent: [Consent!]
+	# plan: [Plan!]
+	# specimens: [Specimen!]
+}
+
+input UpdateLab { # probably used in different methods (e.g. AddSpecimen, RemoveUser)
+	id: ID!
+	name: String
+	# tests: [Test!]
+	# location: Location
+	# users: [User!]
+	# consent: [Consent!]
+	# plan: [Plan!]
+	# specimens: [Specimen!]
+}
+
+# skipping location for now
+
+input CreateOrg {
+	name: String!
+	# users: [User!]! # all "internal" + "external" users w/ different roles (e.g. admin, scientist)
+}
+
+input UpdateOrg { # used in different methods (e.g. AddSpecimen, RemoveRole, ChangeName)
+	id: ID!
+	name: String
+	# specimens: [Specimen!] # continually added to the org over time
+	# roles: [Role!]
+	# users: [User!] # all "internal" + "external" users w/ different roles (e.g. admin, scientist)
+}
+
+input CreatePlan {
+	title: String!
+	# protocol: Protocol!
+	# specimenTypes: [SpecimenType!]!
+	# storages: [Storage!]!
+	# labs: [Lab!]!
+	# tests: [Test!]!
+	# locations: [Location!]!
+	# consents: [Consent!]!
+}
+
+input CreateProtocol {
+	title: String!
+	# specimenTypes: [SpecimenType!]! # defined before the process (on "create")
+	# tests: [Test!]!
+	# locations: [Location!]! # address (?)
+	# consents: [Consent!]! # this should probably be "consent type"
+	# demographics: [Demographic!]!
+}
+
+input UpdateProtocol {
+	id: ID!
+	title: String
+	# specimens: [Specimen!] # collected after the process (after "create")
+	# results: [Result!]
+}
+
+# no "update" provided - essentially "immutable"
+input CreateResult {
+	datetime: String! # string necessary due to conflict between gqlgen + dgraph (some other workaround may be possible)
+	# test: Test!
+	# protocol: Protocol!
+}
+
+input CreateRole {
+	name: String!
+	permissions: [String!]! # e.g. "user:create"
+	# org: Org!
+}
+
+input UpdateRole {
+	id: ID!
+	name: String!
+	permissions: [String!] # e.g. "user:create"
+	# users: [User!]
+}
+
+input CreateSpecimen {
+	temp: String!
+	# specimenType: SpecimenType!
+	# labs: [Lab!]! # should there be more than one (?)
+	# location: Location! # current location (?)
+}
+
+input UpdateSpecimen {
+	id: ID!
+	# storages: [Storage!] # chronological ordering (?)
+	# labs: [Lab!] # should there be more than one (?)
+	# tests: [Test!]
+	# location: Location # current location (?)
+}
+
+# "immutable" and no "update" method provided
+input CreateSpecimenType {
+	temp: String!
+	# protocols: [Protocol!]!
+	# plans: [Plan!]!
+	# consents: [Consent!]!
+}
+
+input CreateStorage {
+	name: String!
+	# location: Location! # single address for storage
+}
+
+input UpdateStorage {
+	id: ID!
+	name: String
+	# specimens: [Specimen!]
+	# consent: [Consent!]
+	# users: [User!] # third-party users added to the app by admins
+	# location: Location # single address for storage
+}
+
+# an "update" will be provided after decisions are made on these fields
+input CreateTest {
+	name: String!
+	# should any of these be singular - likely all singular/multiple (?)
+	# consents: [Consent!]!
+	# plans: [Plan!]!
+	# protocols: [Protocol!]!
+	# specimens: [Specimen!]!
+	# result: [Result!]!
+}
+
+input CreateUser {
 	firstName: String!
 	lastName: String!
+	email: String!
+	# org: Org!
+	# role: Role!
+	# storage: Storage # not guaranteed
+	# lab: Lab # not guaranteed
+}
+
+input UpdateUser {
+	id: ID!
+	firstName: String
+	lastName: String
+	email: String
+	# org: Org
+	# role: Role
+	# storage: Storage # not guaranteed
+	# lab: Lab # not guaranteed
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "backend/schema/mutations.graphql", Input: `type Mutation {
-	createUser(input: UserInput): User! @isAuthorized(permissions: ["user:create"])
+	createUser(input: CreateUser): User! @isAuthorized(permissions: ["user:create"])
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "backend/schema/queries.graphql", Input: `type Query {
@@ -1083,8 +1292,9 @@ type Demographic {
 
 type Donor {
 	id: ID!
+	temp: String! # TEMP
 	specimens: [Specimen!]! # not needed on "create"
-	demographic: Demographic!
+	demographic: Demographic! # should this be multiple in the event they donate at different ages (?)
 	consent: [Consent!]! # probably multiple
 }
 
@@ -1168,6 +1378,7 @@ type Specimen {
 	labs: [Lab!]! # should there be more than one (?)
 	tests: [Test!]!
 	location: Location! # current location (?)
+	temp: String!
 }
 
 type SpecimenType {
@@ -1176,6 +1387,7 @@ type SpecimenType {
 	protocols: [Protocol!]!
 	plans: [Plan!]!
 	consents: [Consent!]!
+	temp: String!
 }
 
 type Storage {
@@ -1234,9 +1446,9 @@ func (ec *executionContext) dir_isAuthorized_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *UserInput
+	var arg0 *CreateUser
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalOUserInput2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋbackendᚋgeneratedᚐUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalOCreateUser2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋbackendᚋgeneratedᚐCreateUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2037,6 +2249,40 @@ func (ec *executionContext) _Donor_id(ctx context.Context, field graphql.Collect
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Donor_temp(ctx context.Context, field graphql.CollectedField, obj *Donor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Donor",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Temp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Donor_specimens(ctx context.Context, field graphql.CollectedField, obj *Donor) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2741,7 +2987,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateUser(rctx, args["input"].(*UserInput))
+		return ec.resolvers.Mutation().CreateUser(rctx, args["input"].(*CreateUser))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4160,6 +4406,40 @@ func (ec *executionContext) _Specimen_location(ctx context.Context, field graphq
 	return ec.marshalNLocation2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋbackendᚋgeneratedᚐLocation(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Specimen_temp(ctx context.Context, field graphql.CollectedField, obj *Specimen) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Specimen",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Temp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _SpecimenType_id(ctx context.Context, field graphql.CollectedField, obj *SpecimenType) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4328,6 +4608,40 @@ func (ec *executionContext) _SpecimenType_consents(ctx context.Context, field gr
 	res := resTmp.([]*Consent)
 	fc.Result = res
 	return ec.marshalNConsent2ᚕᚖgithubᚗcomᚋforstmeierᚋtbdᚋbackendᚋgeneratedᚐConsentᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SpecimenType_temp(ctx context.Context, field graphql.CollectedField, obj *SpecimenType) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "SpecimenType",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Temp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Storage_id(ctx context.Context, field graphql.CollectedField, obj *Storage) (ret graphql.Marshaler) {
@@ -6099,8 +6413,260 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj interface{}) (UserInput, error) {
-	var it UserInput
+func (ec *executionContext) unmarshalInputCreateConsent(ctx context.Context, obj interface{}) (CreateConsent, error) {
+	var it CreateConsent
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "text":
+			var err error
+			it.Text, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateDemographic(ctx context.Context, obj interface{}) (CreateDemographic, error) {
+	var it CreateDemographic
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "race":
+			var err error
+			it.Race, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "age":
+			var err error
+			it.Age, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sex":
+			var err error
+			it.Sex, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateDonor(ctx context.Context, obj interface{}) (CreateDonor, error) {
+	var it CreateDonor
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "temp":
+			var err error
+			it.Temp, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateLab(ctx context.Context, obj interface{}) (CreateLab, error) {
+	var it CreateLab
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateOrg(ctx context.Context, obj interface{}) (CreateOrg, error) {
+	var it CreateOrg
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreatePlan(ctx context.Context, obj interface{}) (CreatePlan, error) {
+	var it CreatePlan
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "title":
+			var err error
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateProtocol(ctx context.Context, obj interface{}) (CreateProtocol, error) {
+	var it CreateProtocol
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "title":
+			var err error
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateResult(ctx context.Context, obj interface{}) (CreateResult, error) {
+	var it CreateResult
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "datetime":
+			var err error
+			it.Datetime, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateRole(ctx context.Context, obj interface{}) (CreateRole, error) {
+	var it CreateRole
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "permissions":
+			var err error
+			it.Permissions, err = ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateSpecimen(ctx context.Context, obj interface{}) (CreateSpecimen, error) {
+	var it CreateSpecimen
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "temp":
+			var err error
+			it.Temp, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateSpecimenType(ctx context.Context, obj interface{}) (CreateSpecimenType, error) {
+	var it CreateSpecimenType
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "temp":
+			var err error
+			it.Temp, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateStorage(ctx context.Context, obj interface{}) (CreateStorage, error) {
+	var it CreateStorage
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateTest(ctx context.Context, obj interface{}) (CreateTest, error) {
+	var it CreateTest
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateUser(ctx context.Context, obj interface{}) (CreateUser, error) {
+	var it CreateUser
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -6114,6 +6680,210 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 		case "lastName":
 			var err error
 			it.LastName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email":
+			var err error
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateDonor(ctx context.Context, obj interface{}) (UpdateDonor, error) {
+	var it UpdateDonor
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateLab(ctx context.Context, obj interface{}) (UpdateLab, error) {
+	var it UpdateLab
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateOrg(ctx context.Context, obj interface{}) (UpdateOrg, error) {
+	var it UpdateOrg
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateProtocol(ctx context.Context, obj interface{}) (UpdateProtocol, error) {
+	var it UpdateProtocol
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateRole(ctx context.Context, obj interface{}) (UpdateRole, error) {
+	var it UpdateRole
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "permissions":
+			var err error
+			it.Permissions, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateSpecimen(ctx context.Context, obj interface{}) (UpdateSpecimen, error) {
+	var it UpdateSpecimen
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateStorage(ctx context.Context, obj interface{}) (UpdateStorage, error) {
+	var it UpdateStorage
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj interface{}) (UpdateUser, error) {
+	var it UpdateUser
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstName":
+			var err error
+			it.FirstName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastName":
+			var err error
+			it.LastName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email":
+			var err error
+			it.Email, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6278,6 +7048,11 @@ func (ec *executionContext) _Donor(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = graphql.MarshalString("Donor")
 		case "id":
 			out.Values[i] = ec._Donor_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "temp":
+			out.Values[i] = ec._Donor_temp(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -6822,6 +7597,11 @@ func (ec *executionContext) _Specimen(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "temp":
+			out.Values[i] = ec._Specimen_temp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6866,6 +7646,11 @@ func (ec *executionContext) _SpecimenType(ctx context.Context, sel ast.Selection
 			}
 		case "consents":
 			out.Values[i] = ec._SpecimenType_consents(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "temp":
+			out.Values[i] = ec._SpecimenType_temp(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -8358,12 +9143,56 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
+func (ec *executionContext) unmarshalOCreateUser2githubᚗcomᚋforstmeierᚋtbdᚋbackendᚋgeneratedᚐCreateUser(ctx context.Context, v interface{}) (CreateUser, error) {
+	return ec.unmarshalInputCreateUser(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOCreateUser2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋbackendᚋgeneratedᚐCreateUser(ctx context.Context, v interface{}) (*CreateUser, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOCreateUser2githubᚗcomᚋforstmeierᚋtbdᚋbackendᚋgeneratedᚐCreateUser(ctx, v)
+	return &res, err
+}
+
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	return graphql.MarshalString(v)
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
@@ -8379,18 +9208,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOString2string(ctx, sel, *v)
-}
-
-func (ec *executionContext) unmarshalOUserInput2githubᚗcomᚋforstmeierᚋtbdᚋbackendᚋgeneratedᚐUserInput(ctx context.Context, v interface{}) (UserInput, error) {
-	return ec.unmarshalInputUserInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOUserInput2ᚖgithubᚗcomᚋforstmeierᚋtbdᚋbackendᚋgeneratedᚐUserInput(ctx context.Context, v interface{}) (*UserInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOUserInput2githubᚗcomᚋforstmeierᚋtbdᚋbackendᚋgeneratedᚐUserInput(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

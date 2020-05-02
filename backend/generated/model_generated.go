@@ -16,6 +16,67 @@ type Consent struct {
 	Location      []*Location     `json:"location"`
 }
 
+type CreateConsent struct {
+	Text string `json:"text"`
+}
+
+type CreateDemographic struct {
+	Race string `json:"race"`
+	Age  string `json:"age"`
+	Sex  string `json:"sex"`
+}
+
+type CreateDonor struct {
+	Temp string `json:"temp"`
+}
+
+type CreateLab struct {
+	Name string `json:"name"`
+}
+
+type CreateOrg struct {
+	Name string `json:"name"`
+}
+
+type CreatePlan struct {
+	Title string `json:"title"`
+}
+
+type CreateProtocol struct {
+	Title string `json:"title"`
+}
+
+type CreateResult struct {
+	Datetime string `json:"datetime"`
+}
+
+type CreateRole struct {
+	Name        string   `json:"name"`
+	Permissions []string `json:"permissions"`
+}
+
+type CreateSpecimen struct {
+	Temp string `json:"temp"`
+}
+
+type CreateSpecimenType struct {
+	Temp string `json:"temp"`
+}
+
+type CreateStorage struct {
+	Name string `json:"name"`
+}
+
+type CreateTest struct {
+	Name string `json:"name"`
+}
+
+type CreateUser struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Email     string `json:"email"`
+}
+
 type Demographic struct {
 	ID        string      `json:"id"`
 	Race      string      `json:"race"`
@@ -28,6 +89,7 @@ type Demographic struct {
 
 type Donor struct {
 	ID          string       `json:"id"`
+	Temp        string       `json:"temp"`
 	Specimens   []*Specimen  `json:"specimens"`
 	Demographic *Demographic `json:"demographic"`
 	Consent     []*Consent   `json:"consent"`
@@ -110,6 +172,7 @@ type Specimen struct {
 	Labs         []*Lab        `json:"labs"`
 	Tests        []*Test       `json:"tests"`
 	Location     *Location     `json:"location"`
+	Temp         string        `json:"temp"`
 }
 
 type SpecimenType struct {
@@ -118,6 +181,7 @@ type SpecimenType struct {
 	Protocols []*Protocol `json:"protocols"`
 	Plans     []*Plan     `json:"plans"`
 	Consents  []*Consent  `json:"consents"`
+	Temp      string      `json:"temp"`
 }
 
 type Storage struct {
@@ -139,6 +203,47 @@ type Test struct {
 	Result    []*Result   `json:"result"`
 }
 
+type UpdateDonor struct {
+	ID string `json:"id"`
+}
+
+type UpdateLab struct {
+	ID   string  `json:"id"`
+	Name *string `json:"name"`
+}
+
+type UpdateOrg struct {
+	ID   string  `json:"id"`
+	Name *string `json:"name"`
+}
+
+type UpdateProtocol struct {
+	ID    string  `json:"id"`
+	Title *string `json:"title"`
+}
+
+type UpdateRole struct {
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Permissions []string `json:"permissions"`
+}
+
+type UpdateSpecimen struct {
+	ID string `json:"id"`
+}
+
+type UpdateStorage struct {
+	ID   string  `json:"id"`
+	Name *string `json:"name"`
+}
+
+type UpdateUser struct {
+	ID        string  `json:"id"`
+	FirstName *string `json:"firstName"`
+	LastName  *string `json:"lastName"`
+	Email     *string `json:"email"`
+}
+
 type User struct {
 	ID        string   `json:"id"`
 	FirstName string   `json:"firstName"`
@@ -148,9 +253,4 @@ type User struct {
 	Role      *Role    `json:"role"`
 	Storage   *Storage `json:"storage"`
 	Lab       *Lab     `json:"lab"`
-}
-
-type UserInput struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
 }
