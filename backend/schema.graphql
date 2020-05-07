@@ -1,0 +1,22 @@
+# outline:
+# [ ] "specimen" will be interface
+# - [ ] implementations will be different categories of specimen
+# - [ ] query on specific categories (implementations)
+# - - [ ] e.g. "... on BloodSpecimen { }"
+# [ ] "form" will be interface
+# - [ ] e.g. "ConsentForm"
+# [ ] "consent" type will be a relationship ("connection"?)
+# - [ ] contains:
+# - - [ ] donor
+# - - [ ] date
+# - - [ ] consent form
+# - - [ ] etc
+# - [ ] represents specific agreement made (an "action")
+# [ ] dgraph-generated notes
+# - [ ] "get*" -> accepts ID-specified fields
+# - - [ ] e.g. "ID!" or "@id" directive
+# - [ ] "query*"
+# - - [ ] "filter" field contains fields tagged with "@search" directive
+# - [ ] dgraph operations
+# - - [ ] "add", "delete", "get", "query", "update"
+# - [ ] update relationships using "set"/"remove" keywords in queries

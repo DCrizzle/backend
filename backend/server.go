@@ -36,7 +36,7 @@ func middleware(client dgrapher) func(http.Handler) http.Handler {
 
 	// outline:
 	// [ ] return wrapped handler function
-	// [ ] retrieve token from request
+	// [ ] retrieve token from request ("authorization" header)
 	// [ ] validate/parse token
 	// [ ] query database with dgraph client
 	// [ ] server request with context
