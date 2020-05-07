@@ -8,7 +8,7 @@ import (
 
 type Server struct {}
 
-func NewServer() *Server {
+func NewServer(gql graphql) *Server {
 
 	router := mux.NewRouter()
 
@@ -24,23 +24,21 @@ func NewServer() *Server {
 	return &Server{}
 }
 
-func middleware(client dgrapher) func(http.Handler) http.Handler {
+func middleware(http.Handler) http.Handler {
 
-	return func(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		})
-
-	}
+	})
 
 	// outline:
 	// [ ] return wrapped handler function
 	// [ ] retrieve token from request ("authorization" header)
 	// [ ] validate/parse token
-	// [ ] query database with dgraph client
-	// [ ] server request with context
+	// [ ] server request with context (?)
 
 }
 
-type dgrapher interface {}
+type graphql interface {
+	query(query string, variables, headers map[string]string) io.ReadCloser
+	mutation(mutation string, variables, headers map[string]string) io.ReadCloser
+}
