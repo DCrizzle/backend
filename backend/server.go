@@ -30,10 +30,6 @@ func middleware(client dgrapher) func(http.Handler) http.Handler {
 
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-
-
-
-
 		})
 
 	}
@@ -43,18 +39,8 @@ func middleware(client dgrapher) func(http.Handler) http.Handler {
 	// [ ] retrieve token from request
 	// [ ] validate/parse token
 	// [ ] query database with dgraph client
-	// [ ] hydrate full user object
-	// [ ] add user object to request context
 	// [ ] server request with context
 
 }
 
-type dgrapher interface {
-// 	Query(query string, variables map[string]string) ([]byte, error)
-}
-
-// type dgraph struct{}
-//
-// func (d *dgraph) Query(query string, variables map[string]string) ([]byte, error) {
-//
-// }
+type dgrapher interface {}

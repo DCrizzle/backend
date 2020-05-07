@@ -1,4 +1,0 @@
-schema @isAuthenticated {
-	query: Query
-	mutation: Mutation
-}

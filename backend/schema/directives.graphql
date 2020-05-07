@@ -1,2 +1,0 @@
-directive @isAuthenticated on MUTATION | QUERY
-directive @isAuthorized(permissions: [String!]!) on MUTATION | QUERY
