@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,22 +12,24 @@ import (
 )
 
 type mockGraphQL struct {
-	mutationResponse io.ReadCloser
-	queryResponse    io.ReadCloser
+	mutationResponse *http.Response
+	mutationError    error
+	queryResponse    *http.Response
+	queryError       error
 }
 
-func (mgql *mockGraphQL) mutation(mutation string, variables map[string]string, headers map[string][]string) io.ReadCloser {
-	return mgql.mutationResponse
+func (mgql *mockGraphQL) mutation(url string, body io.Reader) (*http.Response, error) {
+	return mgql.mutationResponse, mgql.mutationError
 }
 
-func (mgql *mockGraphQL) query(query string, variables map[string]string, headers map[string][]string) io.ReadCloser {
-	return mgql.queryResponse
+func (mgql *mockGraphQL) query(url string) (*http.Response, error) {
+	return mgql.queryResponse, mgql.queryError
 }
 
 func TestNewServer(t *testing.T) {
 	mgql := &mockGraphQL{}
 
-	s := NewServer(mgql)
+	s := NewServer("testURL", mgql)
 
 	if s == nil {
 		t.Error("nil received creating new server")
@@ -40,61 +43,51 @@ func Test_graphQLHandler(t *testing.T) {
 		description      string
 		requestMethod    string
 		requestURL       string
-		requestBody      io.Reader
-		mutationResponse io.ReadCloser
-		queryResponse    io.ReadCloser
+		requestBody      io.Reader // note: remove (?)
+		mutationResponse *http.Response
+		mutationError    error
+		queryResponse    *http.Response
+		queryError       error
 		status           int
 		body             string
 	}{
 		{
-			description:      "no json body received in post request",
+			description:      "error returned from database mutation request",
 			requestMethod:    http.MethodPost,
 			requestURL:       "/graphql",
 			requestBody:      nil,
 			mutationResponse: nil,
+			mutationError:    errors.New("mock mutation error"),
 			queryResponse:    nil,
-			status:           http.StatusBadRequest,
-			body:             fmt.Sprintf(`{"message":"%s"}`, errNoPOSTRequestBody) + "\n",
+			queryError:       nil,
+			status:           http.StatusInternalServerError,
+			body:             fmt.Sprintf(`{"message":"%s"}`, errMutationRequest) + "\n",
 		},
 		{
-			description:      "non-json body received in post request",
-			requestMethod:    http.MethodPost,
-			requestURL:       "/graphql",
-			requestBody:      strings.NewReader("---------"),
-			mutationResponse: nil,
-			queryResponse:    nil,
-			status:           http.StatusBadRequest,
-			body:             fmt.Sprintf(`{"message":"%s"}`, errParsingPOSTJSONBody) + "\n",
+			description:   "successful mutation post request invocation",
+			requestMethod: http.MethodPost,
+			requestURL:    "/graphql",
+			requestBody:   nil,
+			mutationResponse: &http.Response{
+				Body: ioutil.NopCloser(strings.NewReader(responseData)),
+			},
+			mutationError: nil,
+			queryResponse: nil,
+			queryError:    nil,
+			status:        http.StatusOK,
+			body:          responseData,
 		},
 		{
-			description:      "successful mutation post request invocation",
-			requestMethod:    http.MethodPost,
-			requestURL:       "/graphql",
-			requestBody:      strings.NewReader(`{"query":"test query","variables":{"key":"value"}}`),
-			mutationResponse: ioutil.NopCloser(strings.NewReader(responseData)),
-			queryResponse:    nil,
-			status:           http.StatusOK,
-			body:             responseData,
-		},
-		{
-			description:      "no query parameter received in get request",
+			description:      "error returned from database query request",
 			requestMethod:    http.MethodGet,
 			requestURL:       "/graphql",
 			requestBody:      nil,
 			mutationResponse: nil,
+			mutationError:    nil,
 			queryResponse:    nil,
-			status:           http.StatusBadRequest,
-			body:             fmt.Sprintf(`{"message":"%s"}`, errNoQueryInURL) + "\n",
-		},
-		{
-			description:      "incorrect variables parameter received in get request",
-			requestMethod:    http.MethodGet,
-			requestURL:       "/graphql?query=%20getData%20%7B%20value%20%7B&variables=---",
-			requestBody:      nil,
-			mutationResponse: nil,
-			queryResponse:    nil,
-			status:           http.StatusBadRequest,
-			body:             fmt.Sprintf(`{"message":"%s"}`, errParsingGETQueryURL) + "\n",
+			queryError:       errors.New("mock query error"),
+			status:           http.StatusInternalServerError,
+			body:             fmt.Sprintf(`{"message":"%s"}`, errQueryRequest) + "\n",
 		},
 		{
 			description:      "successful query get request invocation",
@@ -102,9 +95,13 @@ func Test_graphQLHandler(t *testing.T) {
 			requestURL:       "/graphql?query=query%20getData(%24arg%3A%20String!)%20%7B%20getData(arg%3A%20%24arg)%20%7B%20value%20%7D%20%7D&variables=%7B%0A%20%20%22arg%22%3A%22value%22%0A%7D",
 			requestBody:      nil,
 			mutationResponse: nil,
-			queryResponse:    ioutil.NopCloser(strings.NewReader(responseData)),
-			status:           http.StatusOK,
-			body:             responseData,
+			mutationError:    nil,
+			queryResponse: &http.Response{
+				Body: ioutil.NopCloser(strings.NewReader(responseData)),
+			},
+			queryError: nil,
+			status:     http.StatusOK,
+			body:       responseData,
 		},
 	}
 
@@ -112,7 +109,9 @@ func Test_graphQLHandler(t *testing.T) {
 		t.Run(test.description, func(t *testing.T) {
 			mgql := &mockGraphQL{
 				mutationResponse: test.mutationResponse,
+				mutationError:    test.mutationError,
 				queryResponse:    test.queryResponse,
+				queryError:       test.queryError,
 			}
 
 			req, err := http.NewRequest(test.requestMethod, test.requestURL, test.requestBody)
@@ -122,7 +121,7 @@ func Test_graphQLHandler(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			handler := http.HandlerFunc(graphQLHandler(mgql))
+			handler := http.HandlerFunc(graphQLHandler("testURL", mgql))
 
 			handler.ServeHTTP(rec, req)
 

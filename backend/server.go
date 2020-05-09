@@ -3,20 +3,20 @@ package backend
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
 
+	auth0 "github.com/auth0-community/go-auth0"
+	jose "gopkg.in/square/go-jose.v2"
+
 	"github.com/gorilla/mux"
 )
 
 const (
-	errNoPOSTRequestBody   = "no body received in payload"
-	errParsingPOSTJSONBody = "error parsing json body"
-	errNoQueryInURL        = "no query variable recieved in url params"
-	errParsingGETQueryURL  = "error parsing query url variable"
+	errMutationRequest = "error invoking backend database mutation"
+	errQueryRequest    = "error invoking backend database query"
 )
 
 // Server hosts the backend server with login/logout and GraphQL endpoints.
@@ -25,11 +25,11 @@ type Server struct {
 }
 
 // NewServer generates a pointer to an inactive Server instance.
-func NewServer(gql graphql) *Server {
+func NewServer(dgraphURL string, gql graphQL) *Server {
 	router := mux.NewRouter()
 
 	router.Use(middleware)
-	router.HandleFunc("/graphql", graphQLHandler(gql))
+	router.HandleFunc("/graphql", graphQLHandler(dgraphURL, gql))
 
 	return &Server{
 		httpServer: &http.Server{
@@ -51,61 +51,48 @@ func (s *Server) Stop(ctx context.Context) {
 	s.httpServer.Shutdown(ctx)
 }
 
-func middleware(http.Handler) http.Handler {
-
+func middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		secret := []byte("AUTH0_API_CLIENT_SECRET")
+		secretProvider := auth0.NewKeyProvider(secret)
+		audience := []string{"AUTH0_API_AUDIENCE"}
+		domain := "https://AUTH0_DOMAIN.auth0.com/"
 
+		configuration := auth0.NewConfiguration(secretProvider, audience, domain, jose.RS256)
+		validator := auth0.NewValidator(configuration, nil)
+
+		_, err := validator.ValidateRequest(r)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("unauthorized"))
+		}
+
+		next.ServeHTTP(w, r)
 	})
-
-	// outline:
-	// [ ] return wrapped handler function
-	// [ ] retrieve token from request ("authorization" header)
-	// [ ] validate/parse token
-	// [ ] server request with context (?)
-
 }
 
-func graphQLHandler(gql graphql) http.HandlerFunc {
+func graphQLHandler(dgraphURL string, gql graphQL) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var output io.ReadCloser
 
 		if r.Method == http.MethodPost {
-			mut := mutation{}
-			if r.Body == nil {
-				http.Error(w, fmt.Sprintf(`{"message":"%s"}`, errNoPOSTRequestBody), http.StatusBadRequest)
-				return
-			}
-
-			err := json.NewDecoder(r.Body).Decode(&mut)
+			response, err := gql.mutation(dgraphURL, r.Body)
 			if err != nil {
-				http.Error(w, fmt.Sprintf(`{"message":"%s"}`, errParsingPOSTJSONBody), http.StatusBadRequest)
+				http.Error(w, fmt.Sprintf(`{"message":"%s"}`, errMutationRequest), http.StatusInternalServerError)
 				return
 			}
 
-			mutationResponse := gql.mutation(mut.mutation, mut.variables, r.Header)
-			output = mutationResponse
+			output = response.Body
 
 		} else if r.Method == http.MethodGet {
-			params := r.URL.Query()
-			queryParam, ok := params["query"]
-			if !ok {
-				http.Error(w, fmt.Sprintf(`{"message":"%s"}`, errNoQueryInURL), http.StatusBadRequest)
+			queryURL := dgraphURL + r.URL.Path + "?" + r.URL.RawQuery
+			response, err := gql.query(queryURL)
+			if err != nil {
+				http.Error(w, fmt.Sprintf(`{"message":"%s"}`, errQueryRequest), http.StatusInternalServerError)
 				return
 			}
 
-			var variablesParam map[string]string
-			variablesString, ok := params["variables"]
-			if ok {
-				err := json.Unmarshal([]byte(variablesString[0]), &variablesParam)
-				if err != nil {
-					http.Error(w, fmt.Sprintf(`{"message":"%s"}`, errParsingGETQueryURL), http.StatusBadRequest)
-					return
-				}
-			}
-
-			queryResponse := gql.query(queryParam[0], variablesParam, r.Header)
-			output = queryResponse
-
+			output = response.Body
 		}
 
 		buffer := new(bytes.Buffer)
@@ -119,9 +106,17 @@ type mutation struct {
 	variables map[string]string `json:"variables"`
 }
 
-type graphql interface {
-	mutation(mutation string, variables map[string]string, headers map[string][]string) io.ReadCloser
-	query(query string, variables map[string]string, headers map[string][]string) io.ReadCloser
+type graphQL interface {
+	mutation(url string, body io.Reader) (*http.Response, error)
+	query(url string) (*http.Response, error)
 }
 
-// todo: add implementation of graphql interface utilizing http client for graphql
+type graphQLClient struct{}
+
+func (gqlc *graphQLClient) mutation(url string, body io.Reader) (*http.Response, error) {
+	return http.Post(url, "application/json", body)
+}
+
+func (gqlc *graphQLClient) query(url string) (*http.Response, error) {
+	return http.Get(url)
+}
