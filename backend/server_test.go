@@ -34,9 +34,12 @@ func TestNewServer(t *testing.T) {
 }
 
 func Test_graphQLHandler(t *testing.T) {
+	responseData := `{"data":{"key":"value"}}`
+
 	tests := []struct {
 		description      string
 		requestMethod    string
+		requestURL       string
 		requestBody      io.Reader
 		mutationResponse io.ReadCloser
 		queryResponse    io.ReadCloser
@@ -46,6 +49,7 @@ func Test_graphQLHandler(t *testing.T) {
 		{
 			description:      "no json body received in post request",
 			requestMethod:    http.MethodPost,
+			requestURL:       "/graphql",
 			requestBody:      nil,
 			mutationResponse: nil,
 			queryResponse:    nil,
@@ -55,6 +59,7 @@ func Test_graphQLHandler(t *testing.T) {
 		{
 			description:      "non-json body received in post request",
 			requestMethod:    http.MethodPost,
+			requestURL:       "/graphql",
 			requestBody:      strings.NewReader("---------"),
 			mutationResponse: nil,
 			queryResponse:    nil,
@@ -64,11 +69,42 @@ func Test_graphQLHandler(t *testing.T) {
 		{
 			description:      "successful mutation post request invocation",
 			requestMethod:    http.MethodPost,
+			requestURL:       "/graphql",
 			requestBody:      strings.NewReader(`{"query":"test query","variables":{"key":"value"}}`),
-			mutationResponse: ioutil.NopCloser(strings.NewReader(`{"data":{"key":"value"}}`)),
+			mutationResponse: ioutil.NopCloser(strings.NewReader(responseData)),
 			queryResponse:    nil,
 			status:           http.StatusOK,
-			body:             `{"data":{"key":"value"}}`,
+			body:             responseData,
+		},
+		{
+			description:      "no query parameter received in get request",
+			requestMethod:    http.MethodGet,
+			requestURL:       "/graphql",
+			requestBody:      nil,
+			mutationResponse: nil,
+			queryResponse:    nil,
+			status:           http.StatusBadRequest,
+			body:             fmt.Sprintf(`{"message":"%s"}`, errNoQueryInURL) + "\n",
+		},
+		{
+			description:      "incorrect variables parameter received in get request",
+			requestMethod:    http.MethodGet,
+			requestURL:       "/graphql?query=%20getData%20%7B%20value%20%7B&variables=---",
+			requestBody:      nil,
+			mutationResponse: nil,
+			queryResponse:    nil,
+			status:           http.StatusBadRequest,
+			body:             fmt.Sprintf(`{"message":"%s"}`, errParsingGETQueryURL) + "\n",
+		},
+		{
+			description:      "successful query get request invocation",
+			requestMethod:    http.MethodGet,
+			requestURL:       "/graphql?query=query%20getData(%24arg%3A%20String!)%20%7B%20getData(arg%3A%20%24arg)%20%7B%20value%20%7D%20%7D&variables=%7B%0A%20%20%22arg%22%3A%22value%22%0A%7D",
+			requestBody:      nil,
+			mutationResponse: nil,
+			queryResponse:    ioutil.NopCloser(strings.NewReader(responseData)),
+			status:           http.StatusOK,
+			body:             responseData,
 		},
 	}
 
@@ -79,7 +115,7 @@ func Test_graphQLHandler(t *testing.T) {
 				queryResponse:    test.queryResponse,
 			}
 
-			req, err := http.NewRequest(test.requestMethod, "/graphql", test.requestBody)
+			req, err := http.NewRequest(test.requestMethod, test.requestURL, test.requestBody)
 			if err != nil {
 				t.Fatal(err)
 			}

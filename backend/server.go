@@ -2,10 +2,12 @@ package backend
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -13,26 +15,40 @@ import (
 const (
 	errNoPOSTRequestBody   = "no body received in payload"
 	errParsingPOSTJSONBody = "error parsing json body"
+	errNoQueryInURL        = "no query variable recieved in url params"
+	errParsingGETQueryURL  = "error parsing query url variable"
 )
 
 // Server hosts the backend server with login/logout and GraphQL endpoints.
-type Server struct{}
+type Server struct {
+	httpServer *http.Server
+}
 
 // NewServer generates a pointer to an inactive Server instance.
 func NewServer(gql graphql) *Server {
-
 	router := mux.NewRouter()
 
 	router.Use(middleware)
+	router.HandleFunc("/graphql", graphQLHandler(gql))
 
-	// outline:
-	// [x] declare mux router
-	// [ ] add authentication middleware
-	// [ ] add graphql handler
-	// [ ] configure/add http server
-	// [ ] return server pointer
+	return &Server{
+		httpServer: &http.Server{
+			Addr:         ":8888",
+			Handler:      router,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
+		},
+	}
+}
 
-	return &Server{}
+// Start begins serving the http.Server.
+func (s *Server) Start() {
+	s.httpServer.ListenAndServe()
+}
+
+// Stop ends serving the http.Server.
+func (s *Server) Stop(ctx context.Context) {
+	s.httpServer.Shutdown(ctx)
 }
 
 func middleware(http.Handler) http.Handler {
@@ -73,16 +89,16 @@ func graphQLHandler(gql graphql) http.HandlerFunc {
 			params := r.URL.Query()
 			queryParam, ok := params["query"]
 			if !ok {
-				http.Error(w, "query parameter not received", http.StatusBadRequest)
+				http.Error(w, fmt.Sprintf(`{"message":"%s"}`, errNoQueryInURL), http.StatusBadRequest)
 				return
 			}
 
 			var variablesParam map[string]string
 			variablesString, ok := params["variables"]
 			if ok {
-				err := json.Unmarshal([]byte(variablesString[0]), variablesParam)
+				err := json.Unmarshal([]byte(variablesString[0]), &variablesParam)
 				if err != nil {
-					http.Error(w, "error parsing query url variable", http.StatusBadRequest)
+					http.Error(w, fmt.Sprintf(`{"message":"%s"}`, errParsingGETQueryURL), http.StatusBadRequest)
 					return
 				}
 			}
