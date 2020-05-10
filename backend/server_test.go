@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -146,6 +147,47 @@ func Test_graphQLHandler(t *testing.T) {
 	}
 }
 
-func Test_middleware(t *testing.T) {
+func Test_graphQLClient(t *testing.T) {
+	responseData := `{"data":"key":"value"}`
 
+	gqlc := &graphQLClient{}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, responseData)
+	})
+
+	server := httptest.NewServer(mux)
+
+	t.Run("test mutation implementation", func(t *testing.T) {
+		body := strings.NewReader(`query getData{ key }`)
+
+		response, err := gqlc.mutation(server.URL+"/graphql", body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(response.Body)
+		bodyString := buf.String()
+
+		if bodyString != responseData {
+			t.Errorf("response data received: %s, expected: %s", bodyString, responseData)
+		}
+	})
+
+	t.Run("test query implementation", func(t *testing.T) {
+		response, err := gqlc.query(server.URL + "/graphql?query%20getData%7B%20key%20%7D")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(response.Body)
+		bodyString := buf.String()
+
+		if bodyString != responseData {
+			t.Errorf("response data received: %s, expected: %s", bodyString, responseData)
+		}
+	})
 }
