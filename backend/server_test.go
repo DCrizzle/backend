@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -34,6 +35,14 @@ func TestNewServer(t *testing.T) {
 	if s == nil {
 		t.Error("nil received creating new server")
 	}
+}
+
+func TestServerStartStop(t *testing.T) {
+	server := NewServer("testURL", &mockGraphQL{})
+
+	go server.Start()
+
+	server.Stop(context.Background())
 }
 
 func Test_graphQLHandler(t *testing.T) {

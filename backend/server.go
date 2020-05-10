@@ -101,11 +101,6 @@ func graphQLHandler(dgraphURL string, gql graphQL) http.HandlerFunc {
 	})
 }
 
-type mutation struct {
-	mutation  string            `json:"query"`
-	variables map[string]string `json:"variables"`
-}
-
 type graphQL interface {
 	mutation(url string, body io.Reader) (*http.Response, error)
 	query(url string) (*http.Response, error)
