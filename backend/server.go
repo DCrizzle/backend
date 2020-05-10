@@ -9,9 +9,9 @@ import (
 	"time"
 
 	auth0 "github.com/auth0-community/go-auth0"
-	jose "gopkg.in/square/go-jose.v2"
-
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	jose "gopkg.in/square/go-jose.v2"
 )
 
 const (
@@ -30,6 +30,8 @@ func NewServer(dgraphURL string, gql graphQL) *Server {
 
 	router.Use(middleware)
 	router.HandleFunc("/graphql", graphQLHandler(dgraphURL, gql))
+
+	csrf.Protect([]byte("TEMP_32_BYTE_LONG_ARRAY"))(router)
 
 	return &Server{
 		httpServer: &http.Server{
@@ -94,6 +96,8 @@ func graphQLHandler(dgraphURL string, gql graphQL) http.HandlerFunc {
 
 			output = response.Body
 		}
+
+		w.Header().Set("X-CSRF-Token", csrf.Token(r))
 
 		buffer := new(bytes.Buffer)
 		buffer.ReadFrom(output)
