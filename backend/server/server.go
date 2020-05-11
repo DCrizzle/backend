@@ -110,12 +110,12 @@ type graphQL interface {
 	query(url string) (*http.Response, error)
 }
 
-type graphQLClient struct{}
+type GraphQLClient struct{}
 
-func (gqlc *graphQLClient) mutation(url string, body io.Reader) (*http.Response, error) {
+func (gqlc *GraphQLClient) mutation(url string, body io.Reader) (*http.Response, error) {
 	return http.Post(url, "application/json", body)
 }
 
-func (gqlc *graphQLClient) query(url string) (*http.Response, error) {
+func (gqlc *GraphQLClient) query(url string) (*http.Response, error) {
 	return http.Get(url)
 }

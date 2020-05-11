@@ -150,7 +150,7 @@ func Test_graphQLHandler(t *testing.T) {
 func Test_graphQLClient(t *testing.T) {
 	responseData := `{"data":"key":"value"}`
 
-	gqlc := &graphQLClient{}
+	gqlc := &GraphQLClient{}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
