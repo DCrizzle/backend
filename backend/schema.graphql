@@ -1,22 +1,140 @@
-# outline:
-# [ ] "specimen" will be interface
-# - [ ] implementations will be different categories of specimen
-# - [ ] query on specific categories (implementations)
-# - - [ ] e.g. "... on BloodSpecimen { }"
-# [ ] "form" will be interface
-# - [ ] e.g. "ConsentForm"
-# [ ] "consent" type will be a relationship ("connection"?)
-# - [ ] contains:
-# - - [ ] donor
-# - - [ ] date
-# - - [ ] consent form
-# - - [ ] etc
-# - [ ] represents specific agreement made (an "action")
-# [ ] dgraph-generated notes
-# - [ ] "get*" -> accepts ID-specified fields
-# - - [ ] e.g. "ID!" or "@id" directive
-# - [ ] "query*"
-# - - [ ] "filter" field contains fields tagged with "@search" directive
-# - [ ] dgraph operations
-# - - [ ] "add", "delete", "get", "query", "update"
-# - [ ] update relationships using "set"/"remove" keywords in queries
+type AgeRange {
+	start: Int! @search
+	stop: Int! @search
+}
+
+type Consent {
+	id: ID!
+	date: DateTime! @search
+	donor: Donor!
+	form: ConsentForm!
+}
+
+type Demographic {
+	id: ID!
+	sex: Sex! @search
+	ageRange: AgeRange!
+	race: String!
+}
+
+enum Sex {
+	MALE
+	FEMALE
+}
+
+type Donor {
+	id: ID!
+	demographic: Demographic!
+	specimens: [Specimen!]!
+	consents: [Consent!]! @hasInverse(field: donor)
+}
+
+interface Form {
+	id: ID!
+	title: String! @search(by: [fulltext])
+	body: String! @search(by: [fulltext])
+}
+
+type ConsentForm implements Form {
+	consent: Consent! @hasInverse(field: form)
+}
+
+type ProtocolForm implements Form {
+	protocolID: String! @search
+}
+
+type Location {
+	id: ID!
+	street: String! @search
+	city: String! @search
+	county: String! @search
+	state: String! @search
+	country: String! @search
+	zip: Int! @search
+}
+
+interface Org {
+	id: ID!
+	name: String!
+	users: [User!]!
+	createdOn: DateTime!
+	updatedOn: DateTime!
+}
+
+type LabOrg implements Org {
+	org: OwnerOrg!
+	specimens: [Specimen!]! @hasInverse(field: lab)
+}
+
+type OwnerOrg implements Org {
+	labs: [LabOrg!]! @hasInverse(field: org)
+	storages: [StorageOrg!]! @hasInverse(field: org)
+}
+
+type StorageOrg implements Org {
+	org: OwnerOrg!
+	specimens: [Specimen!]! @hasInverse(field: storage)
+}
+
+type Plan {
+	id: ID!
+	name: String!
+	labs: [LabOrg!]!
+	storages: [StorageOrg!]!
+}
+
+type Protocol {
+	id: ID!
+	name: String!
+	form: ProtocolForm!
+	plan: Plan!
+	specimens: [Specimen!]! @hasInverse(field: protocol)
+	location: Location!
+}
+
+type Result {
+	id: ID!
+	notes: String!
+}
+
+type Role {
+	id: ID!
+	name: String!
+}
+
+interface Specimen {
+	id: ID!
+	lab: LabOrg!
+	storage: StorageOrg!
+	protocol: Protocol!
+	tests: [Test!]! @hasInverse(field: specimen)
+}
+
+type BloodSpecimen {
+	bloodType: BloodType! @search
+}
+
+enum BloodType {
+	O_NEG
+	O_POS
+	A_NEG
+	A_POS
+	B_NEG
+	B_POS
+	AB_NEG
+	AB_POS
+}
+
+type Test {
+	id: ID!
+	specimen: Specimen!
+	result: Result!
+}
+
+type User {
+	email: String! @id
+	firstName: String! @search(by: [exact])
+	lastName: String! @search(by: [exact])
+	role: Role!
+	org: Org! @hasInverse(field: users)
+}
