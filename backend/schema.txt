@@ -1,18 +1,22 @@
 outline:
-[ ] "specimen" will be interface
-- [ ] implementations will be different categories of specimen
-- [ ] query on specific categories (implementations)
-- - [ ] e.g. "... on BloodSpecimen { }"
-[ ] "form" will be interface
-- [ ] e.g. "ConsentForm"
-[ ] "consent" type will be a relationship ("connection"?)
-- [ ] contains:
-- - [ ] donor
-- - [ ] date
-- - [ ] consent form
-- - [ ] etc
-- [ ] represents specific agreement made (an "action")
+[x] "specimen" will be interface
+- [x] implementations will be different categories of specimen
+- [x] query on specific categories (implementations)
+- - [x] e.g. "... on BloodSpecimen { }"
+[x] "form" will be interface
+- [x] e.g. "ConsentForm"
+[x] "consent" type will be a relationship ("connection"?)
+- [x] contains:
+- - [x] donor
+- - [x] date
+- - [x] consent form
+- - [x] etc
+- [x] represents specific agreement made (an "action")
 - [ ] "@hasInverse" will primarily be used for Specimen type relationships
+- [ ] include an "attribute mapping" type on the Lab entities (?)
+- - [ ] possibly to show individual Lab header/field names for attributes within the "root" type
+- - [ ] this would be added/updated as Lab nodes are added/updated
+- [ ] add "orgID" string fields to all types to facilitate multi-tenancy
 [ ] dgraph-generated notes
 - [ ] "get*" -> accepts ID-specified fields
 - - [ ] e.g. "ID!" or "@id" directive
