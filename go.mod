@@ -1,6 +1,6 @@
 module github.com/forstmeier/tbd
 
-go 1.13
+go 1.12
 
 require (
 	github.com/auth0-community/go-auth0 v1.0.0
