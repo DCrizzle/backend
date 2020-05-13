@@ -104,6 +104,7 @@ type Role {
 
 interface Specimen {
 	id: ID!
+	owner: OwnerOrg!
 	lab: LabOrg!
 	storage: StorageOrg!
 	protocol: Protocol!

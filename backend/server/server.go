@@ -28,14 +28,14 @@ type Server struct {
 func NewServer(dgraphURL string, gql graphQL) *Server {
 	router := mux.NewRouter()
 
-	router.Use(middleware)
+	// router.Use(middleware)
 	router.HandleFunc("/graphql", graphQLHandler(dgraphURL, gql))
 
 	csrf.Protect([]byte("TEMP_32_BYTE_LONG_ARRAY"))(router)
 
 	return &Server{
 		httpServer: &http.Server{
-			Addr:         ":8888",
+			Addr:         "127.0.0.1:8888",
 			Handler:      router,
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
