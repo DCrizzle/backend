@@ -2,8 +2,8 @@
 
 function dgraph_cleanup()
 {
-	echo "STARTING CLEANUP"
-	docker kill $DGRAPH_ID
+	echo && echo "starting cleanup"
+	docker kill $DGRAPH_ID > /dev/null
 	exit
 }
 
@@ -11,24 +11,19 @@ trap dgraph_cleanup SIGINT
 
 DGRAPH_ID=$(docker run -d -p 8080:8080 dgraph/standalone:v2.0.0-rc1)
 
+echo "dgraph container id: " $DGRAPH_ID # temp
+
 sleep 3 # note: maybe not needed
 
-curl -X POST localhost:8080/admin/schema -d '@database/schema.graphql' # note: possibly write out to null
+curl -X POST localhost:8080/admin/schema -d '@database/schema.graphql' > /dev/null
 while [ $? -ne 0 ]
 do
+	echo "retrying schema upload"
 	sleep 3
 	!!
 done
+echo "schema upload status: " $?
 
-echo $DGRAPH_ID # temp
-
-echo "STARTING SLEEP" # temp
-
-sleep 100 # temp
-
-
-
-# outline:
-# [ ] build main binary
-# [ ] run main binary
-# - [ ] create "blocking" call to keep script running
+go build -o backend
+echo "compiled backend binary"
+./backend > /dev/null
