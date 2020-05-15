@@ -17,7 +17,10 @@ func main() {
 
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
-	backendServer := server.NewServer("http://127.0.0.1:8080/graphql", &server.GraphQLClient{})
+	backendServer, err := server.NewServer("config.json", &server.GraphQLClient{})
+	if err != nil {
+		panic(err)
+	}
 
 	go backendServer.Start()
 	go func() {

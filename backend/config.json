@@ -1,0 +1,7 @@
+{
+	"auth0_api_audience": "",
+	"auth0_api_client_secret": "",
+	"auth0_domain": "",
+	"csrf_key": "4b89b9c54dd4848329999d528bed81321e10022bd53390c6cf2e5cd2bd08688b",
+	"dgraph_url": "http://127.0.0.1:8080/graphql"
+}
