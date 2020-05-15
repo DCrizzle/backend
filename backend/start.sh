@@ -7,7 +7,7 @@ function dgraph_cleanup()
 	exit
 }
 
-trap dgraph_cleanup SIGINT
+trap dgraph_cleanup SIGINT ERR
 
 DGRAPH_ID=$(docker run -d -p 8080:8080 dgraph/standalone:v2.0.0-rc1)
 
