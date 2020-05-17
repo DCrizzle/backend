@@ -1,2 +1,9 @@
 # generated binaries
-backend/backend
+backend
+
+# dgraph write-ahead log directories
+zw/
+w/
+
+# dgraph posting lists directory
+p/

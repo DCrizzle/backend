@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/forstmeier/tbd/backend/server"
+	"github.com/forstmeier/backend/server"
 )
 
 func main() {
