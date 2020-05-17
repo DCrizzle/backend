@@ -1,1 +1,34 @@
 #!/bin/bash
+
+function dgraph_cleanup()
+{
+	echo && echo "starting cleanup"
+	killall dgraph > /dev/null
+	exit
+}
+
+trap dgraph_cleanup SIGINT ERR
+
+echo "running dgraph zero"
+dgraph zero --my=localhost:5080 &
+echo "dgraph zero status: " $?
+
+echo "running dgraph alpha"
+dgraph alpha --lru_mb=2048 --my=localhost:7080 --zero=localhost:5080 &
+echo "dgraph alpha status: " $?
+
+sleep 3 # note: maybe not needed
+
+echo "uploading dgraph schema"
+curl -X POST localhost:8080/admin/schema -d '@schema.graphql' > /dev/null
+while [ $? -ne 0 ]
+do
+	echo "retrying schema upload"
+	sleep 3
+	!!
+done
+echo "schema upload status: " $?
+
+# note: binary compiled in dockerfile
+echo "running compiled binary"
+./backend > /dev/null
