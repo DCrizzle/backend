@@ -8,10 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	auth0 "github.com/auth0-community/go-auth0"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
-	jose "gopkg.in/square/go-jose.v2"
 )
 
 const (
@@ -67,20 +65,6 @@ func (s *Server) Stop(ctx context.Context) {
 
 func middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		secret := []byte("AUTH0_API_CLIENT_SECRET")
-		secretProvider := auth0.NewKeyProvider(secret)
-		audience := []string{"AUTH0_API_AUDIENCE"}
-		domain := "https://AUTH0_DOMAIN.auth0.com/"
-
-		configuration := auth0.NewConfiguration(secretProvider, audience, domain, jose.RS256)
-		validator := auth0.NewValidator(configuration, nil)
-
-		_, err := validator.ValidateRequest(r)
-		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("unauthorized"))
-		}
-
 		next.ServeHTTP(w, r)
 	})
 }
