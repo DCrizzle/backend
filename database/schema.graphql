@@ -1,9 +1,54 @@
 type AgeRange @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryAgeRange {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryAgeRange {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryAgeRange {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryAgeRange {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryAgeRange {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
 ) {
 	id: ID!
 	start: Int! @search
@@ -12,11 +57,56 @@ type AgeRange @auth(
 }
 
 type Consent @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryConsent {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryConsent {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryConsent {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryConsent {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryConsent {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
 ) {
 	id: ID!
 	owner: OwnerOrg!
@@ -26,11 +116,56 @@ type Consent @auth(
 }
 
 type Demographic @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryDemographic {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryDemographic {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryDemographic {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryDemographic {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryDemographic {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
 ) {
 	id: ID!
 	owner: OwnerOrg!
@@ -45,11 +180,56 @@ enum Sex {
 }
 
 type Donor @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryDonor {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryDonor {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryDonor {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryDonor {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryDonor {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
 ) {
 	id: ID!
 	owner: OwnerOrg!
@@ -74,11 +254,56 @@ type ProtocolForm implements Form {
 }
 
 type Location @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryLocation {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryLocation {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryLocation {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryLocation {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryLocation {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
 ) {
 	id: ID!
 	owner: OwnerOrg!
@@ -114,11 +339,56 @@ type StorageOrg implements Org {
 }
 
 type Plan @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryPlan {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryPlan {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryPlan {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryPlan {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryPlan {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
 ) {
 	id: ID!
 	owner: OwnerOrg!
@@ -128,11 +398,56 @@ type Plan @auth(
 }
 
 type Protocol @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryProtocol {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryProtocol {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryProtocol {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryProtocol {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryProtocol {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
 ) {
 	id: ID!
 	owner: OwnerOrg!
@@ -144,27 +459,60 @@ type Protocol @auth(
 }
 
 type Result @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryResult {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryResult {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryResult {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryResult {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryResult {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
 ) {
 	id: ID!
 	owner: OwnerOrg!
 	notes: String!
-}
-
-type Role @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-) {
-	id: ID!
-	owner: OwnerOrg!
-	name: String!
 }
 
 interface Specimen {
@@ -192,11 +540,56 @@ enum BloodType {
 }
 
 type Test @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryTest {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryTest {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryTest {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryTest {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryTest {
+				owner( filter: { id: { eq: $orgID } } ) {
+					id
+				}
+			}
+		}"""},
+	]},
 ) {
 	id: ID!
 	owner: OwnerOrg!
@@ -205,17 +598,62 @@ type Test @auth(
 }
 
 type User @auth(
-	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryUser {
+				owner( filter: { id: { eq: $orgID } } ) {
+					email
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryUser {
+				owner( filter: { id: { eq: $orgID } } ) {
+					email
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryUser {
+				owner( filter: { id: { eq: $orgID } } ) {
+					email
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryUser {
+				owner( filter: { id: { eq: $orgID } } ) {
+					email
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: """query($orgID: String!) {
+			queryUser {
+				owner( filter: { id: { eq: $orgID } } ) {
+					email
+				}
+			}
+		}"""},
+	]},
 ) {
 	owner: OwnerOrg!
 	email: String! @id
 	firstName: String! @search(by: [exact])
 	lastName: String! @search(by: [exact])
-	role: Role!
+	role: String!
 	org: Org! @hasInverse(field: users)
 }
 
