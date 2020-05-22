@@ -16,7 +16,7 @@ outline:
 - [ ] include an "attribute mapping" type on the Lab entities (?)
 - - [ ] possibly to show individual Lab header/field names for attributes within the "root" type
 - - [ ] this would be added/updated as Lab nodes are added/updated
-- [ ] add "orgID" string fields to all types to facilitate multi-tenancy
+- [x] add "orgID" string fields to all types to facilitate multi-tenancy
 [ ] dgraph-generated notes
 - [ ] "get*" -> accepts ID-specified fields
 - - [ ] e.g. "ID!" or "@id" directive

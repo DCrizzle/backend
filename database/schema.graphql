@@ -1,17 +1,39 @@
-type AgeRange {
+type AgeRange @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
+	id: ID!
 	start: Int! @search
 	stop: Int! @search
+	owner: OwnerOrg!
 }
 
-type Consent {
+type Consent @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
 	id: ID!
+	owner: OwnerOrg!
 	date: DateTime! @search
 	donor: Donor!
 	form: ConsentForm!
 }
 
-type Demographic {
+type Demographic @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
 	id: ID!
+	owner: OwnerOrg!
 	sex: Sex! @search
 	ageRange: AgeRange!
 	race: String!
@@ -22,8 +44,15 @@ enum Sex {
 	FEMALE
 }
 
-type Donor {
+type Donor @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
 	id: ID!
+	owner: OwnerOrg!
 	demographic: Demographic!
 	specimens: [Specimen!]!
 	consents: [Consent!]! @hasInverse(field: donor)
@@ -31,6 +60,7 @@ type Donor {
 
 interface Form {
 	id: ID!
+	owner: OwnerOrg!
 	title: String! @search(by: [fulltext])
 	body: String! @search(by: [fulltext])
 }
@@ -43,8 +73,15 @@ type ProtocolForm implements Form {
 	protocolID: String! @search
 }
 
-type Location {
+type Location @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
 	id: ID!
+	owner: OwnerOrg!
 	street: String! @search
 	city: String! @search
 	county: String! @search
@@ -62,29 +99,43 @@ interface Org {
 }
 
 type LabOrg implements Org {
-	org: OwnerOrg!
+	owner: OwnerOrg!
 	specimens: [Specimen!]! @hasInverse(field: lab)
 }
 
 type OwnerOrg implements Org {
-	labs: [LabOrg!]! @hasInverse(field: org)
-	storages: [StorageOrg!]! @hasInverse(field: org)
+	labs: [LabOrg!]! @hasInverse(field: owner)
+	storages: [StorageOrg!]! @hasInverse(field: owner)
 }
 
 type StorageOrg implements Org {
-	org: OwnerOrg!
+	owner: OwnerOrg!
 	specimens: [Specimen!]! @hasInverse(field: storage)
 }
 
-type Plan {
+type Plan @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
 	id: ID!
+	owner: OwnerOrg!
 	name: String!
 	labs: [LabOrg!]!
 	storages: [StorageOrg!]!
 }
 
-type Protocol {
+type Protocol @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
 	id: ID!
+	owner: OwnerOrg!
 	name: String!
 	form: ProtocolForm!
 	plan: Plan!
@@ -92,13 +143,27 @@ type Protocol {
 	location: Location!
 }
 
-type Result {
+type Result @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
 	id: ID!
+	owner: OwnerOrg!
 	notes: String!
 }
 
-type Role {
+type Role @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
 	id: ID!
+	owner: OwnerOrg!
 	name: String!
 }
 
@@ -126,16 +191,32 @@ enum BloodType {
 	AB_POS
 }
 
-type Test {
+type Test @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
 	id: ID!
+	owner: OwnerOrg!
 	specimen: Specimen!
 	result: Result!
 }
 
-type User {
+type User @auth(
+	add: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	query: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	get: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	update: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+	delete: { rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+) {
+	owner: OwnerOrg!
 	email: String! @id
 	firstName: String! @search(by: [exact])
 	lastName: String! @search(by: [exact])
 	role: Role!
 	org: Org! @hasInverse(field: users)
 }
+
+# Authorization HEADER CLAIMS_KEY_URL RS256 "ALGORITHM_PUBLIC_KEY"
