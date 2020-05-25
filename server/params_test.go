@@ -15,7 +15,7 @@ func Test_parseParams(t *testing.T) {
 		{
 			description: "no file at provided path",
 			content:     nil,
-			err:         errParseReadFile,
+			err:         errParseReadConfigFile,
 		},
 		{
 			description: "non-json content in config file",
@@ -26,9 +26,6 @@ func Test_parseParams(t *testing.T) {
 			description: "successful config file parse to params",
 			content: []byte(`
 				{
-					"auth0_api_audience":"audience",
-					"auth0_api_client_secret": "secret",
-					"auth0_domain": "domain",
 					"csrf_key": "key",
 					"dgraph_url": "url"
 				}
@@ -61,8 +58,60 @@ func Test_parseParams(t *testing.T) {
 				t.Errorf("error received: %v, expected: %v", err, test.err)
 			}
 
-			if err == nil && p.Auth0APIAudience != "audience" {
+			if err == nil && p.CSRFKey != "key" {
 				t.Errorf("params received: %+v", p)
+			}
+		})
+	}
+}
+
+func Test_readPublicKey(t *testing.T) {
+	tests := []struct {
+		description string
+		content     []byte
+		output      string
+		err         error
+	}{
+		{
+			description: "no file at provided path",
+			content:     nil,
+			output:      "",
+			err:         errParseReadPublicKeyFile,
+		},
+		{
+			description: "successful config file parse to params",
+			content:     []byte("test-public-key"),
+			output:      "test-public-key",
+			err:         nil,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.description, func(t *testing.T) {
+			fileName := "readPublicKey*.pem"
+			if test.content != nil {
+
+				configFile, err := ioutil.TempFile("", fileName)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer os.Remove(configFile.Name())
+
+				fileName = configFile.Name()
+
+				_, err = configFile.Write(test.content)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			keyString, err := readPublicKey(fileName)
+			if err != test.err {
+				t.Errorf("error received: %v, expected: %v", err, test.err)
+			}
+
+			if keyString != test.output {
+				t.Errorf("key received: %s", keyString)
 			}
 		})
 	}
@@ -75,52 +124,22 @@ func Test_validate(t *testing.T) {
 		err         error
 	}{
 		{
-			description: "auth0 api audience not set",
-			params:      params{},
-			err:         errValidateAuth0APIAudience,
-		},
-		{
-			description: "auth0 api client secret not set",
-			params: params{
-				Auth0APIAudience: "audience",
-			},
-			err: errValidateAuth0APIClientSecret,
-		},
-		{
-			description: "auth0 domain not set",
-			params: params{
-				Auth0APIAudience:     "audience",
-				Auth0APIClientSecret: "secret",
-			},
-			err: errValidateAuth0Domain,
-		},
-		{
 			description: "csrf key not set",
-			params: params{
-				Auth0APIAudience:     "audience",
-				Auth0APIClientSecret: "secret",
-				Auth0Domain:          "domain",
-			},
-			err: errValidateCSRFKey,
+			params:      params{},
+			err:         errValidateCSRFKey,
 		},
 		{
 			description: "dgraph url not set",
 			params: params{
-				Auth0APIAudience:     "audience",
-				Auth0APIClientSecret: "secret",
-				Auth0Domain:          "domain",
-				CSRFKey:              "key",
+				CSRFKey: "key",
 			},
 			err: errValidateDgraphURL,
 		},
 		{
 			description: "all fields set",
 			params: params{
-				Auth0APIAudience:     "audience",
-				Auth0APIClientSecret: "secret",
-				Auth0Domain:          "domain",
-				CSRFKey:              "key",
-				DgraphURL:            "url",
+				CSRFKey:   "key",
+				DgraphURL: "url",
 			},
 			err: nil,
 		},
