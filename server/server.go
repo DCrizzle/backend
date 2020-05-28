@@ -34,8 +34,6 @@ func NewServer(configPath string, gql graphQL) (*Server, error) {
 		return nil, err
 	}
 
-	// note: pass params struct into middleware wrapper
-	// router.Use(middleware)
 	router.HandleFunc("/graphql", graphQLHandler(params.DgraphURL, gql))
 
 	csrf.Protect([]byte(params.CSRFKey))(router)

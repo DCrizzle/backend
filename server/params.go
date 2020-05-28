@@ -7,10 +7,8 @@ import (
 )
 
 var (
-	errValidateAuth0APIAudience = errors.New("server: param auth0 api audience not set")
-	errValidateAuth0Domain      = errors.New("server: param auth0 domain not set")
-	errValidateCSRFKey          = errors.New("server: param csrf key not set")
-	errValidateDgraphURL        = errors.New("server: param dgraph url not set")
+	errValidateCSRFKey   = errors.New("server: param csrf key not set")
+	errValidateDgraphURL = errors.New("server: param dgraph url not set")
 
 	errParseReadConfigFile    = errors.New("server: error reading config file")
 	errParseUnmarshal         = errors.New("server: error unmarshalling config file content")
@@ -18,10 +16,8 @@ var (
 )
 
 type params struct {
-	Auth0APIAudience string `json:"auth0_api_audience"`
-	Auth0Domain      string `json:"auth0_domain"`
-	CSRFKey          string `json:"csrf_key"`
-	DgraphURL        string `json:"dgraph_url"`
+	CSRFKey   string `json:"csrf_key"`
+	DgraphURL string `json:"dgraph_url"`
 }
 
 func parseParams(configPath string) (*params, error) {
@@ -48,12 +44,6 @@ func readPublicKey(publicKeyPath string) (string, error) {
 }
 
 func (p *params) validate() error {
-	if p.Auth0APIAudience == "" {
-		return errValidateAuth0APIAudience
-	}
-	if p.Auth0Domain == "" {
-		return errValidateAuth0Domain
-	}
 	if p.CSRFKey == "" {
 		return errValidateCSRFKey
 	}

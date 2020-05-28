@@ -124,41 +124,22 @@ func Test_validate(t *testing.T) {
 		err         error
 	}{
 		{
-			description: "auth0 api audience key not set",
-			params:      params{},
-			err:         errValidateAuth0APIAudience,
-		},
-		{
-			description: "auth0 domain key not set",
-			params: params{
-				Auth0APIAudience: "audience",
-			},
-			err: errValidateAuth0Domain,
-		},
-		{
 			description: "csrf key not set",
-			params: params{
-				Auth0APIAudience: "audience",
-				Auth0Domain:      "domain",
-			},
-			err: errValidateCSRFKey,
+			params:      params{},
+			err:         errValidateCSRFKey,
 		},
 		{
 			description: "dgraph url not set",
 			params: params{
-				Auth0APIAudience: "audience",
-				Auth0Domain:      "domain",
-				CSRFKey:          "key",
+				CSRFKey: "key",
 			},
 			err: errValidateDgraphURL,
 		},
 		{
 			description: "all fields set",
 			params: params{
-				Auth0APIAudience: "audience",
-				Auth0Domain:      "domain",
-				CSRFKey:          "key",
-				DgraphURL:        "url",
+				CSRFKey:   "key",
+				DgraphURL: "url",
 			},
 			err: nil,
 		},
