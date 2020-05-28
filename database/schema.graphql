@@ -661,9 +661,7 @@ type Result @auth(
 	]},
 	delete: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-		]},
+		{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
 		{ rule: """query($orgID: String!) {
 			queryResult {
 				owner( filter: { id: { eq: $orgID } } ) {
@@ -761,9 +759,7 @@ type Test @auth(
 	]},
 	delete: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-		]},
+		{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
 		{ rule: """query($orgID: String!) {
 			queryTest {
 				owner( filter: { id: { eq: $orgID } } ) {
@@ -782,9 +778,7 @@ type Test @auth(
 type User @auth(
 	add: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-		]},
+		{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
 		{ rule: """query($orgID: String!) {
 			queryUser {
 				owner( filter: { id: { eq: $orgID } } ) {
@@ -795,9 +789,7 @@ type User @auth(
 	]},
 	query: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-		]},
+		{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
 		{ rule: """query($orgID: String!) {
 			queryUser {
 				owner( filter: { id: { eq: $orgID } } ) {
@@ -808,9 +800,7 @@ type User @auth(
 	]},
 	get: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-		]},
+		{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
 		{ rule: """query($orgID: String!) {
 			queryUser {
 				owner( filter: { id: { eq: $orgID } } ) {
@@ -821,9 +811,7 @@ type User @auth(
 	]},
 	update: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-		]},
+		{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
 		{ rule: """query($orgID: String!) {
 			queryUser {
 				owner( filter: { id: { eq: $orgID } } ) {
@@ -834,9 +822,7 @@ type User @auth(
 	]},
 	delete: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-		]},
+		{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
 		{ rule: """query($orgID: String!) {
 			queryUser {
 				owner( filter: { id: { eq: $orgID } } ) {
@@ -854,4 +840,4 @@ type User @auth(
 	org: Org! @hasInverse(field: users)
 }
 
-# Authorization HEADER CLAIMS_KEY_URL RS256 "ALGORITHM_PUBLIC_KEY"
+# Dgraph.Authorization X-Auth0-Token https://tbd.io/jwt/claims RS256 "ALGORITHM_PUBLIC_KEY"
