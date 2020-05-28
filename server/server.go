@@ -61,12 +61,6 @@ func (s *Server) Stop(ctx context.Context) {
 	s.httpServer.Shutdown(ctx)
 }
 
-func middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		next.ServeHTTP(w, r)
-	})
-}
-
 type graphQL interface {
 	mutation(url string, body io.Reader) (*http.Response, error)
 	query(url string) (*http.Response, error)
