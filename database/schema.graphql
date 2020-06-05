@@ -1,81 +1,3 @@
-type AgeRange @auth(
-	add: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryAgeRange {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	query: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryAgeRange {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	get: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryAgeRange {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	update: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryAgeRange {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	delete: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryAgeRange {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-) {
-	id: ID!
-	start: Int! @search
-	stop: Int! @search
-	owner: OwnerOrg!
-}
-
 type Consent @auth(
 	add: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
@@ -153,90 +75,6 @@ type Consent @auth(
 	date: DateTime! @search
 	donor: Donor!
 	form: ConsentForm!
-}
-
-type Demographic @auth(
-	add: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryDemographic {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	query: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryDemographic {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	get: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryDemographic {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	update: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryDemographic {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	delete: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryDemographic {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-) {
-	id: ID!
-	owner: OwnerOrg!
-	sex: Sex! @search
-	ageRange: AgeRange!
-	race: String!
-}
-
-enum Sex {
-	MALE
-	FEMALE
 }
 
 type Donor @auth(
@@ -317,9 +155,25 @@ type Donor @auth(
 ) {
 	id: ID!
 	owner: OwnerOrg!
-	demographic: Demographic!
+	age: Int! @search
+	dob: DateTime!
+	sex: Sex!
+	race: Race!
 	specimens: [Specimen!]!
 	consents: [Consent!]! @hasInverse(field: donor)
+}
+
+enum Sex {
+	MALE
+	FEMALE
+}
+
+enum Race {
+	AMERICAN_INDIAN_OR_ALASKA_NATIVE
+	ASIAN
+	BLACK_OR_AFRICAN_AMERICAN
+	HISPANIC_OR_LATINO
+	WHITE
 }
 
 interface Form {
@@ -598,8 +452,16 @@ type Protocol @auth(
 	name: String!
 	form: ProtocolForm!
 	plan: Plan!
+	ages: [Int]
+	ageStart: Int
+	ageEnd: Int
+	dobs: [DateTime]
+	dobStart: DateTime
+	dobEnd: DateTime
+	race: [Race]
+	sex: [Sex]
 	specimens: [Specimen!]! @hasInverse(field: protocol)
-	location: Location!
+	location: [Location]
 }
 
 type Result @auth(
