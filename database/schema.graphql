@@ -472,6 +472,8 @@ type Result @auth(
 	owner: OwnerOrg!
 	lab: LabOrg!
 	notes: String!
+	specimen: Specimen!
+	test: Test!
 }
 
 interface Specimen {
@@ -480,7 +482,8 @@ interface Specimen {
 	lab: LabOrg!
 	storage: StorageOrg!
 	protocol: Protocol!
-	tests: [Test!]! @hasInverse(field: specimen)
+	tests: [Test!]! @hasInverse(field: specimens)
+	results: [Result!]! @hasInverse(field: specimen)
 }
 
 type BloodSpecimen {
@@ -570,8 +573,8 @@ type Test @auth(
 	id: ID!
 	owner: OwnerOrg!
 	lab: LabOrg!
-	specimen: Specimen!
-	result: Result!
+	specimens: [Specimen!]!
+	results: [Result!]! @hasInverse(field: test)
 }
 
 type User @auth(
