@@ -159,6 +159,12 @@ type Donor @auth(
 	dob: DateTime!
 	sex: Sex!
 	race: Race!
+	street: String! @search
+	city: String! @search
+	county: String! @search
+	state: String! @search
+	country: String! @search
+	zip: Int! @search
 	specimens: [Specimen!]!
 	consents: [Consent!]! @hasInverse(field: donor)
 }
@@ -191,94 +197,18 @@ type ProtocolForm implements Form {
 	protocolID: String! @search
 }
 
-type Location @auth(
-	add: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryLocation {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	query: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryLocation {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	get: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryLocation {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	update: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryLocation {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	delete: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{$role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{$role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: String!) {
-			queryLocation {
-				owner( filter: { id: { eq: $orgID } } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-) {
-	id: ID!
-	owner: OwnerOrg!
-	street: String! @search
-	city: String! @search
-	county: String! @search
-	state: String! @search
-	country: String! @search
-	zip: Int! @search
-}
-
 interface Org {
 	id: ID!
 	name: String!
 	users: [User!]!
 	createdOn: DateTime!
 	updatedOn: DateTime!
+	street: String! @search
+	city: String! @search
+	county: String! @search
+	state: String! @search
+	country: String! @search
+	zip: Int! @search
 }
 
 type LabOrg implements Org {
@@ -461,7 +391,12 @@ type Protocol @auth(
 	race: [Race]
 	sex: [Sex]
 	specimens: [Specimen!]! @hasInverse(field: protocol)
-	location: [Location]
+	street: String! @search
+	city: String! @search
+	county: String! @search
+	state: String! @search
+	country: String! @search
+	zip: Int! @search
 }
 
 type Result @auth(
@@ -535,6 +470,7 @@ type Result @auth(
 ) {
 	id: ID!
 	owner: OwnerOrg!
+	lab: LabOrg!
 	notes: String!
 }
 
@@ -633,6 +569,7 @@ type Test @auth(
 ) {
 	id: ID!
 	owner: OwnerOrg!
+	lab: LabOrg!
 	specimen: Specimen!
 	result: Result!
 }
