@@ -638,8 +638,14 @@ type User @auth(
 	email: String! @id
 	firstName: String! @search(by: [exact])
 	lastName: String! @search(by: [exact])
-	role: String!
+	role: Role!
 	org: Org! @hasInverse(field: users)
+}
+
+enum Role {
+	USER_ADMIN
+	USER_INTERNAL
+	USER_LAB
 }
 
 # Dgraph.Authorization X-Auth0-Token https://tbd.io/jwt/claims RS256 "ALGORITHM_PUBLIC_KEY"
