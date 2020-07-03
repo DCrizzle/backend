@@ -469,6 +469,15 @@ type Result @auth(
 
 interface Specimen {
 	id: ID!
+	externalID: String!
+	type: SpecimenType! @search
+	collectionDate: DateTime! @search
+	donor: Donor! @hasInverse(field: specimens)
+	container: ContainerType! @search
+	status: SpecimenStatus! @search
+	destructionDate: DateTime! @search
+	description: String!
+	consent: Consent!
 	owner: OwnerOrg!
 	lab: LabOrg!
 	storage: StorageOrg!
@@ -477,8 +486,27 @@ interface Specimen {
 	results: [Result!]! @hasInverse(field: specimen)
 }
 
+enum SpecimenType {
+	BLOOD
+}
+
+enum ContainerType {
+	VIAL
+}
+
+enum SpecimenStatus {
+	DESTROYED
+	EXHAUSTED
+	IN_INVENTORY
+	IN_TRANSIT
+	LOST
+	RESERVED
+	TRANSFERRED
+}
+
 type BloodSpecimen {
 	bloodType: BloodType! @search
+	volume: Float!
 }
 
 enum BloodType {
