@@ -77,7 +77,7 @@ type Consent @auth(
 	form: ConsentForm!
 }
 
-type Donor @auth(
+type Donor implements Location @auth(
 	add: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
@@ -159,12 +159,6 @@ type Donor @auth(
 	dob: DateTime!
 	sex: Sex!
 	race: Race!
-	street: String! @search
-	city: String! @search
-	county: String! @search
-	state: String! @search
-	country: String! @search
-	zip: Int! @search
 	specimens: [Specimen!]!
 	consents: [Consent!]! @hasInverse(field: donor)
 }
@@ -203,25 +197,19 @@ interface Org {
 	users: [User!]!
 	createdOn: DateTime!
 	updatedOn: DateTime!
-	street: String! @search
-	city: String! @search
-	county: String! @search
-	state: String! @search
-	country: String! @search
-	zip: Int! @search
 }
 
-type LabOrg implements Org {
+type LabOrg implements Org & Location {
 	owner: OwnerOrg!
 	specimens: [Specimen!]! @hasInverse(field: lab)
 }
 
-type OwnerOrg implements Org {
+type OwnerOrg implements Org & Location {
 	labs: [LabOrg!]! @hasInverse(field: owner)
 	storages: [StorageOrg!]! @hasInverse(field: owner)
 }
 
-type StorageOrg implements Org {
+type StorageOrg implements Org & Location {
 	owner: OwnerOrg!
 	specimens: [Specimen!]! @hasInverse(field: storage)
 }
@@ -305,7 +293,7 @@ type Plan @auth(
 	storages: [StorageOrg!]!
 }
 
-type Protocol @auth(
+type Protocol implements Location @auth(
 	add: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
@@ -391,6 +379,9 @@ type Protocol @auth(
 	race: [Race]
 	sex: [Sex]
 	specimens: [Specimen!]! @hasInverse(field: protocol)
+}
+
+interface Location {
 	street: String! @search
 	city: String! @search
 	county: String! @search
