@@ -349,17 +349,197 @@ interface Org {
 	updatedOn: DateTime!
 }
 
-type LabOrg implements Org & Location {
+type LabOrg implements Org & Location @auth(
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+		{ rule: """query($orgID: ID!) {
+			queryLabOrg {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryLabOrg {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryLabOrg {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+		{ rule: """query($orgID: ID!) {
+			queryLabOrg {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+		{ rule: """query($orgID: ID!) {
+			queryLabOrg {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+) {
 	owner: OwnerOrg!
 	specimens: [Specimen!]! @hasInverse(field: lab)
 }
 
-type OwnerOrg implements Org & Location {
+type OwnerOrg implements Org & Location @auth(
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+		{ rule: """query($orgID: ID!) {
+			queryOwnerOrg( filter: { id: [$orgID] } ) {
+				id
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryOwnerOrg( filter: { id: [$orgID] } ) {
+				id
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryOwnerOrg( filter: { id: [$orgID] } ) {
+				id
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+		{ rule: """query($orgID: ID!) {
+			queryOwnerOrg( filter: { id: [$orgID] } ) {
+				id
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+		{ rule: """query($orgID: ID!) {
+			queryOwnerOrg( filter: { id: [$orgID] } ) {
+				id
+			}
+		}"""},
+	]},
+) {
 	labs: [LabOrg!]! @hasInverse(field: owner)
 	storages: [StorageOrg!]! @hasInverse(field: owner)
 }
 
-type StorageOrg implements Org & Location {
+type StorageOrg implements Org & Location @auth(
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+		{ rule: """query($orgID: ID!) {
+			queryStorageOrg {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_STORAGE\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryStorageOrg {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_STORAGE\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryStorageOrg {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+		{ rule: """query($orgID: ID!) {
+			queryStorageOrg {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+		{ rule: """query($orgID: ID!) {
+			queryStorageOrg {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+) {
 	owner: OwnerOrg!
 	specimens: [Specimen!]! @hasInverse(field: storage)
 }
@@ -815,6 +995,7 @@ enum Role {
 	USER_ADMIN
 	USER_INTERNAL
 	USER_LAB
+	USER_STORAGE
 }
 
 # Dgraph.Authorization X-Auth0-Token https://tbd.io/jwt/claims RS256 "ALGORITHM_PUBLIC_KEY"
