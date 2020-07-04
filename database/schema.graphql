@@ -72,9 +72,13 @@ type Consent @auth(
 ) {
 	id: ID!
 	owner: OwnerOrg!
-	date: DateTime! @search
 	donor: Donor!
+	specimen: Specimen!
+	protocol: Protocol!
 	form: ConsentForm!
+	consentedDate: DateTime! @search
+	retentionPeriod: Int! @search
+	destructionDate: DateTime! @search
 }
 
 type Donor implements Location @auth(
