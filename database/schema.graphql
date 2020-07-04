@@ -187,11 +187,157 @@ interface Form {
 	body: String! @search(by: [fulltext])
 }
 
-type ConsentForm implements Form {
+type ConsentForm implements Form @auth(
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryConsentForm {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryConsentForm {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryConsentForm {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryConsentForm {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryConsentForm {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+) {
 	consent: Consent! @hasInverse(field: form)
 }
 
-type ProtocolForm implements Form {
+type ProtocolForm implements Form @auth(
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryProtocolForm {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryProtocolForm {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryProtocolForm {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryProtocolForm {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryProtocolForm {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+) {
 	protocolID: String! @search
 }
 
