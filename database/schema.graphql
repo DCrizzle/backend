@@ -834,7 +834,85 @@ enum SpecimenStatus {
 	TRANSFERRED
 }
 
-type BloodSpecimen {
+type BloodSpecimen implements Specimen @auth(
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryBloodSpecimen {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
+			{ rule: "{ $role: { eq: \"USER_STORAGE\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryBloodSpecimen {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	get: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
+			{ rule: "{ $role: { eq: \"USER_STORAGE\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryBloodSpecimen {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
+			{ rule: "{ $role: { eq: \"USER_STORAGE\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryBloodSpecimen {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryBloodSpecimen {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+) {
 	bloodType: BloodType! @search
 	volume: Float!
 }
