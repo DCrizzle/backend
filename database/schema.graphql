@@ -72,10 +72,10 @@ type Consent @auth(
 ) {
 	id: ID!
 	owner: OwnerOrg!
-	donor: Donor!
-	specimen: Specimen!
+	donor: Donor! @hasInverse(field: consents)
+	specimen: Specimen! @hasInverse(field: consent)
 	protocol: Protocol!
-	form: ConsentForm!
+	form: ConsentForm! @hasInverse(field: consents)
 	consentedDate: DateTime! @search
 	retentionPeriod: Int! @search
 	destructionDate: DateTime! @search
@@ -163,7 +163,7 @@ type Donor implements Location @auth(
 	dob: DateTime!
 	sex: Sex!
 	race: Race!
-	specimens: [Specimen!]!
+	specimens: [Specimen!]! @hasInverse(field: donor)
 	consents: [Consent!]! @hasInverse(field: donor)
 }
 
@@ -263,7 +263,7 @@ type ConsentForm implements Form @auth(
 		}"""},
 	]},
 ) {
-	consent: Consent! @hasInverse(field: form)
+	consents: [Consent!]! @hasInverse(field: form)
 }
 
 type ProtocolForm implements Form @auth(
@@ -339,12 +339,13 @@ type ProtocolForm implements Form @auth(
 	]},
 ) {
 	protocolID: String! @search
+	protocols: [Protocol!]! @hasInverse(field: form)
 }
 
 interface Org {
 	id: ID!
 	name: String!
-	users: [User!]!
+	users: [User!]! @hasInverse(field: org)
 	createdOn: DateTime!
 	updatedOn: DateTime!
 }
@@ -416,6 +417,7 @@ type LabOrg implements Org & Location @auth(
 ) {
 	owner: OwnerOrg!
 	specimens: [Specimen!]! @hasInverse(field: lab)
+	plans: [Plan!]! @hasInverse(field: labs)
 }
 
 type OwnerOrg implements Org & Location @auth(
@@ -542,6 +544,7 @@ type StorageOrg implements Org & Location @auth(
 ) {
 	owner: OwnerOrg!
 	specimens: [Specimen!]! @hasInverse(field: storage)
+	plans: [Plan!]! @hasInverse(field: storages)
 }
 
 type Plan @auth(
@@ -619,8 +622,8 @@ type Plan @auth(
 	id: ID!
 	owner: OwnerOrg!
 	name: String!
-	labs: [LabOrg!]!
-	storages: [StorageOrg!]!
+	labs: [LabOrg!]! @hasInverse(field: plans)
+	storages: [StorageOrg!]! @hasInverse(field: plans)
 }
 
 type Protocol implements Location @auth(
@@ -698,7 +701,7 @@ type Protocol implements Location @auth(
 	id: ID!
 	owner: OwnerOrg!
 	name: String!
-	form: ProtocolForm!
+	form: ProtocolForm! @hasInverse(field: protocols)
 	plan: Plan!
 	ages: [Int]
 	ageStart: Int
@@ -791,10 +794,8 @@ type Result @auth(
 ) {
 	id: ID!
 	owner: OwnerOrg!
-	lab: LabOrg!
 	notes: String!
-	specimen: Specimen!
-	test: Test!
+	test: Test! @hasInverse(field: results)
 }
 
 interface Specimen {
@@ -807,13 +808,12 @@ interface Specimen {
 	status: SpecimenStatus! @search
 	destructionDate: DateTime! @search
 	description: String!
-	consent: Consent!
+	consent: Consent! @hasInverse(field: specimen)
 	owner: OwnerOrg!
-	lab: LabOrg!
-	storage: StorageOrg!
-	protocol: Protocol!
+	lab: LabOrg! @hasInverse(field: specimens)
+	storage: StorageOrg! @hasInverse(field: specimens)
+	protocol: Protocol! @hasInverse(field: specimens)
 	tests: [Test!]! @hasInverse(field: specimens)
-	results: [Result!]! @hasInverse(field: specimen)
 }
 
 enum SpecimenType {
@@ -1000,7 +1000,7 @@ type Test @auth(
 	id: ID!
 	owner: OwnerOrg!
 	lab: LabOrg!
-	specimens: [Specimen!]!
+	specimens: [Specimen!]! @hasInverse(field: tests)
 	results: [Result!]! @hasInverse(field: test)
 }
 
