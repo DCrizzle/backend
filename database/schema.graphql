@@ -160,9 +160,9 @@ type Donor implements Location @auth(
 	id: ID!
 	owner: OwnerOrg!
 	age: Int! @search
-	dob: DateTime!
-	sex: Sex!
-	race: Race!
+	dob: DateTime! @search
+	sex: Sex! @search(by: [hash])
+	race: Race! @search(by: [hash])
 	specimens: [Specimen!]! @hasInverse(field: donor)
 	consents: [Consent!]! @hasInverse(field: donor)
 }
@@ -338,7 +338,7 @@ type ProtocolForm implements Form @auth(
 		}"""},
 	]},
 ) {
-	protocolID: String! @search
+	protocolID: String! @search(by: [hash])
 	protocols: [Protocol!]! @hasInverse(field: form)
 }
 
@@ -621,7 +621,7 @@ type Plan @auth(
 ) {
 	id: ID!
 	owner: OwnerOrg!
-	name: String!
+	name: String! @search(by: [fulltext])
 	labs: [LabOrg!]! @hasInverse(field: plans)
 	storages: [StorageOrg!]! @hasInverse(field: plans)
 }
@@ -700,7 +700,8 @@ type Protocol implements Location @auth(
 ) {
 	id: ID!
 	owner: OwnerOrg!
-	name: String!
+	name: String! @search(by: [fulltext])
+	description: String! @search(by: [fulltext])
 	form: ProtocolForm! @hasInverse(field: protocols)
 	plan: Plan!
 	ages: [Int]
@@ -715,11 +716,11 @@ type Protocol implements Location @auth(
 }
 
 interface Location {
-	street: String! @search
-	city: String! @search
-	county: String! @search
-	state: String! @search
-	country: String! @search
+	street: String! @search(by: [fulltext])
+	city: String! @search(by: [fulltext])
+	county: String! @search(by: [exact])
+	state: String! @search(by: [exact])
+	country: String! @search(by: [exact])
 	zip: Int! @search
 }
 
@@ -794,20 +795,20 @@ type Result @auth(
 ) {
 	id: ID!
 	owner: OwnerOrg!
-	notes: String!
+	notes: String! @search(by: [fulltext])
 	test: Test! @hasInverse(field: results)
 }
 
 interface Specimen {
 	id: ID!
-	externalID: String!
-	type: SpecimenType! @search
+	externalID: String! @search(by: [hash])
+	type: SpecimenType! @search(by: [hash])
 	collectionDate: DateTime! @search
 	donor: Donor! @hasInverse(field: specimens)
-	container: ContainerType! @search
-	status: SpecimenStatus! @search
+	container: ContainerType! @search(by: [hash])
+	status: SpecimenStatus! @search(by: [hash])
 	destructionDate: DateTime! @search
-	description: String!
+	description: String! @search(by: [fulltext])
 	consent: Consent! @hasInverse(field: specimen)
 	owner: OwnerOrg!
 	lab: LabOrg! @hasInverse(field: specimens)
@@ -913,8 +914,8 @@ type BloodSpecimen implements Specimen @auth(
 		}"""},
 	]},
 ) {
-	bloodType: BloodType! @search
-	volume: Float!
+	bloodType: BloodType! @search(by: [hash])
+	volume: Float! @search
 }
 
 enum BloodType {
