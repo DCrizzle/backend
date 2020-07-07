@@ -344,7 +344,7 @@ type ProtocolForm implements Form @auth(
 
 interface Org {
 	id: ID!
-	name: String!
+	name: String! @search(by: [hash])
 	users: [User!]! @hasInverse(field: org)
 	createdOn: DateTime!
 	updatedOn: DateTime!
@@ -999,6 +999,7 @@ type Test @auth(
 	]},
 ) {
 	id: ID!
+	description: String! @search(by: [fulltext])
 	owner: OwnerOrg!
 	lab: LabOrg!
 	specimens: [Specimen!]! @hasInverse(field: tests)
