@@ -29,3 +29,10 @@ RUN curl https://get.dgraph.io -sSf | bash && dgraph
 EXPOSE 8888
 
 CMD ["bash", "start"]
+
+# outline:
+# [ ] set "general" ubuntu image
+# [ ] run install from source steps
+# - [ ] https://github.com/dgraph-io/dgraph#install-from-source
+# [ ] expose required port
+# [ ] run bash start script
