@@ -40,7 +40,43 @@ func generateDonors(count int, owner string) ([]string, error) {
 	return sendMutation(input)
 }
 
-func generateOwnerOrg(name, owner, orgType string) (string, error) {
+func generateOwnerOrg(name string) (string, error) {
+	now := time.Now().Format(time.RFC3339)
+
+	ownerOrg := ownerOrg{
+		org: org{
+			Street:    randomString(streets),
+			City:      randomString(cities),
+			County:    randomString(counties),
+			State:     randomString(states),
+			ZIP:       randomInt(zips),
+			Name:      name,
+			Users:     []string{},
+			CreatedOn: now,
+			UpdatedOn: now,
+		},
+		Labs:     []string{},
+		Storages: []string{},
+	}
+
+	variables := map[string]interface{}{
+		"input": ownerOrg,
+	}
+
+	input := payload{
+		Query:     "",
+		Variables: variables,
+	}
+
+	id, err := sendMutation(input)
+	if err != nil {
+		return "", err
+	}
+
+	return id[0], nil
+}
+
+func generateLabStorageOrgs(name, owner, orgType string) (string, error) {
 	now := time.Now().Format(time.RFC3339)
 
 	var o interface{}
@@ -56,13 +92,7 @@ func generateOwnerOrg(name, owner, orgType string) (string, error) {
 		UpdatedOn: now,
 	}
 
-	if orgType == "owner" {
-		o = ownerOrg{
-			org:      rootOrg,
-			Labs:     []string{},
-			Storages: []string{},
-		}
-	} else if orgType == "lab" {
+	if orgType == "lab" {
 		o = labOrg{
 			org:       rootOrg,
 			Owner:     owner,
