@@ -105,7 +105,7 @@ type protocolForm struct {
 	Protocols  []string `json:"protocols"`
 }
 
-type tests struct {
+type specimenTest struct {
 	Description string   `json:"description"`
 	Owner       string   `json:"owner"`
 	Labs        []string `json:"labs"`
