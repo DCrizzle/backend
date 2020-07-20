@@ -32,6 +32,7 @@ type consent struct {
 	Specimen        string `json:"donor"`
 	Protocol        string `json:"donor"`
 	ConsentDate     string `json:"consentedDate"`
+	RetentionPeriod int    `json:"retentionPeriod"`
 	DestructionDate string `json:"destructionDate"`
 }
 

@@ -201,6 +201,34 @@ func generateProtocol(owner, protocolID string) (string, error) {
 	return id[0], nil
 }
 
+func generateConsent(owner, donor, protocol string) (string, error) {
+	c := consent{
+		Owner: owner,
+		Donor: donor,
+		Specimen: "",
+		Protocol: protocol,
+		ConsentDate: "",
+		RetentionPeriod: 0,
+		DestructionDate: "",
+	}
+
+	variables := map[string]interface{}{
+		"input": c,
+	}
+
+	input := payload{
+		Query:     "",
+		Variables: variables,
+	}
+
+	id, err := sendMutation(input)
+	if err != nil {
+		return "", err
+	}
+
+	return id[0], nil
+}
+
 func randomString(options []string) string {
 	return options[rand.Intn(len(options))]
 }
