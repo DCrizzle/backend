@@ -10,7 +10,7 @@ import (
 const dgraphURL = ""
 
 func generateDonors(count int, owner string) ([]string, error) {
-	donors := []donor{}
+	ds := []donor{}
 	for i := 0; i < count; i++ {
 		d := donor{
 			Street:    randomString(streets),
@@ -27,11 +27,11 @@ func generateDonors(count int, owner string) ([]string, error) {
 			Consents:  []string{},
 		}
 
-		donors = append(donors, d)
+		ds = append(ds, d)
 	}
 
 	variables := map[string][]donor{
-		"input": donors,
+		"input": ds,
 	}
 
 	input := payload{
@@ -44,7 +44,7 @@ func generateDonors(count int, owner string) ([]string, error) {
 
 func generateOwnerOrg(name string) (string, error) {
 	now := time.Now().Format(time.RFC3339)
-	ownerOrg := ownerOrg{
+	oo := ownerOrg{
 		org: org{
 			Street:    randomString(streets),
 			City:      randomString(cities),
@@ -61,7 +61,7 @@ func generateOwnerOrg(name string) (string, error) {
 	}
 
 	variables := map[string]interface{}{
-		"input": ownerOrg,
+		"input": oo,
 	}
 
 	input := payload{
@@ -126,9 +126,9 @@ func generateLabStorageOrgs(name, owner, orgType string) (string, error) {
 }
 
 func generateProtocolConsentForm(owner, formType string) (string, error) {
-	var form interface{}
+	var f interface{}
 	if formType == "protocol" {
-		form = protocolForm{
+		f = protocolForm{
 			Owner:      owner,
 			Title:      randomString(titles),
 			Body:       randomString(bodies),
@@ -136,7 +136,7 @@ func generateProtocolConsentForm(owner, formType string) (string, error) {
 			Protocols:  []string{},
 		}
 	} else if formType == "consent" {
-		form = consentForm{
+		f = consentForm{
 			Owner:    owner,
 			Title:    randomString(titles),
 			Body:     randomString(bodies),
@@ -145,7 +145,7 @@ func generateProtocolConsentForm(owner, formType string) (string, error) {
 	}
 
 	variables := map[string]interface{}{
-		"input": form,
+		"input": f,
 	}
 
 	input := payload{
@@ -162,7 +162,7 @@ func generateProtocolConsentForm(owner, formType string) (string, error) {
 }
 
 func generateProtocol(owner, protocolID string) (string, error) {
-	protocol := protocol{
+	p := protocol{
 		Street:      randomString(streets),
 		City:        randomString(cities),
 		County:      randomString(counties),
@@ -185,7 +185,7 @@ func generateProtocol(owner, protocolID string) (string, error) {
 	}
 
 	variables := map[string]interface{}{
-		"input": protocol,
+		"input": p,
 	}
 
 	input := payload{
