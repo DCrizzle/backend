@@ -255,6 +255,43 @@ func generateTest(owner string, labs, specimens []string) (string, error) {
 	return id[0], nil
 }
 
+func generateSpecimens(count int, owner, donor, consent, lab, storage, protocol string) ([]string, error) {
+	ss := []bloodSpecimen{}
+	for i := 0; i < count; i++ {
+		s := bloodSpecimen{
+			Owner:           owner,
+			ExternalID:      id(),
+			Type:            SPECIMEN_TYPE[0],
+			CollectionDate:  "",
+			Container:       CONTAINER[0],
+			Status:          randomString(STATUS),
+			DestructionDate: "",
+			Description:     randomString(descriptions),
+			BloodType:       randomString(BLOOD_TYPE),
+			Volume:          1.0,
+			Tests:           []string{},
+			Donor:           donor,
+			Consent:         consent,
+			Lab:             lab,
+			Storage:         storage,
+			Protocol:        protocol,
+		}
+
+		ss = append(ss, s)
+	}
+
+	variables := map[string]interface{}{
+		"input": ss,
+	}
+
+	input := payload{
+		Query:     "",
+		Variables: variables,
+	}
+
+	return sendMutation(input)
+}
+
 func randomString(options []string) string {
 	return options[rand.Intn(len(options))]
 }
