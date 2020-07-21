@@ -11,7 +11,7 @@ function (user, context, callback) {
 			{
 				'client_id':'${configuration.RULE_APP_CLIENT_ID}',
 				'client_secret':'${configuration.RULE_APP_CLIENT_SECRET}',
-				'audience':'https://tbdbackend.io/',
+				'audience':'https://folivora.io/',
 				'grant_type':'client_credentials'
 			}`
 	};
@@ -24,7 +24,7 @@ function (user, context, callback) {
 
 		const dgraph_options = {
 			method: 'POST',
-			url: configuration.TBD_BACKEND_URL,
+			url: configuration.FOLIVORA_BACKEND_URL,
 			headers: {
 				'Content-Type': 'application/json',
 				'X-Auth0-Token': access_token
