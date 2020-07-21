@@ -1,3 +1,7 @@
+// NOTE: this rule is used with the assumption that the backend
+// URL value is essentially always available - this makes this
+// particular rule unlikely to be feasible in current form
+
 function (user, context, callback) {
   const axios = require('axios@0.19.2');
 
