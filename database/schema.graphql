@@ -1069,6 +1069,24 @@ type User @auth(
 	lastName: String! @search(by: [exact])
 	role: Role!
 	org: Org! @hasInverse(field: users)
+	user_id: String!
+	createAuth0User: User! @custom(http: {
+		url: " https://folivora.auth0.com/api/v2/users"
+		method: "POST"
+		body: "{email: $email, app_metadata: {role: $role, orgID: $owner}, given_name: $firstName, family_name: $lastName, connection: 'Username-Password-Authentication'}"
+		forwardedHeaders: ["Authorization"]
+	})
+	updateAuth0User: User! @custom(http: {
+		url: " https://folivora.auth0.com/api/v2/users/$user_id"
+		method: "PATCH"
+		body: "{email: $email, app_metadata: {role: $role, orgID: $owner}, given_name: $firstName, family_name: $lastName}"
+		forwardedHeaders: ["Authorization"]
+	})
+	deleteAuth0User: User! @custom(http: {
+		url: " https://folivora.auth0.com/api/v2/users/$user_id"
+		method: "DELETE"
+		forwardedHeaders: ["Authorization"]
+	})
 }
 
 enum Role {
