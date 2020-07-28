@@ -48,7 +48,7 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]map[string][]string, error
 		"storage_org_b",
 	}
 
-	for _, ownerID := range ownerIDs {
+	for i, ownerID := range ownerIDs {
 		labCount := rand.Intn(len(labNames))
 		labInputs := []map[string]interface{}{}
 		for labCount > 0 {
@@ -58,7 +58,7 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]map[string][]string, error
 				"county":    randomString(counties),
 				"state":     randomString(states),
 				"zip":       randomInt(zips),
-				"name":      orgNames[i],
+				"name":      labNames[i],
 				"users":     []string{},
 				"createdOn": "",
 				"updatedOn": "",
@@ -73,6 +73,8 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]map[string][]string, error
 			// [ ] create payload struct w/ populated fields
 			// [ ] execute mutation
 			// [ ] store ids in result map with key "labs"
+
+			labCount--
 		}
 
 		storageName := storageNames[rand.Intn(len(storageNames))]
@@ -82,7 +84,7 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]map[string][]string, error
 			"county":    randomString(counties),
 			"state":     randomString(states),
 			"zip":       randomInt(zips),
-			"name":      orgNames[i],
+			"name":      storageNames[i],
 			"users":     []string{},
 			"createdOn": "",
 			"updatedOn": "",
@@ -100,7 +102,42 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]map[string][]string, error
 	return result, nil
 }
 
+func addUsers(ownerIDs, labIDs, storageIDs []string) ([]string, error) {
+	inputs := []map[string]interface{}{}
+	for i, user := range users {
+		ownerID := ownerIDs[i%3]
+		orgID := ""
+		if user.role == "USER_STORAGE" {
+			orgID = randomString(storageIDs)
+		} else if user.role == "USER_LAB" {
+			orgID = randomString(labIDs)
+		} else {
+			orgID = ownerID
+		}
+
+		input := map[string]interface{}{
+			"owner":     ownerID,
+			"email":     user.email,
+			"firstName": user.first,
+			"lastName":  user.last,
+			"role":      user.role,
+			"org":       orgID,
+		}
+
+		inputs = append(inputs, input)
+	}
+
+	// outline:
+	// [ ] create payload struct w/ populated fields
+	// [ ] execute mutation
+	// [ ] return ids / error values
+}
+
 func randomString(options []string) string {
+	return options[rand.Intn(len(options))]
+}
+
+func randomInt(options []int) int {
 	return options[rand.Intn(len(options))]
 }
 
@@ -190,10 +227,6 @@ func randomString(options []string) string {
 // - [ ] output:
 // - - [ ] result id
 
-// func randomInt(options []int) int {
-// 	return options[rand.Intn(len(options))]
-// }
-//
 // func randomInts(count int, options []int) []int {
 // 	ints := []int{}
 // 	for i := 0; i < count; i++ {
