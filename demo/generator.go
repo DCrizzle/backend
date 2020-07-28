@@ -1,18 +1,122 @@
 package demo
 
+import (
+	"math/rand"
+)
+
+func addOwnerOrgs() ([]string, error) {
+	orgNames := []string{
+		"owner_org_a",
+		"owner_org_b",
+		"owner_org_c",
+	}
+
+	inputs := []map[string]interface{}{}
+	for i := 0; i < len(orgNames); i++ {
+		input := map[string]interface{}{
+			"street":    randomString(streets),
+			"city":      randomString(cities),
+			"county":    randomString(counties),
+			"state":     randomString(states),
+			"zip":       randomInt(zips),
+			"name":      orgNames[i],
+			"users":     []string{},
+			"createdOn": "",
+			"updatedOn": "",
+		}
+		inputs = append(inputs, input)
+	}
+
+	// outline:
+	// [ ] create payload struct w/ populated fields
+	// [ ] execute mutation
+	// [ ] return ids / error values
+}
+
+func addLabStorageOrgs(ownerIDs []string) (map[string]map[string][]string, error) {
+	result := make(map[string]map[string]string)
+	labNames := []string{
+		"lab_org_a",
+		"lab_org_b",
+		"lab_org_c",
+		"lab_org_d",
+		"lab_org_e",
+		"lab_org_f",
+	}
+	storageNames := []string{
+		"storage_org_a",
+		"storage_org_b",
+	}
+
+	for _, ownerID := range ownerIDs {
+		labCount := rand.Intn(len(labNames))
+		labInputs := []map[string]interface{}{}
+		for labCount > 0 {
+			labInput := map[string]interface{}{
+				"street":    randomString(streets),
+				"city":      randomString(cities),
+				"county":    randomString(counties),
+				"state":     randomString(states),
+				"zip":       randomInt(zips),
+				"name":      orgNames[i],
+				"users":     []string{},
+				"createdOn": "",
+				"updatedOn": "",
+				"owner":     ownerID,
+				"specimens": []string{},
+				"plans":     []string{},
+			}
+
+			labInputs = append(labInputs, labInput)
+
+			// outline:
+			// [ ] create payload struct w/ populated fields
+			// [ ] execute mutation
+			// [ ] store ids in result map with key "labs"
+		}
+
+		storageName := storageNames[rand.Intn(len(storageNames))]
+		storageInput := map[string]interface{}{
+			"street":    randomString(streets),
+			"city":      randomString(cities),
+			"county":    randomString(counties),
+			"state":     randomString(states),
+			"zip":       randomInt(zips),
+			"name":      orgNames[i],
+			"users":     []string{},
+			"createdOn": "",
+			"updatedOn": "",
+			"owner":     ownerID,
+			"specimens": []string{},
+			"plans":     []string{},
+		}
+
+		// outline:
+		// [ ] create payload struct w/ populated fields
+		// [ ] execute mutation
+		// [ ] store ids in result map with key "storages"
+	}
+
+	return result, nil
+}
+
+func randomString(options []string) string {
+	return options[rand.Intn(len(options))]
+}
+
 // outline:
-// [ ] add owner org
-// - [ ] input:
-// - - [ ] name string
-// - - [ ] created/updated on time
-// - [ ] output: owner org id
-// [ ] add lab / storage org
-// - [ ] input:
-// - - [ ] name string
-// - - [ ] created/updated on time
-// - - [ ] owner org id
-// - [ ] output:
-// - - [ ] lab / storage org id
+// [x] add owner org
+// - [x] input:
+// - - [x] name string
+// - - [x] created/updated on time
+// - [x] output: owner org id
+// [x] add lab / storage org
+// - [x] input:
+// - - [x] name string
+// - - [x] created/updated on time
+// - - [x] owner org id
+// - [x] output:
+// - - [x] lab / storage org id
 // [ ] add user
 // - [ ] input:
 // - - [ ] owner id
@@ -85,3 +189,24 @@ package demo
 // - - [ ] test id
 // - [ ] output:
 // - - [ ] result id
+
+// func randomInt(options []int) int {
+// 	return options[rand.Intn(len(options))]
+// }
+//
+// func randomInts(count int, options []int) []int {
+// 	ints := []int{}
+// 	for i := 0; i < count; i++ {
+// 		ints = append(ints, options[rand.Intn(len(options))])
+// 	}
+// 	return ints
+// }
+//
+// func dob() string {
+// 	t := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
+// 	return t.Format(time.RFC3339)
+// }
+//
+// func id() string {
+// 	return uuid.New().String()
+// }
