@@ -36,6 +36,8 @@ func addOwnerOrgs() ([]string, error) {
 	// [ ] return ids / error values
 }
 
+// NOTE: reduce all input arguments to single owner IDs and call
+// the generator iteratively over the input values
 func addLabStorageOrgs(ownerIDs []string) (map[string]string, map[string]string, error) {
 	labs := make(map[string]string)
 	storages := make(map[string]string)
@@ -269,6 +271,25 @@ func addDonor(ownerIDs []string) ([]string, error) {
 		// [ ] execute mutation
 		// [ ] store ids in result map with key "owner id"
 	}
+}
+
+func addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
+	now := time.Now()
+	input := map[string]interface{}{
+		"owner":           ownerID,
+		"donor":           donorID,
+		"specimen":        "",
+		"protocol":        protocolID,
+		"form":            formID,
+		"consentedDate":   now.String(),
+		"retentionPeriod": 360,
+		"destructionDate": now.AddDate(0, 0, 360).String(),
+	}
+
+	// outline:
+	// [ ] create payload struct w/ populated fields
+	// [ ] execute mutation
+	// [ ] store ids in result map with key "owner id"
 }
 
 func randomString(options []string) string {
