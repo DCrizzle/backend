@@ -2,6 +2,7 @@ package demo
 
 import (
 	"math/rand"
+	"time"
 )
 
 func addOwnerOrgs() ([]string, error) {
@@ -33,8 +34,11 @@ func addOwnerOrgs() ([]string, error) {
 	// [ ] return ids / error values
 }
 
-func addLabStorageOrgs(ownerIDs []string) (map[string]map[string][]string, error) {
-	result := make(map[string]map[string]string)
+func addLabStorageOrgs(ownerIDs []string) (map[string]string, map[string]string, error) {
+	labs := make(map[string]string)
+	storages := make(map[string]string)
+
+	// result := make(map[string]map[string]string)
 	labNames := []string{
 		"lab_org_a",
 		"lab_org_b",
@@ -72,7 +76,7 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]map[string][]string, error
 			// outline:
 			// [ ] create payload struct w/ populated fields
 			// [ ] execute mutation
-			// [ ] store ids in result map with key "labs"
+			// [ ] store ids in result map with key "owner id"
 
 			labCount--
 		}
@@ -96,10 +100,10 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]map[string][]string, error
 		// outline:
 		// [ ] create payload struct w/ populated fields
 		// [ ] execute mutation
-		// [ ] store ids in result map with key "storages"
+		// [ ] store ids in result map with key "owner id"
 	}
 
-	return result, nil
+	return labs, storages, nil
 }
 
 func addUsers(ownerIDs, labIDs, storageIDs []string) ([]string, error) {
@@ -133,12 +137,77 @@ func addUsers(ownerIDs, labIDs, storageIDs []string) ([]string, error) {
 	// [ ] return ids / error values
 }
 
+func addProtocolsPlans(ownerIDs, labIDs, storageIDs []string) ([]string, error) {
+	for i, ownerID := range ownerIDs {
+		dobStart := time.Date(1977, time.May, 25, 22, 0, 0, 0, time.UTC)
+		dobEnd := time.Date(2005, time.May, 19, 22, 0, 0, 0, time.UTC)
+
+		protocolInputs := []map[string]interface{}{}
+		for _, protocolName := range protocolNames {
+			ageStart := randomInt(ages)
+			ageEnd := ageStart + 20
+
+			input := map[string]interface{}{
+				"street":      randomString(streets),
+				"city":        randomString(cities),
+				"county":      randomString(counties),
+				"state":       randomString(states),
+				"zip":         randomInt(zips),
+				"owner":       ownerID,
+				"name":        protocolName,
+				"description": randomString(descriptions),
+				"form":        "",
+				"plan":        "",
+				"dobStart":    dobStart.String(),
+				"dobEnd":      dobEnd.String(),
+				"race":        randomString(races),
+				"sex":         randomString(sexes),
+				"specimens":   "",
+			}
+
+			protocolInputs = append(protocolInputs, input)
+		}
+
+		// outline:
+		// [ ] create payload struct w/ populated fields
+		// [ ] execute mutation
+		// [ ] store ids in result map with key "owner id"
+
+		protocolIDs := []string{"id_A", "id_B", "id_C"}
+		planInputs := []map[string]interface{}{}
+		for j, planName := range planNames {
+			input := map[string]interface{}{
+				"owner":    ownerID,
+				"name":     planName,
+				"labs":     randomString(labIDs),
+				"storages": randomString(storageIDs),
+				"protocol": protocolIDs[j],
+			}
+
+			planInputs = append(planInputs, input)
+		}
+
+		// outline:
+		// [ ] create payload struct w/ populated fields
+		// [ ] execute mutation
+		// [ ] store ids in result map with key "owner id"
+	}
+}
+
 func randomString(options []string) string {
 	return options[rand.Intn(len(options))]
 }
 
 func randomInt(options []int) int {
 	return options[rand.Intn(len(options))]
+}
+
+func randomInts(count int, options []int) []int {
+	ints := []int{}
+	for i := 0; i < count; i++ {
+		ints = append(ints, options[rand.Intn(len(options))])
+	}
+	return ints
 }
 
 // outline:
@@ -154,12 +223,12 @@ func randomInt(options []int) int {
 // - - [x] owner org id
 // - [x] output:
 // - - [x] lab / storage org id
-// [ ] add user
-// - [ ] input:
-// - - [ ] owner id
-// - - [ ] (various value / enum inputs)
-// - [ ] output:
-// - - [ ] user id
+// [x] add user
+// - [x] input:
+// - - [x] owner id
+// - - [x] (various value / enum inputs)
+// - [x] output:
+// - - [x] user id
 // [ ] add plan
 // - [ ] input:
 // - - [ ] name string
@@ -227,14 +296,6 @@ func randomInt(options []int) int {
 // - [ ] output:
 // - - [ ] result id
 
-// func randomInts(count int, options []int) []int {
-// 	ints := []int{}
-// 	for i := 0; i < count; i++ {
-// 		ints = append(ints, options[rand.Intn(len(options))])
-// 	}
-// 	return ints
-// }
-//
 // func dob() string {
 // 	t := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 // 	return t.Format(time.RFC3339)

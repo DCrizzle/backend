@@ -22,13 +22,6 @@ var zips = []int{
 	16823,
 }
 
-var ages = []int{
-	20,
-	30,
-	40,
-	50,
-}
-
 var titles = []string{
 	"Example Title A",
 	"Example Title B",
@@ -43,6 +36,12 @@ var protocolNames = []string{
 	"Protocol A",
 	"Protocol B",
 	"Protocol C",
+}
+
+var planNames = []string{
+	"Plan A",
+	"Plan B",
+	"Plan C",
 }
 
 var descriptions = []string{
@@ -125,4 +124,26 @@ var users = []struct {
 		last:  "skywalker",
 		role:  "USER_STORAGE",
 	},
+}
+
+var ages = []int{
+	20,
+	30,
+	40,
+	50,
+	60,
+	70,
+}
+
+var races = []string{
+	"AMERICAN_INDIAN_OR_ALASKA_NATIVE",
+	"ASIAN",
+	"BLACK_OR_AFRICAN_AMERICAN",
+	"HISPANIC_OR_LATINO",
+	"WHITE",
+}
+
+var sexes = []string{
+	"MALE",
+	"FEMALE",
 }
