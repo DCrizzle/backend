@@ -137,7 +137,7 @@ func addUsers(ownerIDs, labIDs, storageIDs []string) ([]string, error) {
 	// [ ] return ids / error values
 }
 
-func addProtocolsPlans(ownerIDs, labIDs, storageIDs []string) ([]string, error) {
+func addProtocolsFormsPlans(ownerIDs, labIDs, storageIDs []string) ([]string, []string, []string, error) {
 	for i, ownerID := range ownerIDs {
 		dobStart := time.Date(1977, time.May, 25, 22, 0, 0, 0, time.UTC)
 		dobEnd := time.Date(2005, time.May, 19, 22, 0, 0, 0, time.UTC)
@@ -174,6 +174,23 @@ func addProtocolsPlans(ownerIDs, labIDs, storageIDs []string) ([]string, error) 
 		// [ ] store ids in result map with key "owner id"
 
 		protocolIDs := []string{"id_A", "id_B", "id_C"}
+
+		protocolFormInput := []map[string]interface{}{}
+		for _, protocolID := range protocolIDs {
+			input := map[string]interface{}{
+				"owner": ownerID,
+				"title": randomString(titles),
+				"body":  randomString(bodies),
+			}
+
+			protocolFormInput = append(protocolFormInput, input)
+		}
+
+		// outline:
+		// [ ] create payload struct w/ populated fields
+		// [ ] execute mutation
+		// [ ] store ids in result map with key "owner id"
+
 		planInputs := []map[string]interface{}{}
 		for j, planName := range planNames {
 			input := map[string]interface{}{
@@ -192,6 +209,24 @@ func addProtocolsPlans(ownerIDs, labIDs, storageIDs []string) ([]string, error) 
 		// [ ] execute mutation
 		// [ ] store ids in result map with key "owner id"
 	}
+}
+
+func addConsentForms(ownerIDs []string) ([]string, error) {
+	consentFormInput := []map[string]interface{}{}
+	for _, ownerID := range ownerIDs {
+		input := map[string]interface{}{
+			"owner": ownerID,
+			"title": randomString(titles),
+			"body":  randomString(bodies),
+		}
+
+		consentFormInput = append(consentFormInput, input)
+	}
+
+	// outline:
+	// [ ] create payload struct w/ populated fields
+	// [ ] execute mutation
+	// [ ] store ids in result map with key "owner id"
 }
 
 func randomString(options []string) string {
@@ -229,18 +264,18 @@ func randomInts(count int, options []int) []int {
 // - - [x] (various value / enum inputs)
 // - [x] output:
 // - - [x] user id
-// [ ] add plan
-// - [ ] input:
-// - - [ ] name string
-// - - [ ] owner / lab storage org ids
-// - [ ] output:
-// - - [ ] plan id
-// [ ] add protocol
-// - [ ] input:
-// - - [ ] owner id
-// - - [ ] (various value / enum inputs)
-// - [ ] output:
-// - - [ ] protocol id
+// [x] add plan
+// - [x] input:
+// - - [x] name string
+// - - [x] owner / lab storage org ids
+// - [x] output:
+// - - [x] plan id
+// [x] add protocol
+// - [x] input:
+// - - [x] owner id
+// - - [x] (various value / enum inputs)
+// - [x] output:
+// - - [x] protocol id
 // [ ] add consent form
 // - [ ] input:
 // - - [ ] owner id
@@ -295,12 +330,3 @@ func randomInts(count int, options []int) []int {
 // - - [ ] test id
 // - [ ] output:
 // - - [ ] result id
-
-// func dob() string {
-// 	t := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
-// 	return t.Format(time.RFC3339)
-// }
-//
-// func id() string {
-// 	return uuid.New().String()
-// }
