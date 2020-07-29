@@ -238,6 +238,39 @@ func addConsentForms(ownerIDs []string) ([]string, error) {
 	// [ ] store ids in result map with key "owner id"
 }
 
+func addDonor(ownerIDs []string) ([]string, error) {
+	for _, ownerID := range ownerIDs {
+		donorCount := rand.Intn(100) + 50
+		donorInputs := []map[string]interface{}{}
+		for donorCount > 0 {
+			dob, age := randomDOBAndAge()
+
+			input := map[string]interface{}{
+				"street":    randomString(streets),
+				"city":      randomString(cities),
+				"county":    randomString(counties),
+				"state":     randomString(states),
+				"zip":       randomInt(zips),
+				"owner":     ownerID,
+				"dob":       dob,
+				"age":       age,
+				"sex":       randomString(sexes),
+				"race":      randomString(races),
+				"specimens": []string{},
+				"consents":  []string{},
+			}
+
+			donorInputs = append(donorInputs, input)
+			donorCount--
+		}
+
+		// outline:
+		// [ ] create payload struct w/ populated fields
+		// [ ] execute mutation
+		// [ ] store ids in result map with key "owner id"
+	}
+}
+
 func randomString(options []string) string {
 	return options[rand.Intn(len(options))]
 }
@@ -252,6 +285,20 @@ func randomInts(count int, options []int) []int {
 		ints = append(ints, options[rand.Intn(len(options))])
 	}
 	return ints
+}
+
+func randomDOBAndAge() (string, int) {
+	currentYear := time.Now().Year()
+
+	yo := rand.Intn(50) + 20
+
+	year := currentYear - yo
+	month := rand.Intn(12) + 1
+	day := rand.Intn(25) + 1
+
+	dob := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC).String()
+
+	return dob, yo
 }
 
 // outline:
@@ -299,13 +346,13 @@ func randomInts(count int, options []int) []int {
 // - - [x] title / body string
 // - [x] output:
 // - - [x] protocol form id
-// [ ] add donor
-// - [ ] input:
-// - - [ ] owner id
-// - - [ ] (various value / enum inputs)
-// - - [ ] (not including consents / specimens)
-// - [ ] output:
-// - - [ ] donor id
+// [x] add donor
+// - [x] input:
+// - - [x] owner id
+// - - [x] (various value / enum inputs)
+// - - [x] (not including consents / specimens)
+// - [x] output:
+// - - [x] donor id
 // [ ] add consent
 // - [ ] input:
 // - - [ ] owner id
