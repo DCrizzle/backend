@@ -3,6 +3,8 @@ package demo
 import (
 	"math/rand"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func addOwnerOrgs() ([]string, error) {
@@ -174,13 +176,20 @@ func addProtocolsFormsPlans(ownerIDs, labIDs, storageIDs []string) ([]string, []
 		// [ ] store ids in result map with key "owner id"
 
 		protocolIDs := []string{"id_A", "id_B", "id_C"}
+		protocolExternalIDs := []string{
+			uuid.New().String(),
+			uuid.New().String(),
+			uuid.New().String(),
+		}
 
 		protocolFormInput := []map[string]interface{}{}
-		for _, protocolID := range protocolIDs {
+		for k, protocolID := range protocolIDs {
 			input := map[string]interface{}{
-				"owner": ownerID,
-				"title": randomString(titles),
-				"body":  randomString(bodies),
+				"owner":      ownerID,
+				"title":      randomString(titles),
+				"body":       randomString(bodies),
+				"protocol":   protocolID,
+				"protocolID": protocolExternalIDs[k],
 			}
 
 			protocolFormInput = append(protocolFormInput, input)
@@ -276,20 +285,20 @@ func randomInts(count int, options []int) []int {
 // - - [x] (various value / enum inputs)
 // - [x] output:
 // - - [x] protocol id
-// [ ] add consent form
-// - [ ] input:
-// - - [ ] owner id
-// - - [ ] title / body string
-// - [ ] output:
-// - - [ ] consent form id
-// [ ] add protocol form
-// - [ ] input:
-// - - [ ] protocol id string (generated)
-// - - [ ] protocol ids string array
-// - - [ ] owner id
-// - - [ ] title / body string
-// - [ ] output:
-// - - [ ] protocol form id
+// [x] add consent form
+// - [x] input:
+// - - [x] owner id
+// - - [x] title / body string
+// - [x] output:
+// - - [x] consent form id
+// [x] add protocol form
+// - [x] input:
+// - - [x] protocol id string (generated)
+// - - [x] protocol ids string array
+// - - [x] owner id
+// - - [x] title / body string
+// - [x] output:
+// - - [x] protocol form id
 // [ ] add donor
 // - [ ] input:
 // - - [ ] owner id
