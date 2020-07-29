@@ -624,6 +624,7 @@ type Plan @auth(
 	name: String! @search(by: [fulltext])
 	labs: [LabOrg!]! @hasInverse(field: plans)
 	storages: [StorageOrg!]! @hasInverse(field: plans)
+	protocol: Protocol! @hasInverse(field: plan)
 }
 
 type Protocol implements Location @auth(
@@ -704,10 +705,6 @@ type Protocol implements Location @auth(
 	description: String! @search(by: [fulltext])
 	form: ProtocolForm! @hasInverse(field: protocols)
 	plan: Plan!
-	ages: [Int]
-	ageStart: Int
-	ageEnd: Int
-	dobs: [DateTime]
 	dobStart: DateTime
 	dobEnd: DateTime
 	race: [Race]
@@ -1070,21 +1067,21 @@ type User @auth(
 	role: Role!
 	org: Org! @hasInverse(field: users)
 	user_id: String!
-	createAuth0User: User! @custom(http: {
-		url: " https://folivora.auth0.com/api/v2/users"
-		method: "POST"
-		body: "{email: $email, app_metadata: {role: $role, orgID: $owner}, given_name: $firstName, family_name: $lastName, connection: 'Username-Password-Authentication'}"
+	createAuth0User: User @custom(http: {
+		url: "https://folivora.auth0.com/api/v2/users",
+		method: "POST",
+		body: "{ email: $email, app_metadata: { role: $role, orgID: $owner }, given_name: $firstName, family_name: $lastName, connection: \"Username-Password-Authentication\" }"
 		forwardedHeaders: ["Authorization"]
 	})
-	updateAuth0User: User! @custom(http: {
-		url: " https://folivora.auth0.com/api/v2/users/$user_id"
-		method: "PATCH"
-		body: "{email: $email, app_metadata: {role: $role, orgID: $owner}, given_name: $firstName, family_name: $lastName}"
+	updateAuth0User: User @custom(http: {
+		url: "https://folivora.auth0.com/api/v2/users/$user_id",
+		method: "PATCH",
+		body: "{ email: $email, app_metadata: { role: $role, orgID: $owner }, given_name: $firstName, family_name: $lastName }",
 		forwardedHeaders: ["Authorization"]
 	})
-	deleteAuth0User: User! @custom(http: {
-		url: " https://folivora.auth0.com/api/v2/users/$user_id"
-		method: "DELETE"
+	deleteAuth0User: User @custom(http: {
+		url: "https://folivora.auth0.com/api/v2/users/$user_id",
+		method: "DELETE",
 		forwardedHeaders: ["Authorization"]
 	})
 }
