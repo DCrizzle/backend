@@ -80,10 +80,9 @@ func addLabStorageOrgs(ownerID string) ([]string, []string, error) {
 	return labs, storages, nil
 }
 
-func addUsers(ownerIDs, labIDs, storageIDs []string) ([]string, error) {
+func addUsers(ownerID string, labIDs, storageIDs []string) ([]string, error) {
 	inputs := []map[string]interface{}{}
 	for i, user := range users {
-		ownerID := ownerIDs[i%3]
 		orgID := ""
 		if user.role == "USER_STORAGE" {
 			orgID = randomString(storageIDs)
@@ -105,95 +104,87 @@ func addUsers(ownerIDs, labIDs, storageIDs []string) ([]string, error) {
 		inputs = append(inputs, input)
 	}
 
-	// outline:
-	// [ ] create payload struct w/ populated fields
-	// [ ] execute mutation
-	// [ ] return ids / error values
+	return sendRequest(addUsersMutation, inputs)
 }
 
-func addProtocolsFormsPlans(ownerIDs, labIDs, storageIDs []string) ([]string, []string, []string, error) {
-	for i, ownerID := range ownerIDs {
-		dobStart := time.Date(1977, time.May, 25, 22, 0, 0, 0, time.UTC)
-		dobEnd := time.Date(2005, time.May, 19, 22, 0, 0, 0, time.UTC)
+func addProtocolsFormsPlans(ownerID string, labIDs, storageIDs []string) ([]string, []string, []string, error) {
+	dobStart := time.Date(1977, time.May, 25, 22, 0, 0, 0, time.UTC)
+	dobEnd := time.Date(2005, time.May, 19, 22, 0, 0, 0, time.UTC)
 
-		protocolInputs := []map[string]interface{}{}
-		for _, protocolName := range protocolNames {
-			ageStart := randomInt(ages)
-			ageEnd := ageStart + 20
+	protocolInputs := []map[string]interface{}{}
+	for _, protocolName := range protocolNames {
+		ageStart := randomInt(ages)
+		ageEnd := ageStart + 20
 
-			input := map[string]interface{}{
-				"street":      randomString(streets),
-				"city":        randomString(cities),
-				"county":      randomString(counties),
-				"state":       randomString(states),
-				"zip":         randomInt(zips),
-				"owner":       ownerID,
-				"name":        protocolName,
-				"description": randomString(descriptions),
-				"form":        "",
-				"plan":        "",
-				"dobStart":    dobStart.String(),
-				"dobEnd":      dobEnd.String(),
-				"race":        randomString(RACE),
-				"sex":         randomString(SEX),
-				"specimens":   "",
-			}
-
-			protocolInputs = append(protocolInputs, input)
+		input := map[string]interface{}{
+			"street":      randomString(streets),
+			"city":        randomString(cities),
+			"county":      randomString(counties),
+			"state":       randomString(states),
+			"zip":         randomInt(zips),
+			"owner":       ownerID,
+			"name":        protocolName,
+			"description": randomString(descriptions),
+			"form":        "",
+			"plan":        "",
+			"dobStart":    dobStart.String(),
+			"dobEnd":      dobEnd.String(),
+			"race":        randomString(RACE),
+			"sex":         randomString(SEX),
+			"specimens":   "",
 		}
 
-		// outline:
-		// [ ] create payload struct w/ populated fields
-		// [ ] execute mutation
-		// [ ] store ids in result map with key "owner id"
-
-		protocolIDs := []string{
-			"protocol_id_A",
-			"protocol_id_B",
-			"protocol_id_C",
-		}
-		protocolExternalIDs := []string{
-			uuid.New().String(),
-			uuid.New().String(),
-			uuid.New().String(),
-		}
-
-		protocolFormInput := []map[string]interface{}{}
-		for k, protocolID := range protocolIDs {
-			input := map[string]interface{}{
-				"owner":      ownerID,
-				"title":      randomString(titles),
-				"body":       randomString(bodies),
-				"protocol":   protocolID,
-				"protocolID": protocolExternalIDs[k],
-			}
-
-			protocolFormInput = append(protocolFormInput, input)
-		}
-
-		// outline:
-		// [ ] create payload struct w/ populated fields
-		// [ ] execute mutation
-		// [ ] store ids in result map with key "owner id"
-
-		planInputs := []map[string]interface{}{}
-		for j, planName := range planNames {
-			input := map[string]interface{}{
-				"owner":    ownerID,
-				"name":     planName,
-				"labs":     randomString(labIDs),
-				"storages": randomString(storageIDs),
-				"protocol": protocolIDs[j],
-			}
-
-			planInputs = append(planInputs, input)
-		}
-
-		// outline:
-		// [ ] create payload struct w/ populated fields
-		// [ ] execute mutation
-		// [ ] store ids in result map with key "owner id"
+		protocolInputs = append(protocolInputs, input)
 	}
+
+	protocolIDs, err := sendRequest(addProtocolsMutation, protocolInputs)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	protocolExternalIDs := []string{
+		uuid.New().String(),
+		uuid.New().String(),
+		uuid.New().String(),
+	}
+
+	protocolFormInputs := []map[string]interface{}{}
+	for k, protocolID := range protocolIDs {
+		input := map[string]interface{}{
+			"owner":      ownerID,
+			"title":      randomString(titles),
+			"body":       randomString(bodies),
+			"protocol":   protocolID,
+			"protocolID": protocolExternalIDs[k],
+		}
+
+		protocolFormInputs = append(protocolFormInputs, input)
+	}
+
+	protocolFormIDs, err := sendRequest(addProtocolFormsMutation, protocolFormInputs)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	planInputs := []map[string]interface{}{}
+	for j, planName := range planNames {
+		input := map[string]interface{}{
+			"owner":    ownerID,
+			"name":     planName,
+			"labs":     randomString(labIDs),
+			"storages": randomString(storageIDs),
+			"protocol": protocolIDs[j],
+		}
+
+		planInputs = append(planInputs, input)
+	}
+
+	planIDs, err := sendRequest(addPlansMutation, planInputs)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return protocolIDs, protocolFormIDs, planIDs, nil
 }
 
 func addConsentForms(ownerIDs []string) ([]string, error) {
