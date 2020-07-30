@@ -24,55 +24,20 @@ func addOwnerOrgs() ([]string, error) {
 		inputs = append(inputs, input)
 	}
 
-	// outline:
-	// [ ] create payload struct w/ populated fields
-	// [ ] execute mutation
-	// [ ] return ids / error values
+	return sendRequest(addOwnerOrgsMutation, inputs)
 }
 
-// NOTE: reduce all input arguments to single owner IDs and call
-// the generator iteratively over the input values
-func addLabStorageOrgs(ownerIDs []string) (map[string]string, map[string]string, error) {
-	labs := make(map[string]string)
-	storages := make(map[string]string)
-
-	for i, ownerID := range ownerIDs {
-		labCount := rand.Intn(len(labs))
-		labInputs := []map[string]interface{}{}
-		for labCount > 0 {
-			labInput := map[string]interface{}{
-				"street":    randomString(streets),
-				"city":      randomString(cities),
-				"county":    randomString(counties),
-				"state":     randomString(states),
-				"zip":       randomInt(zips),
-				"name":      labs[i],
-				"users":     []string{},
-				"createdOn": "",
-				"updatedOn": "",
-				"owner":     ownerID,
-				"specimens": []string{},
-				"plans":     []string{},
-			}
-
-			labInputs = append(labInputs, labInput)
-
-			// outline:
-			// [ ] create payload struct w/ populated fields
-			// [ ] execute mutation
-			// [ ] store ids in result map with key "owner id"
-
-			labCount--
-		}
-
-		storageName := storages[rand.Intn(len(storages))]
-		storageInput := map[string]interface{}{
+func addLabStorageOrgs(ownerID string) ([]string, []string, error) {
+	labInputs := []map[string]interface{}{}
+	labCount := rand.Intn(len(labs))
+	for labCount > 0 {
+		labInput := map[string]interface{}{
 			"street":    randomString(streets),
 			"city":      randomString(cities),
 			"county":    randomString(counties),
 			"state":     randomString(states),
 			"zip":       randomInt(zips),
-			"name":      storages[i],
+			"name":      labs[labCount-1],
 			"users":     []string{},
 			"createdOn": "",
 			"updatedOn": "",
@@ -81,10 +46,35 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]string, map[string]string,
 			"plans":     []string{},
 		}
 
-		// outline:
-		// [ ] create payload struct w/ populated fields
-		// [ ] execute mutation
-		// [ ] store ids in result map with key "owner id"
+		labInputs = append(labInputs, labInput)
+		labCount--
+	}
+
+	labs, err := sendRequest(addLabOrgsMutation, labInputs)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	storageIndex := rand.Intn(len(storages))
+	storageName := storages[storageIndex]
+	storageInput := map[string]interface{}{
+		"street":    randomString(streets),
+		"city":      randomString(cities),
+		"county":    randomString(counties),
+		"state":     randomString(states),
+		"zip":       randomInt(zips),
+		"name":      storages[storageIndex],
+		"users":     []string{},
+		"createdOn": "",
+		"updatedOn": "",
+		"owner":     ownerID,
+		"specimens": []string{},
+		"plans":     []string{},
+	}
+
+	storages, err := sendRequest(addStorageOrgsMutation, storageInput)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	return labs, storages, nil

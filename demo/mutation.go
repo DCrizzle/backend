@@ -19,8 +19,19 @@ type data struct {
 	ID string `json:"id"`
 }
 
-func sendMutation(input payload) ([]string, error) {
-	b, err := json.Marshal(input)
+const dgraphURL = "localhost:8080/graphql"
+
+func sendRequest(mutation string, input interface{}) ([]string, error) {
+	variables := map[string]interface{}{
+		"input": input,
+	}
+
+	p := payload{
+		Query:     mutation,
+		Variables: variables,
+	}
+
+	b, err := json.Marshal(p)
 	if err != nil {
 		return nil, err
 	}
