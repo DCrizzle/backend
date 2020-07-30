@@ -164,8 +164,8 @@ func addProtocolsFormsPlans(ownerIDs, labIDs, storageIDs []string) ([]string, []
 				"plan":        "",
 				"dobStart":    dobStart.String(),
 				"dobEnd":      dobEnd.String(),
-				"race":        randomString(races),
-				"sex":         randomString(sexes),
+				"race":        randomString(RACES),
+				"sex":         randomString(SEXES),
 				"specimens":   "",
 			}
 
@@ -256,8 +256,8 @@ func addDonor(ownerIDs []string) ([]string, error) {
 				"owner":     ownerID,
 				"dob":       dob,
 				"age":       age,
-				"sex":       randomString(sexes),
-				"race":      randomString(races),
+				"sex":       randomString(SEXES),
+				"race":      randomString(RACES),
 				"specimens": []string{},
 				"consents":  []string{},
 			}
@@ -374,16 +374,16 @@ func randomDOBAndAge() (string, int) {
 // - - [x] (not including consents / specimens)
 // - [x] output:
 // - - [x] donor id
-// [ ] add consent
-// - [ ] input:
-// - - [ ] owner id
-// - - [ ] donor id
-// - - [ ] consent form id
-// - - [ ] protocol id (non-generated)
-// - - [ ] (various value / enum inputs)
-// - - [ ] (not including specimens)
-// - [ ] output:
-// - - [ ] consent id
+// [x] add consent
+// - [x] input:
+// - - [x] owner id
+// - - [x] donor id
+// - - [x] consent form id
+// - - [x] protocol id (non-generated)
+// - - [x] (various value / enum inputs)
+// - - [x] (not including specimens)
+// - [x] output:
+// - - [x] consent id
 // [ ] add blood specimen
 // - [ ] input:
 // - - [ ] donor id

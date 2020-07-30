@@ -134,16 +134,3 @@ var ages = []int{
 	60,
 	70,
 }
-
-var races = []string{
-	"AMERICAN_INDIAN_OR_ALASKA_NATIVE",
-	"ASIAN",
-	"BLACK_OR_AFRICAN_AMERICAN",
-	"HISPANIC_OR_LATINO",
-	"WHITE",
-}
-
-var sexes = []string{
-	"MALE",
-	"FEMALE",
-}
