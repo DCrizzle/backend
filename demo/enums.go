@@ -22,7 +22,7 @@ var CONTAINER = []string{
 }
 
 var STATUS = []string{
-	"DESTROYD",
+	"DESTROYED",
 	"EXHAUSTED",
 	"IN_INVENTORY",
 	"IN_TRANSIT",

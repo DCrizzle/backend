@@ -51,6 +51,15 @@ var descriptions = []string{
 	"To crush the rebellion once and for all, the EMPIRE is constructing a sinister new battle station. Powerful enough to destroy an entire planet, its completion spells certain doom for the champions of freedom.",
 }
 
+var notes = []string{
+	"The Phantom Menace",
+	"Attack of the Clones",
+	"Revenge of the Sith",
+	"A New Hope",
+	"The Empire Strikes Back",
+	"Return of the Jedi",
+}
+
 var users = []struct {
 	email string
 	first string

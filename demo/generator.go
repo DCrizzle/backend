@@ -164,8 +164,8 @@ func addProtocolsFormsPlans(ownerIDs, labIDs, storageIDs []string) ([]string, []
 				"plan":        "",
 				"dobStart":    dobStart.String(),
 				"dobEnd":      dobEnd.String(),
-				"race":        randomString(RACES),
-				"sex":         randomString(SEXES),
+				"race":        randomString(RACE),
+				"sex":         randomString(SEX),
 				"specimens":   "",
 			}
 
@@ -256,8 +256,8 @@ func addDonor(ownerIDs []string) ([]string, error) {
 				"owner":     ownerID,
 				"dob":       dob,
 				"age":       age,
-				"sex":       randomString(SEXES),
-				"race":      randomString(RACES),
+				"sex":       randomString(SEX),
+				"race":      randomString(RACE),
 				"specimens": []string{},
 				"consents":  []string{},
 			}
@@ -284,6 +284,81 @@ func addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
 		"consentedDate":   now.String(),
 		"retentionPeriod": 360,
 		"destructionDate": now.AddDate(0, 0, 360).String(),
+	}
+
+	// outline:
+	// [ ] create payload struct w/ populated fields
+	// [ ] execute mutation
+	// [ ] store ids in result map with key "owner id"
+}
+
+func addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string, error) {
+	specimenCount := rand.Intn(10) + 1
+
+	specimenInputs := []map[string]interface{}{}
+
+	year := time.Now().Year()
+	month := rand.Intn(12) + 1
+	day := rand.Intn(25) + 1
+	collectionDate := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC).String()
+
+	status := randomString(STATUS)
+	destructionDate := ""
+	if status == "DESTROYED" {
+		destructionDate = time.Now().String()
+	}
+
+	for specimenCount > 0 {
+		input := map[string]interface{}{
+			"externalID":      uuid.New().String(),
+			"type":            SPECIMEN_TYPE[0],
+			"collectionDate":  collectionDate,
+			"donor":           donorID,
+			"container":       CONTAINER[0],
+			"status":          status,
+			"destructionDate": destructionDate,
+			"description":     randomString(descriptions),
+			"consent":         consentID,
+			"owner":           ownerID,
+			"lab":             "", // NOTE: add later (?)
+			"storage":         "", // NOTE: add later (?)
+			"protocol":        protocolID,
+			"tests":           []string{},
+			"bloodType":       randomString(BLOOD_TYPE),
+			"volume":          1.0,
+		}
+
+		specimenInputs = append(specimenInputs, input)
+
+		specimenCount--
+	}
+
+	// outline:
+	// [ ] create payload struct w/ populated fields
+	// [ ] execute mutation
+	// [ ] store ids in result map with key "owner id"
+}
+
+func addTest(ownerID, labID string, specimenIDs []string) ([]string, error) {
+	input := map[string]interface{}{
+		"description": randomString(descriptions),
+		"owner":       ownerID,
+		"lab":         labID,
+		"specimens":   specimenIDs,
+		"results":     []string{},
+	}
+
+	// outline:
+	// [ ] create payload struct w/ populated fields
+	// [ ] execute mutation
+	// [ ] store ids in result map with key "owner id"
+}
+
+func addResult(ownerID, testID string) ([]string, error) {
+	input := map[string]interface{}{
+		"owner": ownerID,
+		"notes": randomString(notes),
+		"test":  testID,
 	}
 
 	// outline:
@@ -321,89 +396,3 @@ func randomDOBAndAge() (string, int) {
 
 	return dob, yo
 }
-
-// outline:
-// [x] add owner org
-// - [x] input:
-// - - [x] name string
-// - - [x] created/updated on time
-// - [x] output: owner org id
-// [x] add lab / storage org
-// - [x] input:
-// - - [x] name string
-// - - [x] created/updated on time
-// - - [x] owner org id
-// - [x] output:
-// - - [x] lab / storage org id
-// [x] add user
-// - [x] input:
-// - - [x] owner id
-// - - [x] (various value / enum inputs)
-// - [x] output:
-// - - [x] user id
-// [x] add plan
-// - [x] input:
-// - - [x] name string
-// - - [x] owner / lab storage org ids
-// - [x] output:
-// - - [x] plan id
-// [x] add protocol
-// - [x] input:
-// - - [x] owner id
-// - - [x] (various value / enum inputs)
-// - [x] output:
-// - - [x] protocol id
-// [x] add consent form
-// - [x] input:
-// - - [x] owner id
-// - - [x] title / body string
-// - [x] output:
-// - - [x] consent form id
-// [x] add protocol form
-// - [x] input:
-// - - [x] protocol id string (generated)
-// - - [x] protocol ids string array
-// - - [x] owner id
-// - - [x] title / body string
-// - [x] output:
-// - - [x] protocol form id
-// [x] add donor
-// - [x] input:
-// - - [x] owner id
-// - - [x] (various value / enum inputs)
-// - - [x] (not including consents / specimens)
-// - [x] output:
-// - - [x] donor id
-// [x] add consent
-// - [x] input:
-// - - [x] owner id
-// - - [x] donor id
-// - - [x] consent form id
-// - - [x] protocol id (non-generated)
-// - - [x] (various value / enum inputs)
-// - - [x] (not including specimens)
-// - [x] output:
-// - - [x] consent id
-// [ ] add blood specimen
-// - [ ] input:
-// - - [ ] donor id
-// - - [ ] consent id
-// - - [ ] owner / lab / storage id
-// - - [ ] protocol id
-// - - [ ] (various value / enum inputs)
-// - [ ] output:
-// - - [ ] blood specimen id
-// [ ] add test
-// - [ ] input:
-// - - [ ] owner id
-// - - [ ] lab id
-// - - [ ] specimens id
-// - [ ] output:
-// - - [ ] test id
-// [ ] add result
-// - [ ] input:
-// - - [ ] owner id
-// - - [ ] notes string
-// - - [ ] test id
-// - [ ] output:
-// - - [ ] result id
