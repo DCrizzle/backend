@@ -26,3 +26,26 @@ outline:
 - - [ ] "add", "delete", "get", "query", "update"
 - [ ] update relationships using "set"/"remove" keywords in queries
 - [ ] searching: https://dgraph.io/docs/query-language/#indexing
+
+NOTE: these fields will be added to the User type when the following limitations are addressed in Dgraph:
+- The keys in the body can only contain [a-zA-Z], things like app_metadata which have _ (underscore) in their name, won’t work for now.
+- Hardcoded values are not supported at present (e.g. \"Username-Password-Authentication\")
+- Non-scalar variables are not supported in the body at present. So, $role (enum) or $owner (ID) won’t work for now.
+
+createAuth0User: User @custom(http: {
+	url: "https://folivora.auth0.com/api/v2/users",
+	method: "POST",
+	body: "{ email: $email, app_metadata: { role: $role, orgID: $owner }, given_name: $firstName, family_name: $lastName, connection: \"Username-Password-Authentication\" }"
+	forwardedHeaders: ["Authorization"]
+})
+updateAuth0User: User @custom(http: {
+	url: "https://folivora.auth0.com/api/v2/users/$user_id",
+	method: "PATCH",
+	body: "{ email: $email, app_metadata: { role: $role, orgID: $owner }, given_name: $firstName, family_name: $lastName }",
+	forwardedHeaders: ["Authorization"]
+})
+deleteAuth0User: User @custom(http: {
+	url: "https://folivora.auth0.com/api/v2/users/$user_id",
+	method: "DELETE",
+	forwardedHeaders: ["Authorization"]
+})
