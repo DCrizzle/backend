@@ -8,21 +8,15 @@ import (
 )
 
 func addOwnerOrgs() ([]string, error) {
-	orgNames := []string{
-		"owner_org_a",
-		"owner_org_b",
-		"owner_org_c",
-	}
-
 	inputs := []map[string]interface{}{}
-	for i := 0; i < len(orgNames); i++ {
+	for i := 0; i < len(orgs); i++ {
 		input := map[string]interface{}{
 			"street":    randomString(streets),
 			"city":      randomString(cities),
 			"county":    randomString(counties),
 			"state":     randomString(states),
 			"zip":       randomInt(zips),
-			"name":      orgNames[i],
+			"name":      orgs[i],
 			"users":     []string{},
 			"createdOn": "",
 			"updatedOn": "",
@@ -42,22 +36,8 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]string, map[string]string,
 	labs := make(map[string]string)
 	storages := make(map[string]string)
 
-	// result := make(map[string]map[string]string)
-	labNames := []string{
-		"lab_org_a",
-		"lab_org_b",
-		"lab_org_c",
-		"lab_org_d",
-		"lab_org_e",
-		"lab_org_f",
-	}
-	storageNames := []string{
-		"storage_org_a",
-		"storage_org_b",
-	}
-
 	for i, ownerID := range ownerIDs {
-		labCount := rand.Intn(len(labNames))
+		labCount := rand.Intn(len(labs))
 		labInputs := []map[string]interface{}{}
 		for labCount > 0 {
 			labInput := map[string]interface{}{
@@ -66,7 +46,7 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]string, map[string]string,
 				"county":    randomString(counties),
 				"state":     randomString(states),
 				"zip":       randomInt(zips),
-				"name":      labNames[i],
+				"name":      labs[i],
 				"users":     []string{},
 				"createdOn": "",
 				"updatedOn": "",
@@ -85,14 +65,14 @@ func addLabStorageOrgs(ownerIDs []string) (map[string]string, map[string]string,
 			labCount--
 		}
 
-		storageName := storageNames[rand.Intn(len(storageNames))]
+		storageName := storages[rand.Intn(len(storages))]
 		storageInput := map[string]interface{}{
 			"street":    randomString(streets),
 			"city":      randomString(cities),
 			"county":    randomString(counties),
 			"state":     randomString(states),
 			"zip":       randomInt(zips),
-			"name":      storageNames[i],
+			"name":      storages[i],
 			"users":     []string{},
 			"createdOn": "",
 			"updatedOn": "",
@@ -177,7 +157,11 @@ func addProtocolsFormsPlans(ownerIDs, labIDs, storageIDs []string) ([]string, []
 		// [ ] execute mutation
 		// [ ] store ids in result map with key "owner id"
 
-		protocolIDs := []string{"id_A", "id_B", "id_C"}
+		protocolIDs := []string{
+			"protocol_id_A",
+			"protocol_id_B",
+			"protocol_id_C",
+		}
 		protocolExternalIDs := []string{
 			uuid.New().String(),
 			uuid.New().String(),

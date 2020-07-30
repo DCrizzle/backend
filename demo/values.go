@@ -1,5 +1,25 @@
 package demo
 
+var orgs = []string{
+	"owner_org_a",
+	"owner_org_b",
+	"owner_org_c",
+}
+
+var labs = []string{
+	"lab_org_a",
+	"lab_org_b",
+	"lab_org_c",
+	"lab_org_d",
+	"lab_org_e",
+	"lab_org_f",
+}
+
+var storages = []string{
+	"storage_org_a",
+	"storage_org_b",
+}
+
 var streets = []string{
 	"1st St.",
 	"2nd St.",
