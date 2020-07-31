@@ -241,6 +241,8 @@ func addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
 	return output[0], err
 }
 
+// NOTE: this could be improved to return the input specimenInputs variable
+// which would be submitted in bulk by the calling scope
 func addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string, error) {
 	specimenCount := rand.Intn(10) + 1
 
@@ -282,10 +284,7 @@ func addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string
 		specimenCount--
 	}
 
-	// outline:
-	// [ ] create payload struct w/ populated fields
-	// [ ] execute mutation
-	// [ ] store ids in result map with key "owner id"
+	return sendRequest(addBloodSpecimenMutation, specimenInputs)
 }
 
 func addTest(ownerID, labID string, specimenIDs []string) ([]string, error) {

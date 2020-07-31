@@ -8,7 +8,6 @@ import (
 )
 
 func loadDemo() {
-
 	results := make(map[string]map[string][]string)
 
 	ownerIDs, err := addOwnerOrgs()
@@ -16,10 +15,7 @@ func loadDemo() {
 		log.Fatal("add owner orgs error:", err.Error())
 	}
 
-	log.Println("ownerIDs:", ownerIDs)
-
 	for _, ownerID := range ownerIDs {
-
 		results[ownerID] = make(map[string][]string)
 
 		labIDs, storageIDs, err := addLabStorageOrgs(ownerID)
@@ -76,6 +72,7 @@ func loadDemo() {
 		}
 
 		consentIDs := []string{}
+		bloodSpecimenIDs := []string{}
 		for _, donorID := range donorIDs {
 			i := rand.Intn(len(protocolIDs))
 			consentID, err := addConsent(
@@ -89,9 +86,21 @@ func loadDemo() {
 			}
 
 			consentIDs = append(consentIDs, consentID)
+
+			donorSpecimenIDs, err := addBloodSpecimens(
+				ownerID,
+				donorID,
+				consentID,
+				protocolIDs[i],
+			)
+			if err != nil {
+				log.Fatal("add blood specimens error:", err.Error())
+			}
+
+			bloodSpecimenIDs = append(bloodSpecimenIDs, donorSpecimenIDs...)
 		}
 
 		results[ownerID]["consents"] = consentIDs
-
+		results[ownerID]["bloodSpecimens"] = bloodSpecimenIDs
 	}
 }
