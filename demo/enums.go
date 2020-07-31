@@ -1,11 +1,11 @@
 package demo
 
-var SEX = []string{
+var sex = []string{
 	"MALE",
 	"FEMALE",
 }
 
-var RACE = []string{
+var race = []string{
 	"AMERICAN_INDIAN_OR_ALASKA_NATIVE",
 	"ASIAN",
 	"BLACK_OR_AFRICAN_AMERICAN",
@@ -13,15 +13,15 @@ var RACE = []string{
 	"WHITE",
 }
 
-var SPECIMEN_TYPE = []string{
+var specimenType = []string{
 	"BLOOD",
 }
 
-var CONTAINER = []string{
+var container = []string{
 	"VIAL",
 }
 
-var STATUS = []string{
+var status = []string{
 	"DESTROYED",
 	"EXHAUSTED",
 	"IN_INVENTORY",
@@ -31,7 +31,7 @@ var STATUS = []string{
 	"TRANSFERRED",
 }
 
-var BLOOD_TYPE = []string{
+var bloodType = []string{
 	"O_NEG",
 	"O_POS",
 	"A_NEG",
@@ -42,7 +42,7 @@ var BLOOD_TYPE = []string{
 	"AB_POS",
 }
 
-var ROLE = []string{
+var role = []string{
 	"USER_ADMIN",
 	"USER_INTERNAL",
 	"USER_LAB",

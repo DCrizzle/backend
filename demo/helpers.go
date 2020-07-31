@@ -125,8 +125,8 @@ func addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string
 			"plan":        "",
 			"dobStart":    dobStart.String(),
 			"dobEnd":      dobEnd.String(),
-			"race":        randomString(RACE),
-			"sex":         randomString(SEX),
+			"race":        randomString(race),
+			"sex":         randomString(sex),
 			"specimens":   "",
 		}
 
@@ -207,8 +207,8 @@ func addDonor(ownerID string) ([]string, error) {
 			"owner":     ownerID,
 			"dob":       dob,
 			"age":       age,
-			"sex":       randomString(SEX),
-			"race":      randomString(RACE),
+			"sex":       randomString(sex),
+			"race":      randomString(race),
 			"specimens": []string{},
 			"consents":  []string{},
 		}
@@ -249,7 +249,7 @@ func addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string
 	day := rand.Intn(25) + 1
 	collectionDate := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC).String()
 
-	status := randomString(STATUS)
+	status := randomString(status)
 	destructionDate := ""
 	if status == "DESTROYED" {
 		destructionDate = time.Now().String()
@@ -258,10 +258,10 @@ func addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string
 	for specimenCount > 0 {
 		input := map[string]interface{}{
 			"externalID":      uuid.New().String(),
-			"type":            SPECIMEN_TYPE[0],
+			"type":            specimenType[0],
 			"collectionDate":  collectionDate,
 			"donor":           donorID,
-			"container":       CONTAINER[0],
+			"container":       container[0],
 			"status":          status,
 			"destructionDate": destructionDate,
 			"description":     randomString(descriptions),
@@ -271,7 +271,7 @@ func addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string
 			"storage":         "", // NOTE: add later (?)
 			"protocol":        protocolID,
 			"tests":           []string{},
-			"bloodType":       randomString(BLOOD_TYPE),
+			"bloodType":       randomString(bloodType),
 			"volume":          1.0,
 		}
 
