@@ -104,6 +104,7 @@ func loadDemo() {
 		results[ownerID]["bloodSpecimens"] = bloodSpecimenIDs
 
 		testIDs := []string{}
+		resultIDs := []string{}
 		testChunk := 25
 		chunkSize := (len(bloodSpecimenIDs) + testChunk - 1) / testChunk
 		for i := 0; i < len(bloodSpecimenIDs); i += chunkSize {
@@ -123,8 +124,16 @@ func loadDemo() {
 			}
 
 			testIDs = append(testIDs, testID)
+
+			resultID, err := addResult(ownerID, testID)
+			if err != nil {
+				log.Fatal("add result error:", err.Error())
+			}
+
+			resultIDs = append(resultIDs, resultID)
 		}
 
 		results[ownerID]["tests"] = testIDs
+		results[ownerID]["results"] = resultIDs
 	}
 }

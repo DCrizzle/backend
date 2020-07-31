@@ -56,7 +56,6 @@ func addLabStorageOrgs(ownerID string) ([]string, []string, error) {
 	}
 
 	storageIndex := rand.Intn(len(storages))
-	storageName := storages[storageIndex]
 	storageInput := map[string]interface{}{
 		"street":    randomString(streets),
 		"city":      randomString(cities),
@@ -82,7 +81,7 @@ func addLabStorageOrgs(ownerID string) ([]string, []string, error) {
 
 func addUsers(ownerID string, labIDs, storageIDs []string) ([]string, error) {
 	inputs := []map[string]interface{}{}
-	for i, user := range users {
+	for _, user := range users {
 		orgID := ""
 		if user.role == "USER_STORAGE" {
 			orgID = randomString(storageIDs)
@@ -113,9 +112,6 @@ func addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string
 
 	protocolInputs := []map[string]interface{}{}
 	for _, protocolName := range protocolNames {
-		ageStart := randomInt(ages)
-		ageEnd := ageStart + 20
-
 		input := map[string]interface{}{
 			"street":      randomString(streets),
 			"city":        randomString(cities),
@@ -300,17 +296,15 @@ func addTest(ownerID, labID string, specimenIDs []string) (string, error) {
 	return output[0], err
 }
 
-func addResult(ownerID, testID string) ([]string, error) {
+func addResult(ownerID, testID string) (string, error) {
 	input := map[string]interface{}{
 		"owner": ownerID,
 		"notes": randomString(notes),
 		"test":  testID,
 	}
 
-	// outline:
-	// [ ] create payload struct w/ populated fields
-	// [ ] execute mutation
-	// [ ] store ids in result map with key "owner id"
+	output, err := sendRequest(addResultsMutation, input)
+	return output[0], err
 }
 
 func randomString(options []string) string {

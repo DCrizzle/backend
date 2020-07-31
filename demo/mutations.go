@@ -23,3 +23,5 @@ const addConsentsMutation = "mutation addConsent(input: $input) { id }"
 const addBloodSpecimensMutation = "mutation addBloodSpecimen(input: $input) { id }"
 
 const addTestsMutation = "mutation addTest(input: $input) { id }"
+
+const addResultsMutation = "mutation addResult(input: $input) { id }"
