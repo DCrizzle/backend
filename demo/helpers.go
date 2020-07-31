@@ -237,10 +237,8 @@ func addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
 		"destructionDate": now.AddDate(0, 0, 360).String(),
 	}
 
-	// outline:
-	// [ ] create payload struct w/ populated fields
-	// [ ] execute mutation
-	// [ ] store ids in result map with key "owner id"
+	output, err := sendRequest(addConsentMutation, input)
+	return output[0], err
 }
 
 func addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string, error) {

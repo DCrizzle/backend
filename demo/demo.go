@@ -64,5 +64,20 @@ func loadDemo() {
 			log.Fatal("add donors error:", err.Error())
 		}
 
+		consentIDs := []string{}
+		for _, donorID := range donorIDs {
+			consentID, err := addConsent(
+				ownerID,
+				donorID,
+				randomString(consentFormIDs),
+				randomString(protocolIDs),
+			)
+			if err != nil {
+				log.Fatal("add consent error:", err.Error())
+			}
+
+			consentIDs = append(consentIDs, consentID)
+		}
+
 	}
 }
