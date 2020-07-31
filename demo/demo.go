@@ -1,6 +1,10 @@
 package demo
 
-import "log"
+import (
+	"log"
+
+	"github.com/google/uuid"
+)
 
 func loadDemo() {
 
@@ -32,14 +36,28 @@ func loadDemo() {
 
 		results[ownerID]["users"] = userIDs
 
-		protocolIDs, protocolFormIDs, planIDs, err := addProtocolsFormsPlans(ownerID, labIDs, storageIDs)
+		protocolIDs, planIDs, err := addProtocolsAndPlans(ownerID, labIDs, storageIDs)
 		if err != nil {
-			log.Fatal("add protocols/protocol forms/plans error:", err.Error())
+			log.Fatal("add protocols/plans error:", err.Error())
 		}
 
 		results[ownerID]["protocols"] = protocolIDs
-		results[ownerID]["protocolForms"] = protocolFormIDs
 		results[ownerID]["plans"] = planIDs
+
+		externalIDs := make([]string, len(protocolIDs))
+		for i := range externalIDs {
+			externalIDs[i] = uuid.New().String()
+		}
+
+		protocolFormIDs, err := addProtocolForms(ownerID, protocolIDs, externalIDs)
+		if err != nil {
+			log.Fatal("add protocol forms error:", err.Error())
+		}
+
+		consentFormIDs, err := addConsentForms(ownerID, len(protocolIDs))
+		if err != nil {
+			log.Fatal("add consent forms error:", err.Error())
+		}
 
 	}
 }

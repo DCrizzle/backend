@@ -107,7 +107,7 @@ func addUsers(ownerID string, labIDs, storageIDs []string) ([]string, error) {
 	return sendRequest(addUsersMutation, inputs)
 }
 
-func addProtocolsFormsPlans(ownerID string, labIDs, storageIDs []string) ([]string, []string, []string, error) {
+func addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string, []string, error) {
 	dobStart := time.Date(1977, time.May, 25, 22, 0, 0, 0, time.UTC)
 	dobEnd := time.Date(2005, time.May, 19, 22, 0, 0, 0, time.UTC)
 
@@ -139,31 +139,7 @@ func addProtocolsFormsPlans(ownerID string, labIDs, storageIDs []string) ([]stri
 
 	protocolIDs, err := sendRequest(addProtocolsMutation, protocolInputs)
 	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	protocolExternalIDs := []string{
-		uuid.New().String(),
-		uuid.New().String(),
-		uuid.New().String(),
-	}
-
-	protocolFormInputs := []map[string]interface{}{}
-	for k, protocolID := range protocolIDs {
-		input := map[string]interface{}{
-			"owner":      ownerID,
-			"title":      randomString(titles),
-			"body":       randomString(bodies),
-			"protocol":   protocolID,
-			"protocolID": protocolExternalIDs[k],
-		}
-
-		protocolFormInputs = append(protocolFormInputs, input)
-	}
-
-	protocolFormIDs, err := sendRequest(addProtocolFormsMutation, protocolFormInputs)
-	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
 	planInputs := []map[string]interface{}{}
@@ -181,28 +157,43 @@ func addProtocolsFormsPlans(ownerID string, labIDs, storageIDs []string) ([]stri
 
 	planIDs, err := sendRequest(addPlansMutation, planInputs)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
-	return protocolIDs, protocolFormIDs, planIDs, nil
+	return protocolIDs, planIDs, nil
 }
 
-func addConsentForms(ownerIDs []string) ([]string, error) {
-	consentFormInput := []map[string]interface{}{}
-	for _, ownerID := range ownerIDs {
+func addProtocolForms(ownerID string, protocolIDs, protocolExternalIDs []string) ([]string, error) {
+	protocolFormInputs := []map[string]interface{}{}
+	for k, protocolID := range protocolIDs {
+		input := map[string]interface{}{
+			"owner":      ownerID,
+			"title":      randomString(titles),
+			"body":       randomString(bodies),
+			"protocol":   protocolID,
+			"protocolID": protocolExternalIDs[k],
+		}
+
+		protocolFormInputs = append(protocolFormInputs, input)
+	}
+
+	return sendRequest(addProtocolFormsMutation, protocolFormInputs)
+}
+
+func addConsentForms(ownerID string, count int) ([]string, error) {
+	consentFormInputs := []map[string]interface{}{}
+	for count > 0 {
 		input := map[string]interface{}{
 			"owner": ownerID,
 			"title": randomString(titles),
 			"body":  randomString(bodies),
 		}
 
-		consentFormInput = append(consentFormInput, input)
+		consentFormInputs = append(consentFormInputs, input)
+		count--
 	}
 
-	// outline:
-	// [ ] create payload struct w/ populated fields
-	// [ ] execute mutation
-	// [ ] store ids in result map with key "owner id"
+	return sendRequest(addConsentFormsMutation, consentFormInputs)
 }
 
 func addDonor(ownerIDs []string) ([]string, error) {

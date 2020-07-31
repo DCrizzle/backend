@@ -13,3 +13,5 @@ const addProtocolsMutation = "mutation addProtocol(input: $input) { id }"
 const addProtocolFormsMutation = "mutation addProtocolForm(input: $input) { id }"
 
 const addPlansMutation = "mutation addPlans(input: $input) { id }"
+
+const addConsentFormsMutation = "mutation addConsentForm(input: $input) { id }"
