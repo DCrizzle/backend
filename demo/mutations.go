@@ -16,8 +16,10 @@ const addPlansMutation = "mutation addPlans(input: $input) { id }"
 
 const addConsentFormsMutation = "mutation addConsentForm(input: $input) { id }"
 
-const addDonorMutation = "mutation addDonor(input: $input) { id }"
+const addDonorsMutation = "mutation addDonor(input: $input) { id }"
 
-const addConsentMutation = "mutation addConsent(input: $input) { id }"
+const addConsentsMutation = "mutation addConsent(input: $input) { id }"
 
-const addBloodSpecimenMutation = "mutation addBloodSpecimen(input: $input) { id }"
+const addBloodSpecimensMutation = "mutation addBloodSpecimen(input: $input) { id }"
+
+const addTestsMutation = "mutation addTest(input: $input) { id }"

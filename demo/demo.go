@@ -102,5 +102,29 @@ func loadDemo() {
 
 		results[ownerID]["consents"] = consentIDs
 		results[ownerID]["bloodSpecimens"] = bloodSpecimenIDs
+
+		testIDs := []string{}
+		testChunk := 25
+		chunkSize := (len(bloodSpecimenIDs) + testChunk - 1) / testChunk
+		for i := 0; i < len(bloodSpecimenIDs); i += chunkSize {
+			end := i + chunkSize
+			if end > len(bloodSpecimenIDs) {
+				end = len(bloodSpecimenIDs)
+			}
+
+			testSpecimens := bloodSpecimenIDs[i:end]
+			testID, err := addTest(
+				ownerID,
+				randomString(labIDs),
+				testSpecimens,
+			)
+			if err != nil {
+				log.Fatal("add test error:", err.Error())
+			}
+
+			testIDs = append(testIDs, testID)
+		}
+
+		results[ownerID]["tests"] = testIDs
 	}
 }

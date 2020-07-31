@@ -221,7 +221,7 @@ func addDonor(ownerID string) ([]string, error) {
 		donorCount--
 	}
 
-	return sendRequest(addDonorMutation, donorInputs)
+	return sendRequest(addDonorsMutation, donorInputs)
 }
 
 func addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
@@ -237,7 +237,7 @@ func addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
 		"destructionDate": now.AddDate(0, 0, 360).String(),
 	}
 
-	output, err := sendRequest(addConsentMutation, input)
+	output, err := sendRequest(addConsentsMutation, input)
 	return output[0], err
 }
 
@@ -284,10 +284,10 @@ func addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string
 		specimenCount--
 	}
 
-	return sendRequest(addBloodSpecimenMutation, specimenInputs)
+	return sendRequest(addBloodSpecimensMutation, specimenInputs)
 }
 
-func addTest(ownerID, labID string, specimenIDs []string) ([]string, error) {
+func addTest(ownerID, labID string, specimenIDs []string) (string, error) {
 	input := map[string]interface{}{
 		"description": randomString(descriptions),
 		"owner":       ownerID,
@@ -296,10 +296,8 @@ func addTest(ownerID, labID string, specimenIDs []string) ([]string, error) {
 		"results":     []string{},
 	}
 
-	// outline:
-	// [ ] create payload struct w/ populated fields
-	// [ ] execute mutation
-	// [ ] store ids in result map with key "owner id"
+	output, err := sendRequest(addTestsMutation, input)
+	return output[0], err
 }
 
 func addResult(ownerID, testID string) ([]string, error) {
