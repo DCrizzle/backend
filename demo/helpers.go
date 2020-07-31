@@ -196,37 +196,32 @@ func addConsentForms(ownerID string, count int) ([]string, error) {
 	return sendRequest(addConsentFormsMutation, consentFormInputs)
 }
 
-func addDonor(ownerIDs []string) ([]string, error) {
-	for _, ownerID := range ownerIDs {
-		donorCount := rand.Intn(100) + 50
-		donorInputs := []map[string]interface{}{}
-		for donorCount > 0 {
-			dob, age := randomDOBAndAge()
+func addDonor(ownerID string) ([]string, error) {
+	donorCount := rand.Intn(100) + 50
+	donorInputs := []map[string]interface{}{}
+	for donorCount > 0 {
+		dob, age := randomDOBAndAge()
 
-			input := map[string]interface{}{
-				"street":    randomString(streets),
-				"city":      randomString(cities),
-				"county":    randomString(counties),
-				"state":     randomString(states),
-				"zip":       randomInt(zips),
-				"owner":     ownerID,
-				"dob":       dob,
-				"age":       age,
-				"sex":       randomString(SEX),
-				"race":      randomString(RACE),
-				"specimens": []string{},
-				"consents":  []string{},
-			}
-
-			donorInputs = append(donorInputs, input)
-			donorCount--
+		input := map[string]interface{}{
+			"street":    randomString(streets),
+			"city":      randomString(cities),
+			"county":    randomString(counties),
+			"state":     randomString(states),
+			"zip":       randomInt(zips),
+			"owner":     ownerID,
+			"dob":       dob,
+			"age":       age,
+			"sex":       randomString(SEX),
+			"race":      randomString(RACE),
+			"specimens": []string{},
+			"consents":  []string{},
 		}
 
-		// outline:
-		// [ ] create payload struct w/ populated fields
-		// [ ] execute mutation
-		// [ ] store ids in result map with key "owner id"
+		donorInputs = append(donorInputs, input)
+		donorCount--
 	}
+
+	return sendRequest(addDonorMutation, donorInputs)
 }
 
 func addConsent(ownerID, donorID, formID, protocolID string) (string, error) {

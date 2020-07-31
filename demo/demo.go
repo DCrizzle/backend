@@ -59,5 +59,10 @@ func loadDemo() {
 			log.Fatal("add consent forms error:", err.Error())
 		}
 
+		donorIDs, err := addDonor(ownerID)
+		if err != nil {
+			log.Fatal("add donors error:", err.Error())
+		}
+
 	}
 }
