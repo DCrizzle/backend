@@ -2,6 +2,7 @@ package demo
 
 import (
 	"log"
+	"math/rand"
 
 	"github.com/google/uuid"
 )
@@ -54,23 +55,34 @@ func loadDemo() {
 			log.Fatal("add protocol forms error:", err.Error())
 		}
 
+		results[ownerID]["protocolForms"] = protocolFormIDs
+
 		consentFormIDs, err := addConsentForms(ownerID, len(protocolIDs))
 		if err != nil {
 			log.Fatal("add consent forms error:", err.Error())
 		}
+
+		results[ownerID]["consentForms"] = consentFormIDs
 
 		donorIDs, err := addDonor(ownerID)
 		if err != nil {
 			log.Fatal("add donors error:", err.Error())
 		}
 
+		results[ownerID]["donors"] = donorIDs
+
+		if len(protocolIDs) != len(consentFormIDs) {
+			log.Fatalf("inequal protocol and consent form count, protocols: %d, consent forms: %d\n", len(protocolIDs), len(consentFormIDs))
+		}
+
 		consentIDs := []string{}
 		for _, donorID := range donorIDs {
+			i := rand.Intn(len(protocolIDs))
 			consentID, err := addConsent(
 				ownerID,
 				donorID,
-				randomString(consentFormIDs),
-				randomString(protocolIDs),
+				consentFormIDs[i],
+				protocolIDs[i],
 			)
 			if err != nil {
 				log.Fatal("add consent error:", err.Error())
@@ -78,6 +90,8 @@ func loadDemo() {
 
 			consentIDs = append(consentIDs, consentID)
 		}
+
+		results[ownerID]["consents"] = consentIDs
 
 	}
 }
