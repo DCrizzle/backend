@@ -1,5 +1,6 @@
 # generated binaries
 backend
+demo/demo
 
 # dgraph write-ahead log directories
 zw/
