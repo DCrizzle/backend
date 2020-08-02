@@ -25,6 +25,10 @@ func main() {
 		log.Fatal("error unmarshalling config file:", err.Error())
 	}
 
+	if c.Token == "YOUR_TOKEN_HERE" || c.Token == "" {
+		log.Fatal("incorrect token provided:", c.Token)
+	}
+
 	loader.LoadDemo(c.Token)
 	log.Println("end demo loading")
 }
