@@ -1,6 +1,6 @@
-package demo
+package loader
 
-const addOwnerOrgsMutation = "mutation addOwnerOrg(input: $input) { id }"
+const addOwnerOrgsMutation = "mutation AddOwnerOrgs($input: [AddOwnerOrgInput!]!) { addOwnerOrg(input: $input) { id } }"
 
 const addLabOrgsMutation = "mutation addLabOrg(input: $input) { id }"
 

@@ -1,4 +1,4 @@
-package demo
+package loader
 
 var sex = []string{
 	"MALE",

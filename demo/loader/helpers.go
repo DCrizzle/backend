@@ -1,4 +1,4 @@
-package demo
+package loader
 
 import (
 	"math/rand"
@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func addOwnerOrgs() ([]string, error) {
+func (h *helper) addOwnerOrgs() ([]string, error) {
 	inputs := []map[string]interface{}{}
 	for i := 0; i < len(orgs); i++ {
 		input := map[string]interface{}{
@@ -24,10 +24,10 @@ func addOwnerOrgs() ([]string, error) {
 		inputs = append(inputs, input)
 	}
 
-	return sendRequest(addOwnerOrgsMutation, inputs)
+	return h.sendRequest(addOwnerOrgsMutation, inputs)
 }
 
-func addLabStorageOrgs(ownerID string) ([]string, []string, error) {
+func (h *helper) addLabStorageOrgs(ownerID string) ([]string, []string, error) {
 	labInputs := []map[string]interface{}{}
 	labCount := rand.Intn(len(labs))
 	for labCount > 0 {
@@ -50,7 +50,7 @@ func addLabStorageOrgs(ownerID string) ([]string, []string, error) {
 		labCount--
 	}
 
-	labs, err := sendRequest(addLabOrgsMutation, labInputs)
+	labs, err := h.sendRequest(addLabOrgsMutation, labInputs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -71,7 +71,7 @@ func addLabStorageOrgs(ownerID string) ([]string, []string, error) {
 		"plans":     []string{},
 	}
 
-	storages, err := sendRequest(addStorageOrgsMutation, storageInput)
+	storages, err := h.sendRequest(addStorageOrgsMutation, storageInput)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -79,7 +79,7 @@ func addLabStorageOrgs(ownerID string) ([]string, []string, error) {
 	return labs, storages, nil
 }
 
-func addUsers(ownerID string, labIDs, storageIDs []string) ([]string, error) {
+func (h *helper) addUsers(ownerID string, labIDs, storageIDs []string) ([]string, error) {
 	inputs := []map[string]interface{}{}
 	for _, user := range users {
 		orgID := ""
@@ -103,10 +103,10 @@ func addUsers(ownerID string, labIDs, storageIDs []string) ([]string, error) {
 		inputs = append(inputs, input)
 	}
 
-	return sendRequest(addUsersMutation, inputs)
+	return h.sendRequest(addUsersMutation, inputs)
 }
 
-func addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string, []string, error) {
+func (h *helper) addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string, []string, error) {
 	dobStart := time.Date(1977, time.May, 25, 22, 0, 0, 0, time.UTC)
 	dobEnd := time.Date(2005, time.May, 19, 22, 0, 0, 0, time.UTC)
 
@@ -133,7 +133,7 @@ func addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string
 		protocolInputs = append(protocolInputs, input)
 	}
 
-	protocolIDs, err := sendRequest(addProtocolsMutation, protocolInputs)
+	protocolIDs, err := h.sendRequest(addProtocolsMutation, protocolInputs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -151,7 +151,7 @@ func addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string
 		planInputs = append(planInputs, input)
 	}
 
-	planIDs, err := sendRequest(addPlansMutation, planInputs)
+	planIDs, err := h.sendRequest(addPlansMutation, planInputs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -159,7 +159,7 @@ func addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string
 	return protocolIDs, planIDs, nil
 }
 
-func addProtocolForms(ownerID string, protocolIDs, protocolExternalIDs []string) ([]string, error) {
+func (h *helper) addProtocolForms(ownerID string, protocolIDs, protocolExternalIDs []string) ([]string, error) {
 	protocolFormInputs := []map[string]interface{}{}
 	for k, protocolID := range protocolIDs {
 		input := map[string]interface{}{
@@ -173,10 +173,10 @@ func addProtocolForms(ownerID string, protocolIDs, protocolExternalIDs []string)
 		protocolFormInputs = append(protocolFormInputs, input)
 	}
 
-	return sendRequest(addProtocolFormsMutation, protocolFormInputs)
+	return h.sendRequest(addProtocolFormsMutation, protocolFormInputs)
 }
 
-func addConsentForms(ownerID string, count int) ([]string, error) {
+func (h *helper) addConsentForms(ownerID string, count int) ([]string, error) {
 	consentFormInputs := []map[string]interface{}{}
 	for count > 0 {
 		input := map[string]interface{}{
@@ -189,10 +189,10 @@ func addConsentForms(ownerID string, count int) ([]string, error) {
 		count--
 	}
 
-	return sendRequest(addConsentFormsMutation, consentFormInputs)
+	return h.sendRequest(addConsentFormsMutation, consentFormInputs)
 }
 
-func addDonor(ownerID string) ([]string, error) {
+func (h *helper) addDonor(ownerID string) ([]string, error) {
 	donorCount := rand.Intn(100) + 50
 	donorInputs := []map[string]interface{}{}
 	for donorCount > 0 {
@@ -217,10 +217,10 @@ func addDonor(ownerID string) ([]string, error) {
 		donorCount--
 	}
 
-	return sendRequest(addDonorsMutation, donorInputs)
+	return h.sendRequest(addDonorsMutation, donorInputs)
 }
 
-func addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
+func (h *helper) addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
 	now := time.Now()
 	input := map[string]interface{}{
 		"owner":           ownerID,
@@ -233,13 +233,13 @@ func addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
 		"destructionDate": now.AddDate(0, 0, 360).String(),
 	}
 
-	output, err := sendRequest(addConsentsMutation, input)
+	output, err := h.sendRequest(addConsentsMutation, input)
 	return output[0], err
 }
 
 // NOTE: this could be improved to return the input specimenInputs variable
 // which would be submitted in bulk by the calling scope
-func addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string, error) {
+func (h *helper) addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string, error) {
 	specimenCount := rand.Intn(10) + 1
 
 	specimenInputs := []map[string]interface{}{}
@@ -280,10 +280,10 @@ func addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string
 		specimenCount--
 	}
 
-	return sendRequest(addBloodSpecimensMutation, specimenInputs)
+	return h.sendRequest(addBloodSpecimensMutation, specimenInputs)
 }
 
-func addTest(ownerID, labID string, specimenIDs []string) (string, error) {
+func (h *helper) addTest(ownerID, labID string, specimenIDs []string) (string, error) {
 	input := map[string]interface{}{
 		"description": randomString(descriptions),
 		"owner":       ownerID,
@@ -292,18 +292,18 @@ func addTest(ownerID, labID string, specimenIDs []string) (string, error) {
 		"results":     []string{},
 	}
 
-	output, err := sendRequest(addTestsMutation, input)
+	output, err := h.sendRequest(addTestsMutation, input)
 	return output[0], err
 }
 
-func addResult(ownerID, testID string) (string, error) {
+func (h *helper) addResult(ownerID, testID string) (string, error) {
 	input := map[string]interface{}{
 		"owner": ownerID,
 		"notes": randomString(notes),
 		"test":  testID,
 	}
 
-	output, err := sendRequest(addResultsMutation, input)
+	output, err := h.sendRequest(addResultsMutation, input)
 	return output[0], err
 }
 

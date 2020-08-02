@@ -1,4 +1,4 @@
-package demo
+package loader
 
 import (
 	"bytes"
@@ -19,9 +19,7 @@ type data struct {
 	ID string `json:"id"`
 }
 
-const dgraphURL = "localhost:8080/graphql"
-
-func sendRequest(mutation string, input interface{}) ([]string, error) {
+func (h *helper) sendRequest(mutation string, input interface{}) ([]string, error) {
 	variables := map[string]interface{}{
 		"input": input,
 	}
@@ -36,7 +34,13 @@ func sendRequest(mutation string, input interface{}) ([]string, error) {
 		return nil, err
 	}
 
-	resp, err := http.Post(dgraphURL, "application/json", bytes.NewBuffer(b))
+	req, err := http.NewRequest("POST", h.dgraphURL, bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("X-Auth0-Token", h.token)
+
+	resp, err := h.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
