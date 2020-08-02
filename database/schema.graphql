@@ -424,11 +424,6 @@ type OwnerOrg implements Org & Location @auth(
 	add: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-		{ rule: """query($orgID: ID!) {
-			queryOwnerOrg( filter: { id: [$orgID] } ) {
-				id
-			}
-		}"""},
 	]},
 	query: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
@@ -1076,4 +1071,4 @@ enum Role {
 	USER_STORAGE
 }
 
-# Dgraph.Authorization X-Auth0-Token https://folivora.io/jwt/claims RS256 "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt50KaKOwI1/r9yEojzVW\ncOwGTZbL7sjlUaSI25icLPF8eK1R2dbVaKTdZNtq6LAxFe+NDt2AuU7Vtqzv8GGv\nb2RP5KEgUcJyy75Yw0hT4TP3SrzDB2paCfcKHxQlTQ0pFP0SJMk4YCfq+gDqPnXQ\nCfzw+Zff29zZh5bs1lOxvAIgsu9LtH/zX6f5ASMdHV8EPWdZq6nq8KoOiMcAizDj\nrbm/qcAJP6k+ztbgtN6HdD8v6+7uIKStrYRa0BLXdJAra2uaLI4z2H22RHuzhkIu\nytxpYnxDlYTXzroSiRs/vs/dyHixT8smbEQmLoPTpflnoEZcNDXkhf0v9yVtG6NV\n1QIDAQAB\n-----END PUBLIC KEY-----"
+# Dgraph.Authorization {"VerificationKey":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt50KaKOwI1/r9yEojzVW\ncOwGTZbL7sjlUaSI25icLPF8eK1R2dbVaKTdZNtq6LAxFe+NDt2AuU7Vtqzv8GGv\nb2RP5KEgUcJyy75Yw0hT4TP3SrzDB2paCfcKHxQlTQ0pFP0SJMk4YCfq+gDqPnXQ\nCfzw+Zff29zZh5bs1lOxvAIgsu9LtH/zX6f5ASMdHV8EPWdZq6nq8KoOiMcAizDj\nrbm/qcAJP6k+ztbgtN6HdD8v6+7uIKStrYRa0BLXdJAra2uaLI4z2H22RHuzhkIu\nytxpYnxDlYTXzroSiRs/vs/dyHixT8smbEQmLoPTpflnoEZcNDXkhf0v9yVtG6NV\n1QIDAQAB\n-----END PUBLIC KEY-----","Header":"X-Auth0-Token","Namespace":"https://folivora.io/jwt/claims","Algo":"RS256"}
