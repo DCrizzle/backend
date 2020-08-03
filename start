@@ -19,6 +19,7 @@ echo "dgraph alpha status: " $?
 
 sleep 3 # note: maybe not needed
 
+# NOTE: update to dynamic url value for final app
 echo "uploading dgraph schema"
 curl -X POST localhost:8080/admin/schema -d '@schema.graphql' > /dev/null
 while [ $? -ne 0 ]
@@ -31,4 +32,4 @@ echo "schema upload status: " $?
 
 # note: binary compiled in dockerfile
 echo "running compiled binary"
-./backend > /dev/null
+./helper > /dev/null

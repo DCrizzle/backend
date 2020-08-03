@@ -11,12 +11,12 @@ COPY . .
 
 RUN go mod download > /dev/null
 
-# compile backend binary
-RUN go build -o backend .
+# compile helper binary
+RUN go build -o helper .
 
 WORKDIR /app
 
-RUN cp /build/backend .
+RUN cp /build/helper .
 RUN cp /build/start .
 RUN cp /build/database/schema.graphql .
 
@@ -24,15 +24,11 @@ RUN apt-get update
 RUN apt-get install -y curl
 
 # download dgraph binary
+# outline:
+# [ ] run install from source steps (for master branch access)
+# - [ ] https://github.com/dgraph-io/dgraph#install-from-source
 RUN curl https://get.dgraph.io -sSf | bash && dgraph
 
 EXPOSE 8888
 
 CMD ["bash", "start"]
-
-# outline:
-# [ ] set "general" ubuntu image
-# [ ] run install from source steps
-# - [ ] https://github.com/dgraph-io/dgraph#install-from-source
-# [ ] expose required port
-# [ ] run bash start script
