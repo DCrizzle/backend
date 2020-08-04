@@ -12,28 +12,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type config struct {
-	Auth0 auth0 `json:"AUTH0"`
-}
-
-type auth0 struct {
-	ClientID     string `json:"CLIENT_ID"`
-	ClientSecret string `json:"CLIENT_SECRET"`
-	Audience     string `json:"AUDIENCE"`
-}
-
 type responseJSON struct {
 	AccessToken string `json:"access_token"`
 }
 
 func getAuth0ManagementAPIToken(url string) (string, error) {
-	configBytes, err := ioutil.ReadFile("config.json")
+	c, err := readConfig()
 	if err != nil {
-		return "", err
-	}
-
-	c := config{}
-	if err := json.Unmarshal(configBytes, &c); err != nil {
 		return "", err
 	}
 
@@ -101,5 +86,14 @@ func (s *server) stop(ctx context.Context) {
 }
 
 func usersHandler(w http.ResponseWriter, r *http.Request) {
+
+	// outline:
+	// [ ] retrieve secret code
+	// - [ ] validate against stored code
+	// [ ] parse received data
+	// [ ] construct auth0 request based on method
+	// - [ ] post method
+	// - [ ] patch method
+	// - [ ] delete method
 
 }
