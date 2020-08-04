@@ -27,20 +27,6 @@ type Consent @auth(
 			}
 		}"""},
 	]},
-	get: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryConsent {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
 	update: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
@@ -98,21 +84,6 @@ type Donor implements Location @auth(
 		}"""},
 	]},
 	query: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryDonor {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	get: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
 			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
@@ -218,21 +189,6 @@ type ConsentForm implements Form @auth(
 			}
 		}"""},
 	]},
-	get: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryConsentForm {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
 	update: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
@@ -282,20 +238,6 @@ type ProtocolForm implements Form @auth(
 		}"""},
 	]},
 	query: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryProtocolForm {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	get: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
 			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
@@ -377,21 +319,6 @@ type LabOrg implements Org & Location @auth(
 			}
 		}"""},
 	]},
-	get: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryLabOrg {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
 	update: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
@@ -426,18 +353,6 @@ type OwnerOrg implements Org & Location @auth(
 		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
 	]},
 	query: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryOwnerOrg( filter: { id: [$orgID] } ) {
-				id
-			}
-		}"""},
-	]},
-	get: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
 			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
@@ -485,21 +400,6 @@ type StorageOrg implements Org & Location @auth(
 		}"""},
 	]},
 	query: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-			{ rule: "{ $role: { eq: \"USER_STORAGE\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryStorageOrg {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	get: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
 			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
@@ -571,20 +471,6 @@ type Plan @auth(
 			}
 		}"""},
 	]},
-	get: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryPlan {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
 	update: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
@@ -638,20 +524,6 @@ type Protocol implements Location @auth(
 		}"""},
 	]},
 	query: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryProtocol {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	get: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
 			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
@@ -732,20 +604,6 @@ type Result @auth(
 		}"""},
 	]},
 	query: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryResult {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	get: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
 			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
@@ -859,22 +717,6 @@ type BloodSpecimen implements Specimen @auth(
 			}
 		}"""},
 	]},
-	get: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-			{ rule: "{ $role: { eq: \"USER_LAB\" } }"},
-			{ rule: "{ $role: { eq: \"USER_STORAGE\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryBloodSpecimen {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
 	update: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
@@ -950,20 +792,6 @@ type Test @auth(
 			}
 		}"""},
 	]},
-	get: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ or: [
-			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
-		]},
-		{ rule: """query($orgID: ID!) {
-			queryTest {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
 	update: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ or: [
@@ -1011,17 +839,6 @@ type User @auth(
 		}"""},
 	]},
 	query: { and: [
-		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
-		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
-		{ rule: """query($orgID: ID!) {
-			queryUser {
-				owner( filter: { id: [$orgID] } ) {
-					id
-				}
-			}
-		}"""},
-	]},
-	get: { and: [
 		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
 		{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
 		{ rule: """query($orgID: ID!) {
