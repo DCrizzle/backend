@@ -2,17 +2,22 @@ package main
 
 import (
 	"context"
-	"net/http"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
+const auth0URL = "https://folivora.us.auth0.com/oauth/token"
+
 func main() {
 	server := &server{}
 	if PROD {
-		client := &http.Client{}
-		token := getAuth0ManagementAPIToken(client)
+		token, err := getAuth0ManagementAPIToken(auth0URL)
+		if err != nil {
+			log.Fatal("error getting auth0 management api token:", err.Error())
+		}
+
 		server = newServer(token, usersHandler)
 	} else {
 		token := "MOCK_AUTH0_MANAGEMENT_API_TOKEN"

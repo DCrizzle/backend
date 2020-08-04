@@ -1,6 +1,7 @@
 # generated binaries
 backend
 demo/demo
+helper/helper
 
 # dgraph write-ahead log directories
 zw/
@@ -8,3 +9,6 @@ w/
 
 # dgraph posting lists directory
 p/
+
+# config resources
+config.json
