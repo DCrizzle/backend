@@ -14,23 +14,18 @@ const (
 )
 
 func main() {
-	server := &server{}
-	if PROD {
-		cfg, err := readConfig()
-		if err != nil {
-			log.Fatal("error reading config:", err.Error())
-		}
-
-		token, err := getAuth0APIToken(auth0TokenURL, cfg.Auth0)
-		if err != nil {
-			log.Fatal("error getting auth0 management api token:", err.Error())
-		}
-
-		handler := usersHandler(cfg.Folivora.HelperSecret, token, auth0APIURL)
-		server = newServer(handler)
-	} else {
-		server = newServer(mockUsersHandler)
+	cfg, err := readConfig()
+	if err != nil {
+		log.Fatal("error reading config:", err.Error())
 	}
+
+	token, err := getAuth0APIToken(auth0TokenURL, cfg.Auth0)
+	if err != nil {
+		log.Fatal("error getting auth0 management api token:", err.Error())
+	}
+
+	handler := usersHandler(cfg.Folivora.HelperSecret, token, auth0APIURL)
+	server := newServer(handler)
 
 	ctx := context.Background()
 
