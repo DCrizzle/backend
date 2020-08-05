@@ -8,20 +8,28 @@ import (
 	"syscall"
 )
 
-const auth0URL = "https://folivora.us.auth0.com/oauth/token"
+const (
+	auth0TokenURL = "https://folivora.us.auth0.com/oauth/token"
+	auth0APIURL   = "AUTH0_URL"
+)
 
 func main() {
 	server := &server{}
 	if PROD {
-		token, err := getAuth0ManagementAPIToken(auth0URL)
+		cfg, err := readConfig()
+		if err != nil {
+			log.Fatal("error reading config:", err.Error())
+		}
+
+		token, err := getAuth0APIToken(auth0TokenURL, cfg.Auth0)
 		if err != nil {
 			log.Fatal("error getting auth0 management api token:", err.Error())
 		}
 
-		server = newServer(token, usersHandler)
+		handler := usersHandler(cfg.Folivora.HelperSecret, token, auth0APIURL)
+		server = newServer(handler)
 	} else {
-		token := "MOCK_AUTH0_MANAGEMENT_API_TOKEN"
-		server = newServer(token, mockUsersHandler)
+		server = newServer(mockUsersHandler)
 	}
 
 	ctx := context.Background()
