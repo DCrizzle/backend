@@ -11,10 +11,11 @@ import (
 
 const (
 	errIncorrectSecret       = "incorrect secret received"
-	errIncorrectBody         = "incorrect body received"
+	errIncorrectRequestBody  = "incorrect request body received"
 	errMarshallingCreateJSON = "error marshalling create json"
 	errMarshallingUpdateJSON = "error marshalling update json"
 	errCreatingAuth0Request  = "error creating auth0 request"
+	errIncorrectResponseBody = "incorrect response body received"
 )
 
 func usersHandler(secret, token, url string) http.HandlerFunc {
@@ -24,23 +25,23 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 			return
 		}
 
-		var requestJSON dgraphRequest
-		if err := json.NewDecoder(r.Body).Decode(&requestJSON); err != nil {
-			http.Error(w, errIncorrectBody, http.StatusBadRequest)
+		var dgraphReqJSON dgraphRequest
+		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {
+			http.Error(w, errIncorrectRequestBody, http.StatusBadRequest)
 			return
 		}
 
-		var auth0Request *http.Request
-		var auth0RequestErr error
+		var auth0Req *http.Request
+		var auth0ReqErr error
 		if r.Method == http.MethodPost {
 			createUserJSON := createUser{
-				Email: requestJSON.Email,
+				Email: dgraphReqJSON.Email,
 				AppMetadata: appMetadata{
-					Role:  requestJSON.Role,
-					OrgID: requestJSON.OrgID,
+					Role:  dgraphReqJSON.Role,
+					OrgID: dgraphReqJSON.OrgID,
 				},
-				FirstName:  requestJSON.FirstName,
-				LastName:   requestJSON.LastName,
+				FirstName:  dgraphReqJSON.FirstName,
+				LastName:   dgraphReqJSON.LastName,
 				Connection: "Username-Password-Authentication",
 			}
 
@@ -50,7 +51,7 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 				return
 			}
 
-			auth0Request, auth0RequestErr = http.NewRequest(
+			auth0Req, auth0ReqErr = http.NewRequest(
 				"POST",
 				url,
 				bytes.NewReader(createUserByte),
@@ -59,7 +60,7 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 		} else if r.Method == http.MethodPatch {
 			updateUserJSON := updateUser{
 				AppMetadata: appMetadata{
-					Role: requestJSON.Role,
+					Role: dgraphReqJSON.Role,
 				},
 			}
 
@@ -69,33 +70,39 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 				return
 			}
 
-			auth0Request, auth0RequestErr = http.NewRequest(
+			auth0Req, auth0ReqErr = http.NewRequest(
 				"PATCH",
-				url+"/"+requestJSON.UserID,
+				url+"/"+dgraphReqJSON.UserID,
 				bytes.NewReader(updateUserByte),
 			)
 
 		} else if r.Method == http.MethodDelete {
-			auth0Request, auth0RequestErr = http.NewRequest(
+			auth0Req, auth0ReqErr = http.NewRequest(
 				"DELETE",
-				url+"/"+requestJSON.UserID,
+				url+"/"+dgraphReqJSON.UserID,
 				nil,
 			)
 		}
 
-		if auth0RequestErr != nil {
+		if auth0ReqErr != nil {
 			http.Error(w, errCreatingAuth0Request, http.StatusInternalServerError)
 			return
 		}
 
-		auth0Request.Header.Set("Authorization", "Bearer "+token)
-		auth0Response, err := http.DefaultClient.Do(auth0Request)
-		if err != nil || !checkSuccess(auth0Response.StatusCode) {
+		auth0Req.Header.Set("Authorization", "Bearer "+token)
+		auth0Resp, err := http.DefaultClient.Do(auth0Req)
+		if err != nil || !checkSuccess(auth0Resp.StatusCode) {
 			http.Error(w, errCreatingAuth0Request, http.StatusInternalServerError)
 			return
 		}
 
-		fmt.Fprintf(w, `{"message": "success"}`)
+		var auth0RespJSON auth0Response
+		if err := json.NewDecoder(r.Body).Decode(&auth0RespJSON); err != nil {
+			http.Error(w, errIncorrectResponseBody, http.StatusBadRequest)
+			return
+		}
+
+		fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "user_id": "%s"}`, auth0RespJSON.UserID))
 	})
 }
 
@@ -127,4 +134,8 @@ type updateUser struct {
 type appMetadata struct {
 	Role  string `json:"role"`
 	OrgID string `json:"orgID"`
+}
+
+type auth0Response struct {
+	UserID string `json:"user_id"`
 }
