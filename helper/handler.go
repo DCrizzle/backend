@@ -12,9 +12,11 @@ import (
 const (
 	errIncorrectSecret       = "incorrect secret received"
 	errIncorrectRequestBody  = "incorrect request body received"
+	errIncorrectHTTPMethod   = "unsupported http method received"
 	errMarshallingCreateJSON = "error marshalling create json"
 	errMarshallingUpdateJSON = "error marshalling update json"
 	errCreatingAuth0Request  = "error creating auth0 request"
+	errExecutingAuth0Request = "error executing auth0 request"
 	errIncorrectResponseBody = "incorrect response body received"
 )
 
@@ -52,7 +54,7 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 			}
 
 			auth0Req, auth0ReqErr = http.NewRequest(
-				"POST",
+				http.MethodPost,
 				url,
 				bytes.NewReader(createUserByte),
 			)
@@ -71,17 +73,20 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 			}
 
 			auth0Req, auth0ReqErr = http.NewRequest(
-				"PATCH",
+				http.MethodPatch,
 				url+"/"+dgraphReqJSON.UserID,
 				bytes.NewReader(updateUserByte),
 			)
 
 		} else if r.Method == http.MethodDelete {
 			auth0Req, auth0ReqErr = http.NewRequest(
-				"DELETE",
+				http.MethodDelete,
 				url+"/"+dgraphReqJSON.UserID,
 				nil,
 			)
+		} else {
+			http.Error(w, errIncorrectHTTPMethod, http.StatusBadRequest)
+			return
 		}
 
 		if auth0ReqErr != nil {
@@ -90,14 +95,18 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 		}
 
 		auth0Req.Header.Set("Authorization", "Bearer "+token)
-		auth0Resp, err := http.DefaultClient.Do(auth0Req)
+
+		client := &http.Client{}
+
+		auth0Resp, err := client.Do(auth0Req)
+		defer auth0Resp.Body.Close()
 		if err != nil || !checkSuccess(auth0Resp.StatusCode) {
-			http.Error(w, errCreatingAuth0Request, http.StatusInternalServerError)
+			http.Error(w, errExecutingAuth0Request, http.StatusInternalServerError)
 			return
 		}
 
 		var auth0RespJSON auth0Response
-		if err := json.NewDecoder(r.Body).Decode(&auth0RespJSON); err != nil {
+		if err := json.NewDecoder(auth0Resp.Body).Decode(&auth0RespJSON); err != nil {
 			http.Error(w, errIncorrectResponseBody, http.StatusBadRequest)
 			return
 		}

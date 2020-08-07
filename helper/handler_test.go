@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	"io"
+	// "io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -13,49 +13,106 @@ import (
 func Test_usersHandler(t *testing.T) {
 	tests := []struct {
 		description        string
-		mockAPIMethod      string
 		mockAPIStatusCode  int
+		mockAPIPath        string
 		helperSecret       string
 		requestSecret      string
+		requestMethod      string
 		requestBody        []byte
 		responseStatusCode int
 		responseBody       string
 	}{
 		{
-			description:        "incorrect secret provided in request",
-			mockAPIMethod:      http.MethodPost,
+			description:        "incorrect secret provided in request to helper",
 			mockAPIStatusCode:  http.StatusTeapot,
+			mockAPIPath:        "/auth0/users",
 			helperSecret:       "correct_secret",
 			requestSecret:      "incorrect_secret",
+			requestMethod:      http.MethodPost,
 			requestBody:        []byte{},
 			responseStatusCode: http.StatusBadRequest,
 			responseBody:       errIncorrectSecret,
+		},
+		{
+			description:        "invalid json body received in request to helper",
+			mockAPIStatusCode:  http.StatusTeapot,
+			mockAPIPath:        "/auth0/users",
+			helperSecret:       "correct_secret",
+			requestSecret:      "correct_secret",
+			requestMethod:      http.MethodPost,
+			requestBody:        []byte("---------"),
+			responseStatusCode: http.StatusBadRequest,
+			responseBody:       errIncorrectRequestBody,
+		},
+		{
+			description:        "unsupported http method in request to helper",
+			mockAPIStatusCode:  http.StatusTeapot,
+			mockAPIPath:        "/auth0/users",
+			helperSecret:       "correct_secret",
+			requestSecret:      "correct_secret",
+			requestMethod:      http.MethodPut,
+			requestBody:        []byte(`{"email": "grandmaster@jeditemple.edu"}`),
+			responseStatusCode: http.StatusBadRequest,
+			responseBody:       errIncorrectHTTPMethod,
+		},
+		{
+			description:        "error received in response from auth0 server",
+			mockAPIStatusCode:  http.StatusBadRequest,
+			mockAPIPath:        "/auth0/users",
+			helperSecret:       "correct_secret",
+			requestSecret:      "correct_secret",
+			requestMethod:      http.MethodPost,
+			requestBody:        []byte(`{"email":"masteroftheorder@jeditemple.edu","app_metadata":{"role":"","orgID":""},"given_name":"","family_name":"","connection":"Username-Password-Authentication"}`),
+			responseStatusCode: http.StatusInternalServerError,
+			responseBody:       errExecutingAuth0Request,
+		},
+		{
+			description:        "successful create user request to helper server",
+			mockAPIStatusCode:  http.StatusOK,
+			mockAPIPath:        "/auth0/users",
+			helperSecret:       "correct_secret",
+			requestSecret:      "correct_secret",
+			requestMethod:      http.MethodPost,
+			requestBody:        []byte(`{"email":"battlemaster@jeditemple.edu","app_metadata":{"role":"","orgID":""},"given_name":"","family_name":"","connection":"Username-Password-Authentication"}`),
+			responseStatusCode: http.StatusOK,
+			responseBody:       `{"message": "success", "user_id": "auth0|123456"}`,
 		},
 	}
 
 	// scenarios:
 	// [x] incorrect secret
-	// [ ] invalid request json
-	// [ ] error response from mock server
-	// [ ] successful create
+	// [x] invalid request json
+	// [x] error response from mock server
+	// [x] successful create
 	// [ ] successful update
 	// [ ] successful delete
 
 	for _, test := range tests {
-		var apiBodyReceived io.ReadCloser
+		var apiBodyReceived []byte
 
 		mux := http.NewServeMux()
-		mux.HandleFunc(test.mockAPIMethod, func(w http.ResponseWriter, r *http.Request) {
-			apiBodyReceived = r.Body
+		mux.HandleFunc(test.mockAPIPath, func(w http.ResponseWriter, r *http.Request) {
+			receivedBytes, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				http.Error(w, "error parsing received body", http.StatusBadRequest)
+				return
+			}
+
+			apiBodyReceived = receivedBytes
 			w.WriteHeader(test.mockAPIStatusCode)
 			w.Write([]byte(`{"user_id": "auth0|123456"}`))
 		})
 
 		server := httptest.NewServer(mux)
-		url := server.URL
+		url := server.URL + test.mockAPIPath
 
 		t.Run(test.description, func(t *testing.T) {
-			req, err := http.NewRequest(test.mockAPIMethod, "/auth0/users", bytes.NewReader(test.requestBody))
+			// mock request from dgraph to helper server/handler
+			req, err := http.NewRequest(
+				test.requestMethod,
+				test.mockAPIPath,
+				bytes.NewReader(test.requestBody),
+			)
 			if err != nil {
 				t.Fatal("error creating request:", err.Error())
 			}
@@ -63,6 +120,7 @@ func Test_usersHandler(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
+			// helper users handler wrapper function
 			handler := http.HandlerFunc(usersHandler(test.helperSecret, "test_token", url))
 
 			handler.ServeHTTP(rec, req)
@@ -71,17 +129,12 @@ func Test_usersHandler(t *testing.T) {
 				t.Errorf("status received: %d, expected: %d", status, test.responseStatusCode)
 			}
 
-			if body := rec.Body.String(); strings.TrimSuffix(body, "\n") != test.responseBody {
+			if body := strings.TrimSuffix(rec.Body.String(), "\n"); body != test.responseBody {
 				t.Errorf("body received: %s, expected: %s", body, test.responseBody)
 			}
 
 			if apiBodyReceived != nil {
-				receivedBytes, err := ioutil.ReadAll(apiBodyReceived)
-				if err != nil {
-					t.Fatal("error reading api body received:", err.Error())
-				}
-
-				receivedString := string(receivedBytes)
+				receivedString := string(apiBodyReceived)
 				requestString := string(test.requestBody)
 				if receivedString != requestString {
 					t.Errorf("api body received: %s, expected: %s", receivedString, requestString)
