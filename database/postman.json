@@ -1,0 +1,340 @@
+{
+	"info": {
+		"_postman_id": "8bf3d8aa-0216-4dbc-95bb-df287f98f295",
+		"name": "folivora",
+		"description": "This is a collection of requests that can be used to:\n- add one-off data to a running instance of the `backend` package\n- update bulk-loaded resources for testing purposes\n- directly manipulate data where the `frontend` package does not provide that support\n\nIn order to provide correct authentication while testing, the `frontend` package will need to be started (see the package documentation for reference) and logged into - in the browser console on the \"Network\" tab the `token` request will contain the Auth0 JWT that can be added to the `X-Auth0-Token` field on requests.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "getHealth",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"query\": \"query { health { instance address status uptime } }\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin"
+					]
+				},
+				"description": "This is used to do a simple query against the `/admin` endpoint to check the current status of the target Dgraph instance."
+			},
+			"response": []
+		},
+		{
+			"name": "getSchema",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"query\":\"{ getGQLSchema { generatedSchema } }\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/admin",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin"
+					]
+				},
+				"description": "Fetch the string representation of the generated schema out of an instance of Dgraph. This is typically stored in the `schema.json` file in the `backend` package for reference.\n"
+			},
+			"response": []
+		},
+		{
+			"name": "addSpecimens",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth0-Token",
+						"type": "text",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Img3NTBPT3RTb0s2dnlCVWdQZXlweSJ9.eyJodHRwczovL2ZvbGl2b3JhLmlvL2p3dC9jbGFpbXMiOnsiaXNBdXRoZW50aWNhdGVkIjoidHJ1ZSIsInJvbGUiOiJVU0VSX0FETUlOIiwib3JnSUQiOiI0MiJ9LCJuaWNrbmFtZSI6ImpvaG4uZm9yc3RtZWllciIsIm5hbWUiOiJqb2huLmZvcnN0bWVpZXJAZ21haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vcy5ncmF2YXRhci5jb20vYXZhdGFyLzhjOWEzMmVjNzE4ZDA5ODE2MTM5YTUyYTU4MDk5YzhmP3M9NDgwJnI9cGcmZD1odHRwcyUzQSUyRiUyRmNkbi5hdXRoMC5jb20lMkZhdmF0YXJzJTJGam8ucG5nIiwidXBkYXRlZF9hdCI6IjIwMjAtMDgtMTBUMjM6NTE6NTEuODg0WiIsImVtYWlsIjoiam9obi5mb3JzdG1laWVyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczovL2ZvbGl2b3JhLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZjE3YTNmMWRiZjZmZjAwMTM1Y2E2YTciLCJhdWQiOiJlVU5BOFVTZ250czZsaWlkUmF5cVdHRFBYQ1puUGczMyIsImlhdCI6MTU5NzEwMzUxMiwiZXhwIjoxNTk3MTM5NTEyLCJub25jZSI6IlIyZFVRV2xaTFc5b09ISk9TVzlvYW5SbExWbFZhRGxZU204dFEyd3RNMEUxVVY5TVJVNTNjV1ZpTkE9PSJ9.iX7IIO6wKMf9rHhNm-HgsqJBLBU9xRqoMnWQqyz-RyXo8DvOirF8-l6I_DHnVvOXtFvE7UWgFycQagz3SjQnT0H76mOHwlporLThXKyy8nq65nz9MBKic2yGbaNttKuQ7HuVYlsYTviC_AclHWzJ6PMwO6FKVC6ivUXuUUHqCvF0DW6Zc9wvaH7HGmc_nMG5PXP4_iFxAZGe3LQRcDYhwZwxEjm1_q3NxlPQZdT9J32FpohVBmUe5jODKYF9b_CRsz4m0uyZaS134LJhsqAvA2eO8WpR1cagRYlulpnl9NAo3wUPJfu9GINwMDtFHXcxif04E8-nJVPAkU8gQEZHHg"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"query\": \"mutation AddBloodSpecimens($input: [AddBloodSpecimenInput!]!) { addBloodSpecimen(input: $input) { bloodSpecimen { id } } }\",\n\t\"variables\": {\n\t\t\"input\": [\n\t\t\t{\n\t\t\t\t\"externalID\": \"random-external-id\",\n\t\t\t\t\"type\": \"BLOOD\",\n\t\t\t\t\"collectionDate\": \"2006-01-02T15:04:05\",\n\t\t\t\t\"donor\": \"\",\n\t\t\t\t\"container\": \"VIAL\",\n\t\t\t\t\"status\": \"IN_INVENTORY\",\n\t\t\t\t\"destructionDate\": \"\",\n\t\t\t\t\"description\": \"a new sample of blood\",\n\t\t\t\t\"consent\": \"\",\n\t\t\t\t\"owner\": \"\",\n\t\t\t\t\"lab\": \"\",\n\t\t\t\t\"storage\": \"\",\n\t\t\t\t\"protocol\": \"\",\n\t\t\t\t\"tests\": [],\n\t\t\t\t\"bloodType\": \"A_NEG\",\n\t\t\t\t\"volume\": 1.0\n\t\t\t}\n\t\t]\n\t}\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/graphql",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"graphql"
+					]
+				},
+				"description": "This is typically going to be used to add one-off `BloodSpecimen` values to the database. Note that several of these fields require that existing values be prepopulated in the database and their IDs provided in this request input.\n\n- `donor`\n- `consent`\n- `owner`\n- `lab`\n- `storage`\n- `protocol`"
+			},
+			"response": []
+		},
+		{
+			"name": "updateSpecimen",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth0-Token",
+						"type": "text",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Img3NTBPT3RTb0s2dnlCVWdQZXlweSJ9.eyJodHRwczovL2ZvbGl2b3JhLmlvL2p3dC9jbGFpbXMiOnsiaXNBdXRoZW50aWNhdGVkIjoidHJ1ZSIsInJvbGUiOiJVU0VSX0FETUlOIiwib3JnSUQiOiI0MiJ9LCJuaWNrbmFtZSI6ImpvaG4uZm9yc3RtZWllciIsIm5hbWUiOiJqb2huLmZvcnN0bWVpZXJAZ21haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vcy5ncmF2YXRhci5jb20vYXZhdGFyLzhjOWEzMmVjNzE4ZDA5ODE2MTM5YTUyYTU4MDk5YzhmP3M9NDgwJnI9cGcmZD1odHRwcyUzQSUyRiUyRmNkbi5hdXRoMC5jb20lMkZhdmF0YXJzJTJGam8ucG5nIiwidXBkYXRlZF9hdCI6IjIwMjAtMDgtMTBUMjM6NTE6NTEuODg0WiIsImVtYWlsIjoiam9obi5mb3JzdG1laWVyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczovL2ZvbGl2b3JhLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZjE3YTNmMWRiZjZmZjAwMTM1Y2E2YTciLCJhdWQiOiJlVU5BOFVTZ250czZsaWlkUmF5cVdHRFBYQ1puUGczMyIsImlhdCI6MTU5NzEwMzUxMiwiZXhwIjoxNTk3MTM5NTEyLCJub25jZSI6IlIyZFVRV2xaTFc5b09ISk9TVzlvYW5SbExWbFZhRGxZU204dFEyd3RNMEUxVVY5TVJVNTNjV1ZpTkE9PSJ9.iX7IIO6wKMf9rHhNm-HgsqJBLBU9xRqoMnWQqyz-RyXo8DvOirF8-l6I_DHnVvOXtFvE7UWgFycQagz3SjQnT0H76mOHwlporLThXKyy8nq65nz9MBKic2yGbaNttKuQ7HuVYlsYTviC_AclHWzJ6PMwO6FKVC6ivUXuUUHqCvF0DW6Zc9wvaH7HGmc_nMG5PXP4_iFxAZGe3LQRcDYhwZwxEjm1_q3NxlPQZdT9J32FpohVBmUe5jODKYF9b_CRsz4m0uyZaS134LJhsqAvA2eO8WpR1cagRYlulpnl9NAo3wUPJfu9GINwMDtFHXcxif04E8-nJVPAkU8gQEZHHg"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"query\": \"mutation UpdateBloodSpecimen($input: UpdateBloodSpecimenInput!) { updateBloodSpecimen(input: $input) { bloodSpecimen { id } } }\",\n\t\"variables\": {\n\t\t\"input\": {\n\t\t\t\"filter\": {\n\t\t\t\t\"id\": \"\"\n\t\t\t},\n\t\t\t\"set\": {\n\t\t\t\t\"externalID\": \"random-external-id\",\n\t\t\t\t\"type\": \"BLOOD\",\n\t\t\t\t\"collectionDate\": \"2006-01-02T15:04:05\",\n\t\t\t\t\"donor\": \"\",\n\t\t\t\t\"container\": \"VIAL\",\n\t\t\t\t\"status\": \"IN_INVENTORY\",\n\t\t\t\t\"destructionDate\": \"\",\n\t\t\t\t\"description\": \"a new sample of blood\",\n\t\t\t\t\"consent\": \"\",\n\t\t\t\t\"owner\": \"\",\n\t\t\t\t\"lab\": \"\",\n\t\t\t\t\"storage\": \"\",\n\t\t\t\t\"protocol\": \"\",\n\t\t\t\t\"tests\": [],\n\t\t\t\t\"bloodType\": \"A_NEG\",\n\t\t\t\t\"volume\": 1.0\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/graphql",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"graphql"
+					]
+				},
+				"description": "This is typically going to be used to add one-off `BloodSpecimen` values to the database. Note that several of these fields require that existing values be prepopulated in the database and their IDs provided in this request input.\n\n- `donor`\n- `consent`\n- `owner`\n- `lab`\n- `storage`\n- `protocol`"
+			},
+			"response": []
+		},
+		{
+			"name": "deleteSpecimens",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth0-Token",
+						"type": "text",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Img3NTBPT3RTb0s2dnlCVWdQZXlweSJ9.eyJodHRwczovL2ZvbGl2b3JhLmlvL2p3dC9jbGFpbXMiOnsiaXNBdXRoZW50aWNhdGVkIjoidHJ1ZSIsInJvbGUiOiJVU0VSX0FETUlOIiwib3JnSUQiOiI0MiJ9LCJuaWNrbmFtZSI6ImpvaG4uZm9yc3RtZWllciIsIm5hbWUiOiJqb2huLmZvcnN0bWVpZXJAZ21haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vcy5ncmF2YXRhci5jb20vYXZhdGFyLzhjOWEzMmVjNzE4ZDA5ODE2MTM5YTUyYTU4MDk5YzhmP3M9NDgwJnI9cGcmZD1odHRwcyUzQSUyRiUyRmNkbi5hdXRoMC5jb20lMkZhdmF0YXJzJTJGam8ucG5nIiwidXBkYXRlZF9hdCI6IjIwMjAtMDgtMTBUMjM6NTE6NTEuODg0WiIsImVtYWlsIjoiam9obi5mb3JzdG1laWVyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczovL2ZvbGl2b3JhLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZjE3YTNmMWRiZjZmZjAwMTM1Y2E2YTciLCJhdWQiOiJlVU5BOFVTZ250czZsaWlkUmF5cVdHRFBYQ1puUGczMyIsImlhdCI6MTU5NzEwMzUxMiwiZXhwIjoxNTk3MTM5NTEyLCJub25jZSI6IlIyZFVRV2xaTFc5b09ISk9TVzlvYW5SbExWbFZhRGxZU204dFEyd3RNMEUxVVY5TVJVNTNjV1ZpTkE9PSJ9.iX7IIO6wKMf9rHhNm-HgsqJBLBU9xRqoMnWQqyz-RyXo8DvOirF8-l6I_DHnVvOXtFvE7UWgFycQagz3SjQnT0H76mOHwlporLThXKyy8nq65nz9MBKic2yGbaNttKuQ7HuVYlsYTviC_AclHWzJ6PMwO6FKVC6ivUXuUUHqCvF0DW6Zc9wvaH7HGmc_nMG5PXP4_iFxAZGe3LQRcDYhwZwxEjm1_q3NxlPQZdT9J32FpohVBmUe5jODKYF9b_CRsz4m0uyZaS134LJhsqAvA2eO8WpR1cagRYlulpnl9NAo3wUPJfu9GINwMDtFHXcxif04E8-nJVPAkU8gQEZHHg"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"query\": \"mutation DeleteBloodSpecimen($input: BloodSpecimenFilter!) { deleteBloodSpecimen(input: $input) { bloodSpecimen { id } } }\",\n\t\"variables\": {\n\t\t\"input\": {\n\t\t\t\"filter\": {\n\t\t\t\t\"id\": []\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/graphql",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"graphql"
+					]
+				},
+				"description": "This request can be used to purge one or more `BloodSpecimen` values from the database as needed."
+			},
+			"response": []
+		},
+		{
+			"name": "addUsers",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth0-Token",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Img3NTBPT3RTb0s2dnlCVWdQZXlweSJ9.eyJodHRwczovL2ZvbGl2b3JhLmlvL2p3dC9jbGFpbXMiOnsiaXNBdXRoZW50aWNhdGVkIjoidHJ1ZSIsInJvbGUiOiJVU0VSX0FETUlOIiwib3JnSUQiOiI0MiJ9LCJuaWNrbmFtZSI6ImpvaG4uZm9yc3RtZWllciIsIm5hbWUiOiJqb2huLmZvcnN0bWVpZXJAZ21haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vcy5ncmF2YXRhci5jb20vYXZhdGFyLzhjOWEzMmVjNzE4ZDA5ODE2MTM5YTUyYTU4MDk5YzhmP3M9NDgwJnI9cGcmZD1odHRwcyUzQSUyRiUyRmNkbi5hdXRoMC5jb20lMkZhdmF0YXJzJTJGam8ucG5nIiwidXBkYXRlZF9hdCI6IjIwMjAtMDgtMTBUMjM6NTE6NTEuODg0WiIsImVtYWlsIjoiam9obi5mb3JzdG1laWVyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczovL2ZvbGl2b3JhLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZjE3YTNmMWRiZjZmZjAwMTM1Y2E2YTciLCJhdWQiOiJlVU5BOFVTZ250czZsaWlkUmF5cVdHRFBYQ1puUGczMyIsImlhdCI6MTU5NzEwMzUxMiwiZXhwIjoxNTk3MTM5NTEyLCJub25jZSI6IlIyZFVRV2xaTFc5b09ISk9TVzlvYW5SbExWbFZhRGxZU204dFEyd3RNMEUxVVY5TVJVNTNjV1ZpTkE9PSJ9.iX7IIO6wKMf9rHhNm-HgsqJBLBU9xRqoMnWQqyz-RyXo8DvOirF8-l6I_DHnVvOXtFvE7UWgFycQagz3SjQnT0H76mOHwlporLThXKyy8nq65nz9MBKic2yGbaNttKuQ7HuVYlsYTviC_AclHWzJ6PMwO6FKVC6ivUXuUUHqCvF0DW6Zc9wvaH7HGmc_nMG5PXP4_iFxAZGe3LQRcDYhwZwxEjm1_q3NxlPQZdT9J32FpohVBmUe5jODKYF9b_CRsz4m0uyZaS134LJhsqAvA2eO8WpR1cagRYlulpnl9NAo3wUPJfu9GINwMDtFHXcxif04E8-nJVPAkU8gQEZHHg",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"query\": \"mutation AddUsers($input: AddUserInput!) { addUser(input: [$input]) { user { email } } }\",\n\t\"variables\": {\n\t\t\"input\": [\n\t\t\t{\n\t\t\t\t\"owner\": \"\",\n\t\t\t\t\"email\": \"john@folivora.com\",\n\t\t\t\t\"firstName\": \"john\",\n\t\t\t\t\"lastName\": \"forstmeier\",\n\t\t\t\t\"role\": {\n\t\t\t\t\t\"name\": \"USER_ADMIN\"\n\t\t\t\t},\n\t\t\t\t\"org\": {\n\t\t\t\t\t\"id\":\"\"\n\t\t\t\t},\n\t\t\t\t\"user_id\": \"auth0_id\"\n\t\t\t}\n\t\t]\n\t}\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/graphql",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"graphql"
+					]
+				},
+				"description": "Create new instance of the `User` object in the database. Note that this requires that certain objects exist in the database ahead of time:\n\n- `owner`\n\t- this would be the actual org the user has access to\n- `org`\n\t- this would be the \"sub-org\" the user belongs to (e.g. a lab)"
+			},
+			"response": []
+		},
+		{
+			"name": "getUsers",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth0-Token",
+						"type": "text",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Img3NTBPT3RTb0s2dnlCVWdQZXlweSJ9.eyJodHRwczovL2ZvbGl2b3JhLmlvL2p3dC9jbGFpbXMiOnsiaXNBdXRoZW50aWNhdGVkIjoidHJ1ZSIsInJvbGUiOiJVU0VSX0FETUlOIiwib3JnSUQiOiI0MiJ9LCJuaWNrbmFtZSI6ImpvaG4uZm9yc3RtZWllciIsIm5hbWUiOiJqb2huLmZvcnN0bWVpZXJAZ21haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vcy5ncmF2YXRhci5jb20vYXZhdGFyLzhjOWEzMmVjNzE4ZDA5ODE2MTM5YTUyYTU4MDk5YzhmP3M9NDgwJnI9cGcmZD1odHRwcyUzQSUyRiUyRmNkbi5hdXRoMC5jb20lMkZhdmF0YXJzJTJGam8ucG5nIiwidXBkYXRlZF9hdCI6IjIwMjAtMDgtMTBUMjM6NTE6NTEuODg0WiIsImVtYWlsIjoiam9obi5mb3JzdG1laWVyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczovL2ZvbGl2b3JhLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZjE3YTNmMWRiZjZmZjAwMTM1Y2E2YTciLCJhdWQiOiJlVU5BOFVTZ250czZsaWlkUmF5cVdHRFBYQ1puUGczMyIsImlhdCI6MTU5NzEwMzUxMiwiZXhwIjoxNTk3MTM5NTEyLCJub25jZSI6IlIyZFVRV2xaTFc5b09ISk9TVzlvYW5SbExWbFZhRGxZU204dFEyd3RNMEUxVVY5TVJVNTNjV1ZpTkE9PSJ9.iX7IIO6wKMf9rHhNm-HgsqJBLBU9xRqoMnWQqyz-RyXo8DvOirF8-l6I_DHnVvOXtFvE7UWgFycQagz3SjQnT0H76mOHwlporLThXKyy8nq65nz9MBKic2yGbaNttKuQ7HuVYlsYTviC_AclHWzJ6PMwO6FKVC6ivUXuUUHqCvF0DW6Zc9wvaH7HGmc_nMG5PXP4_iFxAZGe3LQRcDYhwZwxEjm1_q3NxlPQZdT9J32FpohVBmUe5jODKYF9b_CRsz4m0uyZaS134LJhsqAvA2eO8WpR1cagRYlulpnl9NAo3wUPJfu9GINwMDtFHXcxif04E8-nJVPAkU8gQEZHHg"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"query\": \"query QueryUsers { queryUser(filter: {}) { user { email } } }\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/graphql",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"graphql"
+					]
+				},
+				"description": "Fetch an unfiltered array of `User` objects from the database."
+			},
+			"response": []
+		},
+		{
+			"name": "updateUser",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth0-Token",
+						"type": "text",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Img3NTBPT3RTb0s2dnlCVWdQZXlweSJ9.eyJodHRwczovL2ZvbGl2b3JhLmlvL2p3dC9jbGFpbXMiOnsiaXNBdXRoZW50aWNhdGVkIjoidHJ1ZSIsInJvbGUiOiJVU0VSX0FETUlOIiwib3JnSUQiOiI0MiJ9LCJuaWNrbmFtZSI6ImpvaG4uZm9yc3RtZWllciIsIm5hbWUiOiJqb2huLmZvcnN0bWVpZXJAZ21haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vcy5ncmF2YXRhci5jb20vYXZhdGFyLzhjOWEzMmVjNzE4ZDA5ODE2MTM5YTUyYTU4MDk5YzhmP3M9NDgwJnI9cGcmZD1odHRwcyUzQSUyRiUyRmNkbi5hdXRoMC5jb20lMkZhdmF0YXJzJTJGam8ucG5nIiwidXBkYXRlZF9hdCI6IjIwMjAtMDgtMTBUMjM6NTE6NTEuODg0WiIsImVtYWlsIjoiam9obi5mb3JzdG1laWVyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczovL2ZvbGl2b3JhLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZjE3YTNmMWRiZjZmZjAwMTM1Y2E2YTciLCJhdWQiOiJlVU5BOFVTZ250czZsaWlkUmF5cVdHRFBYQ1puUGczMyIsImlhdCI6MTU5NzEwMzUxMiwiZXhwIjoxNTk3MTM5NTEyLCJub25jZSI6IlIyZFVRV2xaTFc5b09ISk9TVzlvYW5SbExWbFZhRGxZU204dFEyd3RNMEUxVVY5TVJVNTNjV1ZpTkE9PSJ9.iX7IIO6wKMf9rHhNm-HgsqJBLBU9xRqoMnWQqyz-RyXo8DvOirF8-l6I_DHnVvOXtFvE7UWgFycQagz3SjQnT0H76mOHwlporLThXKyy8nq65nz9MBKic2yGbaNttKuQ7HuVYlsYTviC_AclHWzJ6PMwO6FKVC6ivUXuUUHqCvF0DW6Zc9wvaH7HGmc_nMG5PXP4_iFxAZGe3LQRcDYhwZwxEjm1_q3NxlPQZdT9J32FpohVBmUe5jODKYF9b_CRsz4m0uyZaS134LJhsqAvA2eO8WpR1cagRYlulpnl9NAo3wUPJfu9GINwMDtFHXcxif04E8-nJVPAkU8gQEZHHg"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"query\": \"mutation UpdateUser($input: UpdateUserInput!) { updateUser(input: [$input]) { user { email } } }\",\n\t\"variables\": {\n\t\t\"input\": {\n\t\t\t\"filter\": {\n\t\t\t\t\"id\": \"\"\n\t\t\t},\n\t\t\t\"set\": {\n\t\t\t\t\"owner\": \"\",\n\t\t\t\t\"email\": \"john@folivora.com\",\n\t\t\t\t\"firstName\": \"john\",\n\t\t\t\t\"lastName\": \"forstmeier\",\n\t\t\t\t\"role\": {\n\t\t\t\t\t\"name\": \"USER_ADMIN\"\n\t\t\t\t},\n\t\t\t\t\"org\": {\n\t\t\t\t\t\"id\":\"\"\n\t\t\t\t},\n\t\t\t\t\"user_id\": \"auth0_id\"\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/graphql",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"graphql"
+					]
+				},
+				"description": "Edit existing instances of the `User` object in the database. Note that this requires that certain objects exist in the database ahead of time (assuming these fields are the ones being edited):\n\n- `owner`\n\t- this would be the actual org the user has access to\n- `org`\n\t- this would be the \"sub-org\" the user belongs to (e.g. a lab)"
+			},
+			"response": []
+		},
+		{
+			"name": "deleteUsers",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth0-Token",
+						"type": "text",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Img3NTBPT3RTb0s2dnlCVWdQZXlweSJ9.eyJodHRwczovL2ZvbGl2b3JhLmlvL2p3dC9jbGFpbXMiOnsiaXNBdXRoZW50aWNhdGVkIjoidHJ1ZSIsInJvbGUiOiJVU0VSX0FETUlOIiwib3JnSUQiOiI0MiJ9LCJuaWNrbmFtZSI6ImpvaG4uZm9yc3RtZWllciIsIm5hbWUiOiJqb2huLmZvcnN0bWVpZXJAZ21haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vcy5ncmF2YXRhci5jb20vYXZhdGFyLzhjOWEzMmVjNzE4ZDA5ODE2MTM5YTUyYTU4MDk5YzhmP3M9NDgwJnI9cGcmZD1odHRwcyUzQSUyRiUyRmNkbi5hdXRoMC5jb20lMkZhdmF0YXJzJTJGam8ucG5nIiwidXBkYXRlZF9hdCI6IjIwMjAtMDgtMTBUMjM6NTE6NTEuODg0WiIsImVtYWlsIjoiam9obi5mb3JzdG1laWVyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczovL2ZvbGl2b3JhLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZjE3YTNmMWRiZjZmZjAwMTM1Y2E2YTciLCJhdWQiOiJlVU5BOFVTZ250czZsaWlkUmF5cVdHRFBYQ1puUGczMyIsImlhdCI6MTU5NzEwMzUxMiwiZXhwIjoxNTk3MTM5NTEyLCJub25jZSI6IlIyZFVRV2xaTFc5b09ISk9TVzlvYW5SbExWbFZhRGxZU204dFEyd3RNMEUxVVY5TVJVNTNjV1ZpTkE9PSJ9.iX7IIO6wKMf9rHhNm-HgsqJBLBU9xRqoMnWQqyz-RyXo8DvOirF8-l6I_DHnVvOXtFvE7UWgFycQagz3SjQnT0H76mOHwlporLThXKyy8nq65nz9MBKic2yGbaNttKuQ7HuVYlsYTviC_AclHWzJ6PMwO6FKVC6ivUXuUUHqCvF0DW6Zc9wvaH7HGmc_nMG5PXP4_iFxAZGe3LQRcDYhwZwxEjm1_q3NxlPQZdT9J32FpohVBmUe5jODKYF9b_CRsz4m0uyZaS134LJhsqAvA2eO8WpR1cagRYlulpnl9NAo3wUPJfu9GINwMDtFHXcxif04E8-nJVPAkU8gQEZHHg"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"query\": \"mutation DeleteUsers($input: UserFilter!) { deleteUser(input: $input) { user { id } } }\",\n\t\"variables\": {\n\t\t\"input\": {\n\t\t\t\"filter\": {\n\t\t\t\t\"id\": []\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/graphql",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"graphql"
+					]
+				},
+				"description": "This request can be used to purge one or more `User` values from the database as needed."
+			},
+			"response": []
+		}
+	]
+}
