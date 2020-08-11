@@ -26,6 +26,8 @@ outline:
 - - [ ] "add", "delete", "get", "query", "update"
 - [ ] update relationships using "set"/"remove" keywords in queries
 - [ ] searching: https://dgraph.io/docs/query-language/#indexing
+[ ] public key
+- [ ] access public key jwt.io after translating generated JWT
 
 NOTE: these fields will be added to the User type when the following limitations are addressed in Dgraph:
 - The keys in the body can only contain [a-zA-Z], things like app_metadata which have _ (underscore) in their name, won’t work for now.
