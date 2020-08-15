@@ -42,6 +42,10 @@ var zips = []int{
 	16823,
 }
 
+var countries = []string{
+	"United States",
+}
+
 var titles = []string{
 	"Example Title A",
 	"Example Title B",

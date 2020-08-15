@@ -1,9 +1,13 @@
 package loader
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
+
+	"github.com/tidwall/gjson"
 )
 
 type payload struct {
@@ -11,46 +15,76 @@ type payload struct {
 	Variables interface{} `json:"variables"`
 }
 
-type response struct {
-	Data []data `json:"data"`
+type auth0Client struct {
+	httpClient *http.Client
 }
 
-type data struct {
-	ID string `json:"id"`
+// https://auth0.com/docs/api/authentication?shell#resource-owner-password
+func (ac *auth0Client) getUserToken(cfg Config) (string, error) {
+	data := fmt.Sprintf(`{
+		"grant_type": "password",
+		"username": "%s",
+		"password": "%s",
+		"audience": "%s",
+		"scope": "%s",
+		"client_id": "%s",
+		"client_secret": "%s"
+	}`,
+		cfg.Username,
+		cfg.Password,
+		cfg.Audience,
+		cfg.Scope,
+		cfg.ClientID,
+		cfg.ClientSecret,
+	)
+
+	req, err := http.NewRequest(http.MethodPost, cfg.Audience+"/oauth/token", strings.NewReader(data))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", cfg.ManagementToken))
+
+	resp, err := ac.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	bodyData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	userToken := gjson.Get(string(bodyData), "access_token")
+
+	return userToken.String(), nil
 }
 
-func (h *helper) sendRequest(mutation string, input interface{}) ([]string, error) {
-	variables := map[string]interface{}{
-		"input": input,
-	}
+// https://auth0.com/docs/api/management/v2#!/Users/patch_users_by_id
+func (ac *auth0Client) updateUserToken(userID, orgID, audience, managementToken string) error {
+	encodedUserID := url.QueryEscape(userID)
+	data := fmt.Sprintf(`{
+		"app_metadata": {
+			"orgID": "%s"
+		}
+	}`, orgID)
 
-	p := payload{
-		Query:     mutation,
-		Variables: variables,
-	}
-
-	b, err := json.Marshal(p)
+	req, err := http.NewRequest(http.MethodPatch, audience+"/users/"+encodedUserID, strings.NewReader(data))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	req, err := http.NewRequest("POST", h.dgraphURL, bytes.NewReader(b))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", managementToken))
+
+	resp, err := ac.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	req.Header.Set("X-Auth0-Token", h.token)
-
-	resp, err := h.httpClient.Do(req)
-	if err != nil {
-		return nil, err
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("non-200 status received: %d", resp.StatusCode)
 	}
 
-	ids := []string{}
-	var respJSON response
-	json.NewDecoder(resp.Body).Decode(&respJSON)
-	for _, item := range respJSON.Data {
-		ids = append(ids, item.ID)
-	}
-
-	return ids, nil
+	return nil
 }

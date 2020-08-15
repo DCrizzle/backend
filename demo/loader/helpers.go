@@ -1,35 +1,69 @@
 package loader
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt" // TEMP
+	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/tidwall/gjson"
 )
 
-func (h *helper) addOwnerOrgs() ([]string, error) {
+type dgraphClient struct {
+	httpClient *http.Client
+	dgraphURL  string
+	userToken  string
+}
+
+func (dc *dgraphClient) addOwnerOrgs() ([]string, error) {
 	inputs := []map[string]interface{}{}
 	for i := 0; i < len(orgs); i++ {
+		now := time.Now().Format(time.RFC3339)
 		input := map[string]interface{}{
 			"street":    randomString(streets),
 			"city":      randomString(cities),
 			"county":    randomString(counties),
 			"state":     randomString(states),
 			"zip":       randomInt(zips),
+			"country":   randomString(countries),
 			"name":      orgs[i],
 			"users":     []string{},
-			"createdOn": "",
-			"updatedOn": "",
+			"createdOn": now,
+			"updatedOn": now,
+			"labs":      []string{},
+			"storages":  []string{},
 		}
 		inputs = append(inputs, input)
 	}
 
-	return h.sendRequest(addOwnerOrgsMutation, inputs)
+	data, err := dc.sendRequest(addOwnerOrgsMutation, inputs)
+	if err != nil {
+		return nil, err
+	}
+
+	idValues := gjson.Get(data, "data.addOwnerOrg.ownerOrg.#.id").Array()
+	ids := []string{}
+	for _, id := range idValues {
+		ids = append(ids, id.String())
+	}
+
+	return ids, nil
 }
 
-func (h *helper) addLabStorageOrgs(ownerID string) ([]string, []string, error) {
+func (dc *dgraphClient) addLabAndStorageOrgs(ownerID string) ([]string, []string, error) {
+	fmt.Println("addLabAndStorageOrgs")
 	labInputs := []map[string]interface{}{}
 	labCount := rand.Intn(len(labs))
+
+	owner := map[string]string{
+		"id": ownerID,
+	}
+	now := time.Now().Format(time.RFC3339)
+
 	for labCount > 0 {
 		labInput := map[string]interface{}{
 			"street":    randomString(streets),
@@ -37,11 +71,12 @@ func (h *helper) addLabStorageOrgs(ownerID string) ([]string, []string, error) {
 			"county":    randomString(counties),
 			"state":     randomString(states),
 			"zip":       randomInt(zips),
+			"country":   randomString(countries),
 			"name":      labs[labCount-1],
 			"users":     []string{},
-			"createdOn": "",
-			"updatedOn": "",
-			"owner":     ownerID,
+			"createdOn": now,
+			"updatedOn": now,
+			"owner":     owner,
 			"specimens": []string{},
 			"plans":     []string{},
 		}
@@ -49,10 +84,18 @@ func (h *helper) addLabStorageOrgs(ownerID string) ([]string, []string, error) {
 		labInputs = append(labInputs, labInput)
 		labCount--
 	}
+	fmt.Println("lab inputs:", labInputs)
 
-	labs, err := h.sendRequest(addLabOrgsMutation, labInputs)
+	labs, err := dc.sendRequest(addLabOrgsMutation, labInputs)
 	if err != nil {
 		return nil, nil, err
+	}
+	fmt.Println("labs:", labs)
+
+	labIDValues := gjson.Get(labs, "data.addLabOrg.labOrg.#.id").Array()
+	labIDs := []string{}
+	for _, id := range labIDValues {
+		labIDs = append(labIDs, id.String())
 	}
 
 	storageIndex := rand.Intn(len(storages))
@@ -61,25 +104,33 @@ func (h *helper) addLabStorageOrgs(ownerID string) ([]string, []string, error) {
 		"city":      randomString(cities),
 		"county":    randomString(counties),
 		"state":     randomString(states),
+		"country":   randomString(countries),
 		"zip":       randomInt(zips),
 		"name":      storages[storageIndex],
 		"users":     []string{},
-		"createdOn": "",
-		"updatedOn": "",
-		"owner":     ownerID,
+		"createdOn": now,
+		"updatedOn": now,
+		"owner":     owner,
 		"specimens": []string{},
 		"plans":     []string{},
 	}
 
-	storages, err := h.sendRequest(addStorageOrgsMutation, storageInput)
+	storages, err := dc.sendRequest(addStorageOrgsMutation, storageInput)
 	if err != nil {
 		return nil, nil, err
 	}
+	fmt.Println("storages:", storages)
 
-	return labs, storages, nil
+	storageIDValues := gjson.Get(storages, "data.addStorageOrg.#.storageOrg.id").Array()
+	storageIDs := []string{}
+	for _, id := range storageIDValues {
+		storageIDs = append(storageIDs, id.String())
+	}
+
+	return labIDs, storageIDs, nil
 }
 
-func (h *helper) addUsers(ownerID string, labIDs, storageIDs []string) ([]string, error) {
+func (dc *dgraphClient) addUsers(ownerID string, labIDs, storageIDs []string) ([]string, error) {
 	inputs := []map[string]interface{}{}
 	for _, user := range users {
 		orgID := ""
@@ -103,10 +154,21 @@ func (h *helper) addUsers(ownerID string, labIDs, storageIDs []string) ([]string
 		inputs = append(inputs, input)
 	}
 
-	return h.sendRequest(addUsersMutation, inputs)
+	data, err := dc.sendRequest(addUsersMutation, inputs)
+	if err != nil {
+		return nil, err
+	}
+
+	idValues := gjson.Get(data, "data.addUser.user.#.id").Array()
+	ids := []string{}
+	for _, id := range idValues {
+		ids = append(ids, id.String())
+	}
+
+	return ids, nil
 }
 
-func (h *helper) addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string, []string, error) {
+func (dc *dgraphClient) addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string, []string, error) {
 	dobStart := time.Date(1977, time.May, 25, 22, 0, 0, 0, time.UTC)
 	dobEnd := time.Date(2005, time.May, 19, 22, 0, 0, 0, time.UTC)
 
@@ -133,9 +195,15 @@ func (h *helper) addProtocolsAndPlans(ownerID string, labIDs, storageIDs []strin
 		protocolInputs = append(protocolInputs, input)
 	}
 
-	protocolIDs, err := h.sendRequest(addProtocolsMutation, protocolInputs)
+	protocols, err := dc.sendRequest(addProtocolsMutation, protocolInputs)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	protocolsIDValues := gjson.Get(protocols, "data.addProtocol.protocol.#.id").Array()
+	protocolIDs := []string{}
+	for _, id := range protocolsIDValues {
+		protocolIDs = append(protocolIDs, id.String())
 	}
 
 	planInputs := []map[string]interface{}{}
@@ -151,15 +219,21 @@ func (h *helper) addProtocolsAndPlans(ownerID string, labIDs, storageIDs []strin
 		planInputs = append(planInputs, input)
 	}
 
-	planIDs, err := h.sendRequest(addPlansMutation, planInputs)
+	plans, err := dc.sendRequest(addPlansMutation, planInputs)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	plansIDValues := gjson.Get(plans, "data.addPlan.plan.#.id").Array()
+	planIDs := []string{}
+	for _, id := range plansIDValues {
+		planIDs = append(planIDs, id.String())
 	}
 
 	return protocolIDs, planIDs, nil
 }
 
-func (h *helper) addProtocolForms(ownerID string, protocolIDs, protocolExternalIDs []string) ([]string, error) {
+func (dc *dgraphClient) addProtocolForms(ownerID string, protocolIDs, protocolExternalIDs []string) ([]string, error) {
 	protocolFormInputs := []map[string]interface{}{}
 	for k, protocolID := range protocolIDs {
 		input := map[string]interface{}{
@@ -173,10 +247,21 @@ func (h *helper) addProtocolForms(ownerID string, protocolIDs, protocolExternalI
 		protocolFormInputs = append(protocolFormInputs, input)
 	}
 
-	return h.sendRequest(addProtocolFormsMutation, protocolFormInputs)
+	data, err := dc.sendRequest(addProtocolFormsMutation, protocolFormInputs)
+	if err != nil {
+		return nil, err
+	}
+
+	idValues := gjson.Get(data, "data.addProtocolForm.protocolForm.#.id").Array()
+	ids := []string{}
+	for _, id := range idValues {
+		ids = append(ids, id.String())
+	}
+
+	return ids, nil
 }
 
-func (h *helper) addConsentForms(ownerID string, count int) ([]string, error) {
+func (dc *dgraphClient) addConsentForms(ownerID string, count int) ([]string, error) {
 	consentFormInputs := []map[string]interface{}{}
 	for count > 0 {
 		input := map[string]interface{}{
@@ -189,10 +274,21 @@ func (h *helper) addConsentForms(ownerID string, count int) ([]string, error) {
 		count--
 	}
 
-	return h.sendRequest(addConsentFormsMutation, consentFormInputs)
+	data, err := dc.sendRequest(addConsentFormsMutation, consentFormInputs)
+	if err != nil {
+		return nil, err
+	}
+
+	idValues := gjson.Get(data, "data.addConsentForm.consentForm.#.id").Array()
+	ids := []string{}
+	for _, id := range idValues {
+		ids = append(ids, id.String())
+	}
+
+	return ids, nil
 }
 
-func (h *helper) addDonor(ownerID string) ([]string, error) {
+func (dc *dgraphClient) addDonor(ownerID string) ([]string, error) {
 	donorCount := rand.Intn(100) + 50
 	donorInputs := []map[string]interface{}{}
 	for donorCount > 0 {
@@ -217,10 +313,21 @@ func (h *helper) addDonor(ownerID string) ([]string, error) {
 		donorCount--
 	}
 
-	return h.sendRequest(addDonorsMutation, donorInputs)
+	data, err := dc.sendRequest(addDonorsMutation, donorInputs)
+	if err != nil {
+		return nil, err
+	}
+
+	idValues := gjson.Get(data, "data.addDonor.donor.#.id").Array()
+	ids := []string{}
+	for _, id := range idValues {
+		ids = append(ids, id.String())
+	}
+
+	return ids, nil
 }
 
-func (h *helper) addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
+func (dc *dgraphClient) addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
 	now := time.Now()
 	input := map[string]interface{}{
 		"owner":           ownerID,
@@ -233,13 +340,23 @@ func (h *helper) addConsent(ownerID, donorID, formID, protocolID string) (string
 		"destructionDate": now.AddDate(0, 0, 360).String(),
 	}
 
-	output, err := h.sendRequest(addConsentsMutation, input)
-	return output[0], err
+	data, err := dc.sendRequest(addConsentsMutation, input)
+	if err != nil {
+		return "", err
+	}
+
+	idValues := gjson.Get(data, "data.addConsent.consent.#.id").Array()
+	ids := []string{}
+	for _, id := range idValues {
+		ids = append(ids, id.String())
+	}
+
+	return ids[0], nil
 }
 
 // NOTE: this could be improved to return the input specimenInputs variable
 // which would be submitted in bulk by the calling scope
-func (h *helper) addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string, error) {
+func (dc *dgraphClient) addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string, error) {
 	specimenCount := rand.Intn(10) + 1
 
 	specimenInputs := []map[string]interface{}{}
@@ -280,10 +397,21 @@ func (h *helper) addBloodSpecimens(ownerID, donorID, consentID, protocolID strin
 		specimenCount--
 	}
 
-	return h.sendRequest(addBloodSpecimensMutation, specimenInputs)
+	data, err := dc.sendRequest(addBloodSpecimensMutation, specimenInputs)
+	if err != nil {
+		return nil, err
+	}
+
+	idValues := gjson.Get(data, "data.addBloodSpecimen.bloodSpecimen.#.id").Array()
+	ids := []string{}
+	for _, id := range idValues {
+		ids = append(ids, id.String())
+	}
+
+	return ids, nil
 }
 
-func (h *helper) addTest(ownerID, labID string, specimenIDs []string) (string, error) {
+func (dc *dgraphClient) addTest(ownerID, labID string, specimenIDs []string) (string, error) {
 	input := map[string]interface{}{
 		"description": randomString(descriptions),
 		"owner":       ownerID,
@@ -292,19 +420,75 @@ func (h *helper) addTest(ownerID, labID string, specimenIDs []string) (string, e
 		"results":     []string{},
 	}
 
-	output, err := h.sendRequest(addTestsMutation, input)
-	return output[0], err
+	data, err := dc.sendRequest(addTestsMutation, input)
+	if err != nil {
+		return "", err
+	}
+
+	idValues := gjson.Get(data, "data.addTest.test.#.id").Array()
+	ids := []string{}
+	for _, id := range idValues {
+		ids = append(ids, id.String())
+	}
+
+	return ids[0], nil
 }
 
-func (h *helper) addResult(ownerID, testID string) (string, error) {
+func (dc *dgraphClient) addResult(ownerID, testID string) (string, error) {
 	input := map[string]interface{}{
 		"owner": ownerID,
 		"notes": randomString(notes),
 		"test":  testID,
 	}
 
-	output, err := h.sendRequest(addResultsMutation, input)
-	return output[0], err
+	data, err := dc.sendRequest(addResultsMutation, input)
+	if err != nil {
+		return "", err
+	}
+
+	idValues := gjson.Get(data, "data.addResult.result.#.id").Array()
+	ids := []string{}
+	for _, id := range idValues {
+		ids = append(ids, id.String())
+	}
+
+	return ids[0], nil
+}
+
+func (dc *dgraphClient) sendRequest(mutation string, input interface{}) (string, error) {
+	variables := map[string]interface{}{
+		"input": input,
+	}
+
+	p := payload{
+		Query:     mutation,
+		Variables: variables,
+	}
+
+	b, err := json.Marshal(p)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest("POST", dc.dgraphURL, bytes.NewBuffer(b))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("X-Auth0-Token", dc.userToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := dc.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
 }
 
 func randomString(options []string) string {

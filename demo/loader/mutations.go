@@ -1,8 +1,8 @@
 package loader
 
-const addOwnerOrgsMutation = "mutation AddOwnerOrgs($input: [AddOwnerOrgInput!]!) { addOwnerOrg(input: $input) { id } }"
+const addOwnerOrgsMutation = "mutation AddOwnerOrgs($input: [AddOwnerOrgInput!]!) { addOwnerOrg(input: $input) { ownerOrg { id } } }"
 
-const addLabOrgsMutation = "mutation addLabOrg(input: $input) { id }"
+const addLabOrgsMutation = "mutation AddLabOrgs($input: [AddLabOrgInput!]!) { addLabOrg(input: $input) { labOrg { id } } }"
 
 const addStorageOrgsMutation = "mutation addStorageOrg(input: $input) { id }"
 
