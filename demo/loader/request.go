@@ -21,30 +21,23 @@ type auth0Client struct {
 
 // https://auth0.com/docs/api/authentication?shell#resource-owner-password
 func (ac *auth0Client) getUserToken(cfg Config) (string, error) {
-	data := fmt.Sprintf(`{
-		"grant_type": "password",
-		"username": "%s",
-		"password": "%s",
-		"audience": "%s",
-		"scope": "%s",
-		"client_id": "%s",
-		"client_secret": "%s"
-	}`,
+	grantType := "http://auth0.com/oauth/grant-type/password-realm"
+	realm := "Username-Password-Authentication"
+	data := fmt.Sprintf(
+		"grant_type=%s&username=%s&password=%s&client_id=%s&realm=%s",
+		grantType,
 		cfg.Username,
 		cfg.Password,
-		cfg.Audience,
-		cfg.Scope,
 		cfg.ClientID,
-		cfg.ClientSecret,
+		realm,
 	)
 
-	req, err := http.NewRequest(http.MethodPost, cfg.Audience+"/oauth/token", strings.NewReader(data))
+	tokenURL := "https://" + cfg.Domain + "/oauth/token"
+	req, err := http.NewRequest(http.MethodPost, tokenURL, strings.NewReader(data))
 	if err != nil {
 		return "", err
 	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", cfg.ManagementToken))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := ac.httpClient.Do(req)
 	if err != nil {
@@ -56,8 +49,7 @@ func (ac *auth0Client) getUserToken(cfg Config) (string, error) {
 		return "", err
 	}
 
-	userToken := gjson.Get(string(bodyData), "access_token")
-
+	userToken := gjson.Get(string(bodyData), "id_token")
 	return userToken.String(), nil
 }
 
@@ -70,11 +62,11 @@ func (ac *auth0Client) updateUserToken(userID, orgID, audience, managementToken 
 		}
 	}`, orgID)
 
-	req, err := http.NewRequest(http.MethodPatch, audience+"/users/"+encodedUserID, strings.NewReader(data))
+	userURL := audience+"users/"+encodedUserID
+	req, err := http.NewRequest(http.MethodPatch, userURL, strings.NewReader(data))
 	if err != nil {
 		return err
 	}
-
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", managementToken))
 

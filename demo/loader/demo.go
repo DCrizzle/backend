@@ -12,8 +12,8 @@ type Config struct {
 	ManagementToken string `json:"MANAGEMENT_TOKEN"`
 	Username        string `json:"USERNAME"`
 	Password        string `json:"PASSWORD"`
+	Domain          string `json:"DOMAIN"`
 	Audience        string `json:"AUDIENCE"`
-	Scope           string `json:"SCOPE"`
 	ClientID        string `json:"CLIENT_ID"`
 	ClientSecret    string `json:"CLIENT_SECRET"`
 	DgraphURL       string `json:"DGRAPH_URL"`
