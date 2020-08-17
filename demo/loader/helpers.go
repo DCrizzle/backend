@@ -55,7 +55,6 @@ func (dc *dgraphClient) addOwnerOrgs() ([]string, error) {
 }
 
 func (dc *dgraphClient) addLabAndStorageOrgs(ownerID string) ([]string, []string, error) {
-	fmt.Println("addLabAndStorageOrgs")
 	labInputs := []map[string]interface{}{}
 	labCount := rand.Intn(len(labs))
 
@@ -84,13 +83,11 @@ func (dc *dgraphClient) addLabAndStorageOrgs(ownerID string) ([]string, []string
 		labInputs = append(labInputs, labInput)
 		labCount--
 	}
-	fmt.Println("lab inputs:", labInputs)
 
 	labs, err := dc.sendRequest(addLabOrgsMutation, labInputs)
 	if err != nil {
 		return nil, nil, err
 	}
-	fmt.Println("labs:", labs)
 
 	labIDValues := gjson.Get(labs, "data.addLabOrg.labOrg.#.id").Array()
 	labIDs := []string{}
@@ -99,20 +96,22 @@ func (dc *dgraphClient) addLabAndStorageOrgs(ownerID string) ([]string, []string
 	}
 
 	storageIndex := rand.Intn(len(storages))
-	storageInput := map[string]interface{}{
-		"street":    randomString(streets),
-		"city":      randomString(cities),
-		"county":    randomString(counties),
-		"state":     randomString(states),
-		"country":   randomString(countries),
-		"zip":       randomInt(zips),
-		"name":      storages[storageIndex],
-		"users":     []string{},
-		"createdOn": now,
-		"updatedOn": now,
-		"owner":     owner,
-		"specimens": []string{},
-		"plans":     []string{},
+	storageInput := []map[string]interface{}{
+		map[string]interface{}{
+			"street":    randomString(streets),
+			"city":      randomString(cities),
+			"county":    randomString(counties),
+			"state":     randomString(states),
+			"country":   randomString(countries),
+			"zip":       randomInt(zips),
+			"name":      storages[storageIndex],
+			"users":     []string{},
+			"createdOn": now,
+			"updatedOn": now,
+			"owner":     owner,
+			"specimens": []string{},
+			"plans":     []string{},
+		},
 	}
 
 	storages, err := dc.sendRequest(addStorageOrgsMutation, storageInput)
@@ -121,7 +120,7 @@ func (dc *dgraphClient) addLabAndStorageOrgs(ownerID string) ([]string, []string
 	}
 	fmt.Println("storages:", storages)
 
-	storageIDValues := gjson.Get(storages, "data.addStorageOrg.#.storageOrg.id").Array()
+	storageIDValues := gjson.Get(storages, "data.addStorageOrg.storageOrg.#.id").Array()
 	storageIDs := []string{}
 	for _, id := range storageIDValues {
 		storageIDs = append(storageIDs, id.String())
