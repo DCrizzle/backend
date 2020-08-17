@@ -4,24 +4,24 @@ const addOwnerOrgsMutation = "mutation AddOwnerOrgs($input: [AddOwnerOrgInput!]!
 
 const addLabOrgsMutation = "mutation AddLabOrgs($input: [AddLabOrgInput!]!) { addLabOrg(input: $input) { labOrg { id } } }"
 
-const addStorageOrgsMutation = "mutation addStorageOrg(input: $input) { id }"
+const addStorageOrgsMutation = "mutation AddStorageOrgs($input: [AddStorageOrgInput!]!) { addStorageOrg(input: $input) { storageOrg { id } } }"
 
-const addUsersMutation = "mutation addUser(input: $input) { id }"
+const addUsersMutation = "mutation AddUsers($input: [AddUserInput!]!) { addUser(input: $input) { user { id } } }"
 
-const addProtocolsMutation = "mutation addProtocol(input: $input) { id }"
+const addProtocolsMutation = "mutation AddProtocols($input: [AddProtocolInput!]!) { addProtocol(input: $input) { protocol { id } } }"
 
-const addProtocolFormsMutation = "mutation addProtocolForm(input: $input) { id }"
+const addProtocolFormsMutation = "mutation AddProtocolForms($input: [AddProtocolFormInput!]!) { addProtocolForm(input: $input) { protocolForm { id } } }"
 
-const addPlansMutation = "mutation addPlans(input: $input) { id }"
+const addPlansMutation = "mutation AddPlans($input: [AddPlanInput!]!) { addPlan(input: $input) { plan { id } } }"
 
-const addConsentFormsMutation = "mutation addConsentForm(input: $input) { id }"
+const addConsentFormsMutation = "mutation AddConsentForms($input: [AddConsentFormInput!]!) { addConsentForm(input: $input) { consentForm { id } } }"
 
-const addDonorsMutation = "mutation addDonor(input: $input) { id }"
+const addDonorsMutation = "mutation AddDonors($input: [AddDonorInput!]!) { addDonor(input: $input) { donor { id } } }"
 
-const addConsentsMutation = "mutation addConsent(input: $input) { id }"
+const addConsentsMutation = "mutation AddConsent($input: [AddConsentInput!]!) { addConsent(input: $input) { consent { id } } }"
 
-const addBloodSpecimensMutation = "mutation addBloodSpecimen(input: $input) { id }"
+const addBloodSpecimensMutation = "mutation AddBloodSpecimens($input: [AddBloodSpecimenInput!]!) { addBloodSpecimen(input: $input) { bloodSpecimen { id } } }"
 
-const addTestsMutation = "mutation addTest(input: $input) { id }"
+const addTestsMutation = "mutation AddTests($input: [AddTestInput!]!) { addTest(input: $input) { test { id } } }"
 
-const addResultsMutation = "mutation addResult(input: $input) { id }"
+const addResultsMutation = "mutation AddResults($input: [AddResultInput!]!) { addResult(input: $input) { result { id } } }"
