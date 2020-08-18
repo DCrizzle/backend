@@ -3,7 +3,7 @@ package loader
 import (
 	"bytes"
 	"encoding/json"
-	"fmt" // TEMP
+	"errors"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -56,7 +56,7 @@ func (dc *dgraphClient) addOwnerOrgs() ([]string, error) {
 
 func (dc *dgraphClient) addLabAndStorageOrgs(ownerID string) ([]string, []string, error) {
 	labInputs := []map[string]interface{}{}
-	labCount := rand.Intn(len(labs))
+	labCount := rand.Intn(len(labs)) + 1
 
 	owner := map[string]string{
 		"id": ownerID,
@@ -118,7 +118,6 @@ func (dc *dgraphClient) addLabAndStorageOrgs(ownerID string) ([]string, []string
 	if err != nil {
 		return nil, nil, err
 	}
-	fmt.Println("storages:", storages)
 
 	storageIDValues := gjson.Get(storages, "data.addStorageOrg.storageOrg.#.id").Array()
 	storageIDs := []string{}
@@ -129,9 +128,16 @@ func (dc *dgraphClient) addLabAndStorageOrgs(ownerID string) ([]string, []string
 	return labIDs, storageIDs, nil
 }
 
-func (dc *dgraphClient) addUsers(ownerID string, labIDs, storageIDs []string) ([]string, error) {
+func (dc *dgraphClient) addUsers(ownerID string, ownerIndex int, labIDs, storageIDs []string) ([]string, error) {
 	inputs := []map[string]interface{}{}
-	for _, user := range users {
+
+	start := (len(users) / len(orgs)) * ownerIndex
+	end := start + (len(users) / len(orgs))
+	if end > len(users) {
+		end = len(users) - 1
+	}
+
+	for _, user := range users[start:end] {
 		orgID := ""
 		if user.role == "USER_STORAGE" {
 			orgID = randomString(storageIDs)
@@ -141,13 +147,20 @@ func (dc *dgraphClient) addUsers(ownerID string, labIDs, storageIDs []string) ([
 			orgID = ownerID
 		}
 
+		owner := map[string]string{
+			"id": ownerID,
+		}
+		org := map[string]string{
+			"id": orgID,
+		}
 		input := map[string]interface{}{
-			"owner":     ownerID,
+			"owner":     owner,
 			"email":     user.email,
 			"firstName": user.first,
 			"lastName":  user.last,
 			"role":      user.role,
-			"org":       orgID,
+			"org":       org,
+			"user_id":   user.userID,
 		}
 
 		inputs = append(inputs, input)
@@ -158,18 +171,34 @@ func (dc *dgraphClient) addUsers(ownerID string, labIDs, storageIDs []string) ([
 		return nil, err
 	}
 
-	idValues := gjson.Get(data, "data.addUser.user.#.id").Array()
-	ids := []string{}
-	for _, id := range idValues {
-		ids = append(ids, id.String())
+	emailValues := gjson.Get(data, "data.addUser.user.#.email").Array()
+	emails := []string{}
+	for _, email := range emailValues {
+		emails = append(emails, email.String())
 	}
 
-	return ids, nil
+	return emails, nil
 }
 
 func (dc *dgraphClient) addProtocolsAndPlans(ownerID string, labIDs, storageIDs []string) ([]string, []string, error) {
 	dobStart := time.Date(1977, time.May, 25, 22, 0, 0, 0, time.UTC)
 	dobEnd := time.Date(2005, time.May, 19, 22, 0, 0, 0, time.UTC)
+	owner := map[string]string{
+		"id": ownerID,
+	}
+
+	emptyForm := map[string]interface{}{
+		"owner":      owner,
+		"title":      "",
+		"body":       "",
+		"protocolID": "",
+	}
+	emptyPlan := map[string]interface{}{
+		"owner":    owner,
+		"name":     "",
+		"labs":     []string{},
+		"storages": []string{},
+	}
 
 	protocolInputs := []map[string]interface{}{}
 	for _, protocolName := range protocolNames {
@@ -179,16 +208,21 @@ func (dc *dgraphClient) addProtocolsAndPlans(ownerID string, labIDs, storageIDs 
 			"county":      randomString(counties),
 			"state":       randomString(states),
 			"zip":         randomInt(zips),
-			"owner":       ownerID,
+			"country":     randomString(countries),
+			"owner":       owner,
 			"name":        protocolName,
 			"description": randomString(descriptions),
-			"form":        "",
-			"plan":        "",
+			"form":        emptyForm,
+			"plan":        emptyPlan,
 			"dobStart":    dobStart.String(),
 			"dobEnd":      dobEnd.String(),
-			"race":        randomString(race),
-			"sex":         randomString(sex),
-			"specimens":   "",
+			"race": []string{
+				randomString(race),
+			},
+			"sex": []string{
+				randomString(sex),
+			},
+			"specimens": make([]map[string]string, 0),
 		}
 
 		protocolInputs = append(protocolInputs, input)
@@ -204,15 +238,32 @@ func (dc *dgraphClient) addProtocolsAndPlans(ownerID string, labIDs, storageIDs 
 	for _, id := range protocolsIDValues {
 		protocolIDs = append(protocolIDs, id.String())
 	}
+	if len(protocolIDs) == 0 {
+		return nil, nil, errors.New("no protocol ids returned from add mutation")
+	}
 
 	planInputs := []map[string]interface{}{}
 	for j, planName := range planNames {
+		lab := map[string]string{
+			"id": randomString(labIDs),
+		}
+		storage := map[string]string{
+			"id": randomString(storageIDs),
+		}
+		protocol := map[string]string{
+			"id": protocolIDs[j],
+		}
+
 		input := map[string]interface{}{
-			"owner":    ownerID,
-			"name":     planName,
-			"labs":     randomString(labIDs),
-			"storages": randomString(storageIDs),
-			"protocol": protocolIDs[j],
+			"owner": owner,
+			"name":  planName,
+			"labs": []map[string]string{
+				lab,
+			},
+			"storages": []map[string]string{
+				storage,
+			},
+			"protocol": protocol,
 		}
 
 		planInputs = append(planInputs, input)

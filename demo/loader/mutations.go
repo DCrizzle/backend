@@ -6,7 +6,7 @@ const addLabOrgsMutation = "mutation AddLabOrgs($input: [AddLabOrgInput!]!) { ad
 
 const addStorageOrgsMutation = "mutation AddStorageOrgs($input: [AddStorageOrgInput!]!) { addStorageOrg(input: $input) { storageOrg { id } } }"
 
-const addUsersMutation = "mutation AddUsers($input: [AddUserInput!]!) { addUser(input: $input) { user { id } } }"
+const addUsersMutation = "mutation AddUsers($input: [AddUserInput!]!) { addUser(input: $input) { user { email } } }"
 
 const addProtocolsMutation = "mutation AddProtocols($input: [AddProtocolInput!]!) { addProtocol(input: $input) { protocol { id } } }"
 

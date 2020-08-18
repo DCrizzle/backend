@@ -43,7 +43,7 @@ func LoadDemo(cfg Config) {
 	}
 	log.Println("ownerIDs:", ownerIDs)
 
-	for _, ownerID := range ownerIDs {
+	for ownerIndex, ownerID := range ownerIDs {
 		if err := ac.updateUserToken(cfg.UserID, ownerID, cfg.Audience, cfg.ManagementToken); err != nil {
 			log.Fatal("error updating user token:", err.Error())
 		}
@@ -65,21 +65,25 @@ func LoadDemo(cfg Config) {
 		results[ownerID]["labs"] = labIDs
 		results[ownerID]["storages"] = storageIDs
 
-		// userIDs, err := addUsers(ownerID, labIDs, storageIDs)
+		_ = ownerIndex // TEMP
+		// userIDs, err := dc.addUsers(ownerID, ownerIndex, labIDs, storageIDs)
 		// if err != nil {
 		// 	log.Fatal("add users error:", err.Error())
 		// }
+		// log.Println("userIDs:", userIDs)
 		//
 		// results[ownerID]["users"] = userIDs
-		//
-		// protocolIDs, planIDs, err := addProtocolsAndPlans(ownerID, labIDs, storageIDs)
-		// if err != nil {
-		// 	log.Fatal("add protocols/plans error:", err.Error())
-		// }
-		//
-		// results[ownerID]["protocols"] = protocolIDs
-		// results[ownerID]["plans"] = planIDs
-		//
+
+		protocolIDs, planIDs, err := dc.addProtocolsAndPlans(ownerID, labIDs, storageIDs)
+		if err != nil {
+			log.Fatal("add protocols/plans error:", err.Error())
+		}
+		log.Println("protocolIDs:", protocolIDs)
+		log.Println("planIDs:", planIDs)
+
+		results[ownerID]["protocols"] = protocolIDs
+		results[ownerID]["plans"] = planIDs
+
 		// externalIDs := make([]string, len(protocolIDs))
 		// for i := range externalIDs {
 		// 	externalIDs[i] = uuid.New().String()

@@ -62,7 +62,7 @@ func (ac *auth0Client) updateUserToken(userID, orgID, audience, managementToken 
 		}
 	}`, orgID)
 
-	userURL := audience+"users/"+encodedUserID
+	userURL := audience + "users/" + encodedUserID
 	req, err := http.NewRequest(http.MethodPatch, userURL, strings.NewReader(data))
 	if err != nil {
 		return err

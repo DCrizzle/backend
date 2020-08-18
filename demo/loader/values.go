@@ -99,77 +99,88 @@ var notes = []string{
 }
 
 var users = []struct {
-	email string
-	first string
-	last  string
-	role  string
+	email  string
+	first  string
+	last   string
+	role   string
+	userID string
 }{
 	{
-		email: "yoda@jedi.com",
-		first: "yoda",
-		last:  "---",
-		role:  "USER_ADMIN",
+		email:  "yoda@jedi.com",
+		first:  "yoda",
+		last:   "---",
+		role:   "USER_ADMIN",
+		userID: "auth0|123",
 	},
 	{
-		email: "dooku@jedi.com",
-		first: "---",
-		last:  "dooku",
-		role:  "USER_INTERNAL",
+		email:  "dooku@jedi.com",
+		first:  "---",
+		last:   "dooku",
+		role:   "USER_INTERNAL",
+		userID: "auth0|234",
 	},
 	{
-		email: "jinn@jedi.com",
-		first: "qui-gon",
-		last:  "jinn",
-		role:  "USER_LAB",
+		email:  "jinn@jedi.com",
+		first:  "qui-gon",
+		last:   "jinn",
+		role:   "USER_LAB",
+		userID: "auth0|345",
 	},
 	{
-		email: "kenobi@jedi.com",
-		first: "obi-wan",
-		last:  "kenobi",
-		role:  "USER_STORAGE",
+		email:  "kenobi@jedi.com",
+		first:  "obi-wan",
+		last:   "kenobi",
+		role:   "USER_STORAGE",
+		userID: "auth0|456",
 	},
 	{
-		email: "skywalker@jedi.com",
-		first: "anakin",
-		last:  "skywalker",
-		role:  "USER_STORAGE",
+		email:  "skywalker@jedi.com",
+		first:  "anakin",
+		last:   "skywalker",
+		role:   "USER_STORAGE",
+		userID: "auth0|567",
 	},
 	{
-		email: "tano@jedi.com",
-		first: "ashoka",
-		last:  "tano",
-		role:  "USER_LAB",
-	},
-
-	{
-		email: "plagueis@sith.com",
-		first: "hego",
-		last:  "damask",
-		role:  "USER_ADMIN",
+		email:  "tano@jedi.com",
+		first:  "ashoka",
+		last:   "tano",
+		role:   "USER_LAB",
+		userID: "auth0|678",
 	},
 	{
-		email: "sidious@sith.com",
-		first: "sheev",
-		last:  "palpatine",
-		role:  "USER_ADMIN",
+		email:  "plagueis@sith.com",
+		first:  "hego",
+		last:   "damask",
+		role:   "USER_ADMIN",
+		userID: "auth0|789",
 	},
 	{
-		email: "maul@sith.com",
-		first: "maul",
-		last:  "---",
-		role:  "USER_LAB",
+		email:  "sidious@sith.com",
+		first:  "sheev",
+		last:   "palpatine",
+		role:   "USER_ADMIN",
+		userID: "auth0|890",
 	},
 	{
-		email: "tyranus@sith.com",
-		first: "---",
-		last:  "dooku",
-		role:  "USER_STORAGE",
+		email:  "maul@sith.com",
+		first:  "maul",
+		last:   "---",
+		role:   "USER_LAB",
+		userID: "auth0|321",
 	},
 	{
-		email: "vader@sith.com",
-		first: "anakin",
-		last:  "skywalker",
-		role:  "USER_STORAGE",
+		email:  "tyranus@sith.com",
+		first:  "---",
+		last:   "dooku",
+		role:   "USER_STORAGE",
+		userID: "auth0|432",
+	},
+	{
+		email:  "vader@sith.com",
+		first:  "anakin",
+		last:   "skywalker",
+		role:   "USER_STORAGE",
+		userID: "auth0|543",
 	},
 }
 
