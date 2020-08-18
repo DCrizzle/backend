@@ -146,43 +146,44 @@ func LoadDemo(cfg Config) {
 
 			bloodSpecimenIDs = append(bloodSpecimenIDs, donorSpecimenIDs...)
 		}
-		log.Println("consentIDs:", consentIDs)
-		log.Println("bloodSpecimenIDs:", bloodSpecimenIDs)
+		// log.Println("consentIDs:", consentIDs)
+		// log.Println("bloodSpecimenIDs:", bloodSpecimenIDs)
 
 		results[ownerID]["consents"] = consentIDs
 		results[ownerID]["bloodSpecimens"] = bloodSpecimenIDs
 
-		// testIDs := []string{}
+		testIDs := []string{}
 		// resultIDs := []string{}
-		// testChunk := 25
-		// chunkSize := (len(bloodSpecimenIDs) + testChunk - 1) / testChunk
-		// for i := 0; i < len(bloodSpecimenIDs); i += chunkSize {
-		// 	end := i + chunkSize
-		// 	if end > len(bloodSpecimenIDs) {
-		// 		end = len(bloodSpecimenIDs)
-		// 	}
-		//
-		// 	testSpecimens := bloodSpecimenIDs[i:end]
-		// 	testID, err := addTest(
-		// 		ownerID,
-		// 		randomString(labIDs),
-		// 		testSpecimens,
-		// 	)
-		// 	if err != nil {
-		// 		log.Fatal("add test error:", err.Error())
-		// 	}
-		//
-		// 	testIDs = append(testIDs, testID)
-		//
-		// 	resultID, err := addResult(ownerID, testID)
-		// 	if err != nil {
-		// 		log.Fatal("add result error:", err.Error())
-		// 	}
-		//
-		// 	resultIDs = append(resultIDs, resultID)
-		// }
-		//
-		// results[ownerID]["tests"] = testIDs
+		testChunk := 25
+		chunkSize := (len(bloodSpecimenIDs) + testChunk - 1) / testChunk
+		for i := 0; i < len(bloodSpecimenIDs); i += chunkSize {
+			end := i + chunkSize
+			if end > len(bloodSpecimenIDs) {
+				end = len(bloodSpecimenIDs)
+			}
+
+			testSpecimens := bloodSpecimenIDs[i:end]
+			testID, err := dc.addTest(
+				ownerID,
+				randomString(labIDs),
+				testSpecimens,
+			)
+			if err != nil {
+				log.Fatal("add test error:", err.Error())
+			}
+
+			testIDs = append(testIDs, testID)
+
+			// 	resultID, err := addResult(ownerID, testID)
+			// 	if err != nil {
+			// 		log.Fatal("add result error:", err.Error())
+			// 	}
+			//
+			// 	resultIDs = append(resultIDs, resultID)
+		}
+		log.Println("testIDs:", testIDs)
+
+		results[ownerID]["tests"] = testIDs
 		// results[ownerID]["results"] = resultIDs
 	}
 }
