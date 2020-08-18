@@ -59,7 +59,7 @@ type Consent @auth(
 	id: ID!
 	owner: OwnerOrg!
 	donor: Donor! @hasInverse(field: consents)
-	specimen: Specimen! @hasInverse(field: consent)
+	specimen: Specimen @hasInverse(field: consent)
 	protocol: Protocol!
 	form: ConsentForm! @hasInverse(field: consents)
 	consentedDate: DateTime! @search
@@ -657,12 +657,12 @@ interface Specimen {
 	donor: Donor! @hasInverse(field: specimens)
 	container: ContainerType! @search(by: [hash])
 	status: SpecimenStatus! @search(by: [hash])
-	destructionDate: DateTime! @search
+	destructionDate: DateTime @search
 	description: String! @search(by: [fulltext])
 	consent: Consent! @hasInverse(field: specimen)
 	owner: OwnerOrg!
-	lab: LabOrg! @hasInverse(field: specimens)
-	storage: StorageOrg! @hasInverse(field: specimens)
+	lab: LabOrg @hasInverse(field: specimens)
+	storage: StorageOrg @hasInverse(field: specimens)
 	protocol: Protocol! @hasInverse(field: specimens)
 	tests: [Test!]! @hasInverse(field: specimens)
 }
