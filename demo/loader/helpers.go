@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log" // TEMP
+	// "log" // TEMP
 	"math/rand"
 	"net/http"
 	"time"
@@ -397,23 +397,37 @@ func (dc *dgraphClient) addDonor(ownerID string) ([]string, error) {
 }
 
 func (dc *dgraphClient) addConsent(ownerID, donorID, formID, protocolID string) (string, error) {
+	owner := map[string]string{
+		"id": ownerID,
+	}
+	donor := map[string]string{
+		"id": donorID,
+	}
+	protocol := map[string]string{
+		"id": protocolID,
+	}
+	form := map[string]string{
+		"id": formID,
+	}
+
 	now := time.Now()
-	input := map[string]interface{}{
-		"owner":           ownerID,
-		"donor":           donorID,
-		"specimen":        "",
-		"protocol":        protocolID,
-		"form":            formID,
-		"consentedDate":   now.String(),
-		"retentionPeriod": 360,
-		"destructionDate": now.AddDate(0, 0, 360).String(),
+
+	input := []map[string]interface{}{
+		map[string]interface{}{
+			"owner":           owner,
+			"donor":           donor,
+			"protocol":        protocol,
+			"form":            form,
+			"consentedDate":   now.Format(time.RFC3339),
+			"retentionPeriod": 360,
+			"destructionDate": now.AddDate(0, 0, 360).Format(time.RFC3339),
+		},
 	}
 
 	data, err := dc.sendRequest(addConsentsMutation, input)
 	if err != nil {
 		return "", err
 	}
-	log.Println("data:", data)
 
 	idValues := gjson.Get(data, "data.addConsent.consent.#.id").Array()
 	ids := []string{}
@@ -427,6 +441,19 @@ func (dc *dgraphClient) addConsent(ownerID, donorID, formID, protocolID string) 
 // NOTE: this could be improved to return the input specimenInputs variable
 // which would be submitted in bulk by the calling scope
 func (dc *dgraphClient) addBloodSpecimens(ownerID, donorID, consentID, protocolID string) ([]string, error) {
+	owner := map[string]string{
+		"id": ownerID,
+	}
+	donor := map[string]string{
+		"id": donorID,
+	}
+	consent := map[string]string{
+		"id": consentID,
+	}
+	protocol := map[string]string{
+		"id": protocolID,
+	}
+
 	specimenCount := rand.Intn(10) + 1
 
 	specimenInputs := []map[string]interface{}{}
@@ -437,29 +464,22 @@ func (dc *dgraphClient) addBloodSpecimens(ownerID, donorID, consentID, protocolI
 	collectionDate := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC).String()
 
 	status := randomString(status)
-	destructionDate := ""
-	if status == "DESTROYED" {
-		destructionDate = time.Now().String()
-	}
 
 	for specimenCount > 0 {
 		input := map[string]interface{}{
-			"externalID":      uuid.New().String(),
-			"type":            specimenType[0],
-			"collectionDate":  collectionDate,
-			"donor":           donorID,
-			"container":       container[0],
-			"status":          status,
-			"destructionDate": destructionDate,
-			"description":     randomString(descriptions),
-			"consent":         consentID,
-			"owner":           ownerID,
-			"lab":             "", // NOTE: add later (?)
-			"storage":         "", // NOTE: add later (?)
-			"protocol":        protocolID,
-			"tests":           []string{},
-			"bloodType":       randomString(bloodType),
-			"volume":          1.0,
+			"externalID":     uuid.New().String(),
+			"type":           specimenType[0],
+			"collectionDate": collectionDate,
+			"donor":          donor,
+			"container":      container[0],
+			"status":         status,
+			"description":    randomString(descriptions),
+			"consent":        consent,
+			"owner":          owner,
+			"protocol":       protocol,
+			"tests":          []string{},
+			"bloodType":      randomString(bloodType),
+			"volume":         1.0,
 		}
 
 		specimenInputs = append(specimenInputs, input)

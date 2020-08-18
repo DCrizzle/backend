@@ -2,7 +2,7 @@ package loader
 
 import (
 	"log"
-	// "math/rand"
+	"math/rand"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -118,38 +118,40 @@ func LoadDemo(cfg Config) {
 			log.Fatalf("inequal protocol and consent form count, protocols: %d, consent forms: %d\n", len(protocolIDs), len(consentFormIDs))
 		}
 
-		// consentIDs := []string{}
-		// bloodSpecimenIDs := []string{}
-		// for _, donorID := range donorIDs {
-		// 	i := rand.Intn(len(protocolIDs))
-		// 	consentID, err := addConsent(
-		// 		ownerID,
-		// 		donorID,
-		// 		consentFormIDs[i],
-		// 		protocolIDs[i],
-		// 	)
-		// 	if err != nil {
-		// 		log.Fatal("add consent error:", err.Error())
-		// 	}
-		//
-		// 	consentIDs = append(consentIDs, consentID)
-		//
-		// 	donorSpecimenIDs, err := addBloodSpecimens(
-		// 		ownerID,
-		// 		donorID,
-		// 		consentID,
-		// 		protocolIDs[i],
-		// 	)
-		// 	if err != nil {
-		// 		log.Fatal("add blood specimens error:", err.Error())
-		// 	}
-		//
-		// 	bloodSpecimenIDs = append(bloodSpecimenIDs, donorSpecimenIDs...)
-		// }
-		//
-		// results[ownerID]["consents"] = consentIDs
-		// results[ownerID]["bloodSpecimens"] = bloodSpecimenIDs
-		//
+		consentIDs := []string{}
+		bloodSpecimenIDs := []string{}
+		for _, donorID := range donorIDs {
+			i := rand.Intn(len(protocolIDs))
+			consentID, err := dc.addConsent(
+				ownerID,
+				donorID,
+				consentFormIDs[i],
+				protocolIDs[i],
+			)
+			if err != nil {
+				log.Fatal("add consent error:", err.Error())
+			}
+
+			consentIDs = append(consentIDs, consentID)
+
+			donorSpecimenIDs, err := dc.addBloodSpecimens(
+				ownerID,
+				donorID,
+				consentID,
+				protocolIDs[i],
+			)
+			if err != nil {
+				log.Fatal("add blood specimens error:", err.Error())
+			}
+
+			bloodSpecimenIDs = append(bloodSpecimenIDs, donorSpecimenIDs...)
+		}
+		log.Println("consentIDs:", consentIDs)
+		log.Println("bloodSpecimenIDs:", bloodSpecimenIDs)
+
+		results[ownerID]["consents"] = consentIDs
+		results[ownerID]["bloodSpecimens"] = bloodSpecimenIDs
+
 		// testIDs := []string{}
 		// resultIDs := []string{}
 		// testChunk := 25
