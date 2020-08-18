@@ -134,8 +134,8 @@ type Donor implements Location @auth(
 	dob: DateTime! @search
 	sex: Sex! @search(by: [hash])
 	race: Race! @search(by: [hash])
-	specimens: [Specimen!]! @hasInverse(field: donor)
-	consents: [Consent!]! @hasInverse(field: donor)
+	specimens: [Specimen] @hasInverse(field: donor)
+	consents: [Consent] @hasInverse(field: donor)
 }
 
 enum Sex {
