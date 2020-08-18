@@ -106,17 +106,18 @@ func LoadDemo(cfg Config) {
 
 		results[ownerID]["consentForms"] = consentFormIDs
 
-		// donorIDs, err := addDonor(ownerID)
-		// if err != nil {
-		// 	log.Fatal("add donors error:", err.Error())
-		// }
-		//
-		// results[ownerID]["donors"] = donorIDs
-		//
-		// if len(protocolIDs) != len(consentFormIDs) {
-		// 	log.Fatalf("inequal protocol and consent form count, protocols: %d, consent forms: %d\n", len(protocolIDs), len(consentFormIDs))
-		// }
-		//
+		donorIDs, err := dc.addDonor(ownerID)
+		if err != nil {
+			log.Fatal("add donors error:", err.Error())
+		}
+		log.Println("donorIDs:", donorIDs)
+
+		results[ownerID]["donors"] = donorIDs
+
+		if len(protocolIDs) != len(consentFormIDs) {
+			log.Fatalf("inequal protocol and consent form count, protocols: %d, consent forms: %d\n", len(protocolIDs), len(consentFormIDs))
+		}
+
 		// consentIDs := []string{}
 		// bloodSpecimenIDs := []string{}
 		// for _, donorID := range donorIDs {

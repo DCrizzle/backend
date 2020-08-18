@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log" // TEMP
 	"math/rand"
 	"net/http"
 	"time"
@@ -355,6 +356,9 @@ func (dc *dgraphClient) addConsentForms(ownerID string, count int) ([]string, er
 func (dc *dgraphClient) addDonor(ownerID string) ([]string, error) {
 	donorCount := rand.Intn(100) + 50
 	donorInputs := []map[string]interface{}{}
+	owner := map[string]string{
+		"id": ownerID,
+	}
 	for donorCount > 0 {
 		dob, age := randomDOBAndAge()
 
@@ -364,7 +368,8 @@ func (dc *dgraphClient) addDonor(ownerID string) ([]string, error) {
 			"county":    randomString(counties),
 			"state":     randomString(states),
 			"zip":       randomInt(zips),
-			"owner":     ownerID,
+			"country":   randomString(countries),
+			"owner":     owner,
 			"dob":       dob,
 			"age":       age,
 			"sex":       randomString(sex),
@@ -408,6 +413,7 @@ func (dc *dgraphClient) addConsent(ownerID, donorID, formID, protocolID string) 
 	if err != nil {
 		return "", err
 	}
+	log.Println("data:", data)
 
 	idValues := gjson.Get(data, "data.addConsent.consent.#.id").Array()
 	ids := []string{}
