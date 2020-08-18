@@ -285,12 +285,22 @@ func (dc *dgraphClient) addProtocolsAndPlans(ownerID string, labIDs, storageIDs 
 
 func (dc *dgraphClient) addProtocolForms(ownerID string, protocolIDs, protocolExternalIDs []string) ([]string, error) {
 	protocolFormInputs := []map[string]interface{}{}
+	owner := map[string]string{
+		"id": ownerID,
+	}
+
 	for k, protocolID := range protocolIDs {
+		protocol := map[string]string{
+			"id": protocolID,
+		}
+
 		input := map[string]interface{}{
-			"owner":      ownerID,
-			"title":      randomString(titles),
-			"body":       randomString(bodies),
-			"protocol":   protocolID,
+			"owner": owner,
+			"title": randomString(titles),
+			"body":  randomString(bodies),
+			"protocols": []map[string]string{
+				protocol,
+			},
 			"protocolID": protocolExternalIDs[k],
 		}
 
@@ -313,9 +323,13 @@ func (dc *dgraphClient) addProtocolForms(ownerID string, protocolIDs, protocolEx
 
 func (dc *dgraphClient) addConsentForms(ownerID string, count int) ([]string, error) {
 	consentFormInputs := []map[string]interface{}{}
+	owner := map[string]string{
+		"id": ownerID,
+	}
+
 	for count > 0 {
 		input := map[string]interface{}{
-			"owner": ownerID,
+			"owner": owner,
 			"title": randomString(titles),
 			"body":  randomString(bodies),
 		}

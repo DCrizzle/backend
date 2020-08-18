@@ -4,7 +4,8 @@ import (
 	"log"
 	// "math/rand"
 	"net/http"
-	// "github.com/google/uuid"
+
+	"github.com/google/uuid"
 )
 
 type Config struct {
@@ -84,25 +85,27 @@ func LoadDemo(cfg Config) {
 		results[ownerID]["protocols"] = protocolIDs
 		results[ownerID]["plans"] = planIDs
 
-		// externalIDs := make([]string, len(protocolIDs))
-		// for i := range externalIDs {
-		// 	externalIDs[i] = uuid.New().String()
-		// }
-		//
-		// protocolFormIDs, err := addProtocolForms(ownerID, protocolIDs, externalIDs)
-		// if err != nil {
-		// 	log.Fatal("add protocol forms error:", err.Error())
-		// }
-		//
-		// results[ownerID]["protocolForms"] = protocolFormIDs
-		//
-		// consentFormIDs, err := addConsentForms(ownerID, len(protocolIDs))
-		// if err != nil {
-		// 	log.Fatal("add consent forms error:", err.Error())
-		// }
-		//
-		// results[ownerID]["consentForms"] = consentFormIDs
-		//
+		externalIDs := make([]string, len(protocolIDs))
+		for i := range externalIDs {
+			externalIDs[i] = uuid.New().String()
+		}
+
+		protocolFormIDs, err := dc.addProtocolForms(ownerID, protocolIDs, externalIDs)
+		if err != nil {
+			log.Fatal("add protocol forms error:", err.Error())
+		}
+		log.Println("protocolFormIDs:", protocolFormIDs)
+
+		results[ownerID]["protocolForms"] = protocolFormIDs
+
+		consentFormIDs, err := dc.addConsentForms(ownerID, len(protocolIDs))
+		if err != nil {
+			log.Fatal("add consent forms error:", err.Error())
+		}
+		log.Println("consentFormIDs:", consentFormIDs)
+
+		results[ownerID]["consentForms"] = consentFormIDs
+
 		// donorIDs, err := addDonor(ownerID)
 		// if err != nil {
 		// 	log.Fatal("add donors error:", err.Error())
