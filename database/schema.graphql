@@ -219,7 +219,7 @@ type ConsentForm implements Form @auth(
 		}"""},
 	]},
 ) {
-	consents: [Consent!]! @hasInverse(field: form)
+	consents: [Consent] @hasInverse(field: form)
 }
 
 type ProtocolForm implements Form @auth(
