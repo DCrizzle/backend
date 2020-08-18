@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log" // TEMP
 	"math/rand"
 	"net/http"
 	"time"
@@ -541,10 +540,19 @@ func (dc *dgraphClient) addTest(ownerID, labID string, specimenIDs []string) (st
 }
 
 func (dc *dgraphClient) addResult(ownerID, testID string) (string, error) {
-	input := map[string]interface{}{
-		"owner": ownerID,
-		"notes": randomString(notes),
-		"test":  testID,
+	owner := map[string]string{
+		"id": ownerID,
+	}
+	test := map[string]string{
+		"id": testID,
+	}
+
+	input := []map[string]interface{}{
+		map[string]interface{}{
+			"owner": owner,
+			"notes": randomString(notes),
+			"test":  test,
+		},
 	}
 
 	data, err := dc.sendRequest(addResultsMutation, input)
