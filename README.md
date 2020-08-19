@@ -26,4 +26,5 @@
 - [ ] available configurations/states:
 - [ ] production - running fully connected to external resources (e.g. auth0)
 - [ ] mocking - running dgraph live but not unit testing (e.g. manually testing database/api)
+	- [ ] build command: `go build -tags mock`
 - [ ] testing - running isolated for code testing purposes (e.g. "go test")
