@@ -21,6 +21,8 @@ func main() {
 		log.Fatal("error unmarshalling config file:", err.Error())
 	}
 
-	loader.LoadDemo(cfg)
+	if err := loader.LoadDemo(cfg); err != nil {
+		log.Fatal("error loading demo:", err.Error())
+	}
 	log.Println("end demo loading")
 }

@@ -1,10 +1,13 @@
 package loader
 
 import (
-	"log"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 
+	"github.com/cheggaaa/pb/v3"
 	"github.com/google/uuid"
 )
 
@@ -20,7 +23,7 @@ type Config struct {
 	DgraphURL       string `json:"DGRAPH_URL"`
 }
 
-func LoadDemo(cfg Config) {
+func LoadDemo(cfg Config) error {
 	results := make(map[string]map[string][]string)
 
 	ac := &auth0Client{
@@ -29,7 +32,7 @@ func LoadDemo(cfg Config) {
 
 	userToken, err := ac.getUserToken(cfg)
 	if err != nil {
-		log.Fatal("error getting user token:", err.Error())
+		return fmt.Errorf("error getting user token: %w", err)
 	}
 
 	dc := &dgraphClient{
@@ -40,47 +43,46 @@ func LoadDemo(cfg Config) {
 
 	ownerIDs, err := dc.addOwnerOrgs()
 	if err != nil {
-		log.Fatal("add owner orgs error:", err.Error())
+		return fmt.Errorf("add owner orgs error: %w", err)
 	}
-	log.Println("ownerIDs:", ownerIDs)
+
+	helperCount := 10 // number of helper methods being called without owner orgs
+	bar := pb.StartNew(helperCount * len(ownerIDs))
 
 	for ownerIndex, ownerID := range ownerIDs {
 		if err := ac.updateUserToken(cfg.UserID, ownerID, cfg.Audience, cfg.ManagementToken); err != nil {
-			log.Fatal("error updating user token:", err.Error())
+			return fmt.Errorf("error updating user token: %w", err)
 		}
 
 		userToken, err := ac.getUserToken(cfg)
 		if err != nil {
-			log.Fatal("error getting updated user token:", err.Error())
+			return fmt.Errorf("error getting updated user token: %w", err)
 		}
 		dc.userToken = userToken
 
 		results[ownerID] = make(map[string][]string)
 		labIDs, storageIDs, err := dc.addLabAndStorageOrgs(ownerID)
 		if err != nil {
-			log.Fatal("add lab/storage orgs error:", err.Error())
+			return fmt.Errorf("add lab/storage orgs error: %w", err)
 		}
-		log.Println("labIDs:", labIDs)
-		log.Println("storageIDs:", storageIDs)
+		bar.Increment()
 
 		results[ownerID]["labs"] = labIDs
 		results[ownerID]["storages"] = storageIDs
 
-		_ = ownerIndex // TEMP
-		// userIDs, err := dc.addUsers(ownerID, ownerIndex, labIDs, storageIDs)
-		// if err != nil {
-		// 	log.Fatal("add users error:", err.Error())
-		// }
-		// log.Println("userIDs:", userIDs)
-		//
-		// results[ownerID]["users"] = userIDs
+		userIDs, err := dc.addUsers(ownerID, ownerIndex, labIDs, storageIDs)
+		if err != nil {
+			return fmt.Errorf("add users error: %w", err)
+		}
+		bar.Increment()
+
+		results[ownerID]["users"] = userIDs
 
 		protocolIDs, planIDs, err := dc.addProtocolsAndPlans(ownerID, labIDs, storageIDs)
 		if err != nil {
-			log.Fatal("add protocols/plans error:", err.Error())
+			return fmt.Errorf("add protocols/plans error: %w", err)
 		}
-		log.Println("protocolIDs:", protocolIDs)
-		log.Println("planIDs:", planIDs)
+		bar.Increment()
 
 		results[ownerID]["protocols"] = protocolIDs
 		results[ownerID]["plans"] = planIDs
@@ -92,30 +94,30 @@ func LoadDemo(cfg Config) {
 
 		protocolFormIDs, err := dc.addProtocolForms(ownerID, protocolIDs, externalIDs)
 		if err != nil {
-			log.Fatal("add protocol forms error:", err.Error())
+			return fmt.Errorf("add protocol forms error: %w", err)
 		}
-		log.Println("protocolFormIDs:", protocolFormIDs)
+		bar.Increment()
 
 		results[ownerID]["protocolForms"] = protocolFormIDs
 
 		consentFormIDs, err := dc.addConsentForms(ownerID, len(protocolIDs))
 		if err != nil {
-			log.Fatal("add consent forms error:", err.Error())
+			return fmt.Errorf("add consent forms error: %w", err)
 		}
-		log.Println("consentFormIDs:", consentFormIDs)
+		bar.Increment()
 
 		results[ownerID]["consentForms"] = consentFormIDs
 
 		donorIDs, err := dc.addDonor(ownerID)
 		if err != nil {
-			log.Fatal("add donors error:", err.Error())
+			return fmt.Errorf("add donors error: %w", err)
 		}
-		log.Println("donorIDs:", donorIDs)
+		bar.Increment()
 
 		results[ownerID]["donors"] = donorIDs
 
 		if len(protocolIDs) != len(consentFormIDs) {
-			log.Fatalf("inequal protocol and consent form count, protocols: %d, consent forms: %d\n", len(protocolIDs), len(consentFormIDs))
+			return fmt.Errorf("inequal protocol and consent form count, protocols: %d, consent forms: %d\n", len(protocolIDs), len(consentFormIDs))
 		}
 
 		consentIDs := []string{}
@@ -129,7 +131,7 @@ func LoadDemo(cfg Config) {
 				protocolIDs[i],
 			)
 			if err != nil {
-				log.Fatal("add consent error:", err.Error())
+				return fmt.Errorf("add consent error: %w", err)
 			}
 
 			consentIDs = append(consentIDs, consentID)
@@ -141,50 +143,57 @@ func LoadDemo(cfg Config) {
 				protocolIDs[i],
 			)
 			if err != nil {
-				log.Fatal("add blood specimens error:", err.Error())
+				return fmt.Errorf("add blood specimens error: %w", err)
 			}
 
 			bloodSpecimenIDs = append(bloodSpecimenIDs, donorSpecimenIDs...)
 		}
-		log.Println("consentIDs:", consentIDs)
-		log.Println("bloodSpecimenIDs:", bloodSpecimenIDs)
+		bar.Increment()
+		bar.Increment()
 
 		results[ownerID]["consents"] = consentIDs
 		results[ownerID]["bloodSpecimens"] = bloodSpecimenIDs
 
+		splitSpecimenIDs := chunkBy(bloodSpecimenIDs, 25)
+
 		testIDs := []string{}
 		resultIDs := []string{}
-		testChunk := 25
-		chunkSize := (len(bloodSpecimenIDs) + testChunk - 1) / testChunk
-		for i := 0; i < len(bloodSpecimenIDs); i += chunkSize {
-			end := i + chunkSize
-			if end > len(bloodSpecimenIDs) {
-				end = len(bloodSpecimenIDs)
-			}
-
-			testSpecimens := bloodSpecimenIDs[i:end]
+		for _, chunkSpecimenIDs := range splitSpecimenIDs {
 			testID, err := dc.addTest(
 				ownerID,
 				randomString(labIDs),
-				testSpecimens,
+				chunkSpecimenIDs,
 			)
 			if err != nil {
-				log.Fatal("add test error:", err.Error())
+				return fmt.Errorf("add test error: %w", err)
 			}
 
 			testIDs = append(testIDs, testID)
 
 			resultID, err := dc.addResult(ownerID, testID)
 			if err != nil {
-				log.Fatal("add result error:", err.Error())
+				return fmt.Errorf("add result error: %w", err)
 			}
 
 			resultIDs = append(resultIDs, resultID)
 		}
-		log.Println("testIDs:", testIDs)
-		log.Println("resultIDs:", resultIDs)
+		bar.Increment()
+		bar.Increment()
 
 		results[ownerID]["tests"] = testIDs
 		results[ownerID]["results"] = resultIDs
 	}
+
+	bar.Finish()
+
+	jsonData, err := json.Marshal(results)
+	if err != nil {
+		return fmt.Errorf("error marshalling results data: %w", err)
+	}
+
+	if err := ioutil.WriteFile("results.json", jsonData, 0644); err != nil {
+		return fmt.Errorf("error writing results to file: %w", err)
+	}
+
+	return nil
 }

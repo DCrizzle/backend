@@ -12,3 +12,6 @@ p/
 
 # config resources
 config.json
+
+# demo output
+results.json
