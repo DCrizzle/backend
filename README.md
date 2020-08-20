@@ -28,3 +28,14 @@
 - [ ] mocking - running dgraph live but not unit testing (e.g. manually testing database/api)
 	- [ ] build command: `go build -tags mock`
 - [ ] testing - running isolated for code testing purposes (e.g. "go test")
+- [ ] docker:
+	- [ ] build with `docker build .`
+	- [ ] copy result output ID
+	- [ ] run with `docker run -p 4080:4080 <ID>`
+
+## notes
+
+- [ ] ports
+	- [ ] dgraph zero: 5080/6080
+	- [ ] dgraph alpha: 7080/8080/9080
+	- [ ] helper: 4080
