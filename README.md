@@ -7,6 +7,14 @@
 - [ ] `delete*` payload responses include a `msg` field that can be used as a default
 - [ ] deleting any object from dgraph will remove all references to that object on other objects
 - [ ] [graphql cheatsheet](https://devhints.io/graphql)
+- [ ] include an "attribute mapping" type on the Lab entities (?)
+- - [ ] possibly to show individual Lab header/field names for attributes within the "root" type
+- - [ ] this would be added/updated as Lab nodes are added/updated
+- [ ] general notes:
+- - [ ] update relationships using "set"/"remove" keywords in queries
+- - [ ] searching: https://dgraph.io/docs/query-language/#indexing
+- - [ ] "query*"
+- - - [ ] "filter" field contains fields tagged with "@search" directive
 
 ## demo
 
