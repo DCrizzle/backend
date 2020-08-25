@@ -10,7 +10,7 @@ import (
 
 const (
 	auth0TokenURL = "https://folivora.us.auth0.com/oauth/token"
-	auth0APIURL   = "AUTH0_URL"
+	auth0APIURL   = "https://folivora.us.auth0.com/api/v2/"
 )
 
 func main() {

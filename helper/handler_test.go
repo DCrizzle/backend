@@ -86,33 +86,33 @@ func Test_usersHandler(t *testing.T) {
 			requestMethod:      http.MethodPost,
 			requestBody:        []byte(`{"email":"battlemaster@jeditemple.edu","app_metadata":{"role":"USER_ADMIN","orgID":"jedi-order"},"given_name":"","family_name":"","connection":"Username-Password-Authentication"}`),
 			responseStatusCode: http.StatusOK,
-			responseBody:       `{"message": "success", "user_id": "auth0_id"}`,
+			responseBody:       `{"message": "success", "auth0ID": "auth0|id"}`,
 		},
 		{
 			description:        "successful update user request to helper server",
 			mockAPIStatusCode:  http.StatusOK,
 			mockAPIPath:        "/auth0/users",
-			mockAPIUserID:      "/auth0_id",
+			mockAPIUserID:      "/auth0|id",
 			mockAPIRequest:     `{"app_metadata":{"role":"USER_ADMIN","orgID":""}}`,
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
 			requestMethod:      http.MethodPatch,
-			requestBody:        []byte(`{"user_id":"auth0_id","role":"USER_ADMIN","orgID":""}`),
+			requestBody:        []byte(`{"auth0ID":"auth0|id","role":"USER_ADMIN","orgID":""}`),
 			responseStatusCode: http.StatusOK,
-			responseBody:       `{"message": "success", "user_id": "auth0_id"}`,
+			responseBody:       `{"message": "success", "auth0ID": "auth0|id"}`,
 		},
 		{
 			description:        "successful delete user request to helper server",
 			mockAPIStatusCode:  http.StatusOK,
 			mockAPIPath:        "/auth0/users",
-			mockAPIUserID:      "/auth0_id",
+			mockAPIUserID:      "/auth0|id",
 			mockAPIRequest:     "",
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
 			requestMethod:      http.MethodDelete,
-			requestBody:        []byte(`{"user_id":"auth0_id"}`),
+			requestBody:        []byte(`{"auth0ID":"auth0|id"}`),
 			responseStatusCode: http.StatusOK,
-			responseBody:       `{"message": "success", "user_id": "auth0_id"}`,
+			responseBody:       `{"message": "success", "auth0ID": "auth0|id"}`,
 		},
 	}
 
@@ -129,7 +129,7 @@ func Test_usersHandler(t *testing.T) {
 
 			apiBodyReceived = receivedBytes
 			w.WriteHeader(test.mockAPIStatusCode)
-			w.Write([]byte(`{"user_id": "auth0_id"}`))
+			w.Write([]byte(`{"auth0ID": "auth0|id"}`))
 		})
 
 		server := httptest.NewServer(mux)

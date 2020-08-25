@@ -55,7 +55,7 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 
 			auth0Req, auth0ReqErr = http.NewRequest(
 				http.MethodPost,
-				url,
+				url+"users",
 				bytes.NewReader(createUserByte),
 			)
 
@@ -74,14 +74,14 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 
 			auth0Req, auth0ReqErr = http.NewRequest(
 				http.MethodPatch,
-				url+"/"+dgraphReqJSON.UserID,
+				url+"users/"+dgraphReqJSON.UserID,
 				bytes.NewReader(updateUserByte),
 			)
 
 		} else if r.Method == http.MethodDelete {
 			auth0Req, auth0ReqErr = http.NewRequest(
 				http.MethodDelete,
-				url+"/"+dgraphReqJSON.UserID,
+				url+"users/"+dgraphReqJSON.UserID,
 				nil,
 			)
 		} else {
@@ -111,7 +111,7 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 			return
 		}
 
-		fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "user_id": "%s"}`, auth0RespJSON.UserID))
+		fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0RespJSON.UserID))
 	})
 }
 
@@ -120,7 +120,7 @@ func checkSuccess(status int) bool {
 }
 
 type dgraphRequest struct {
-	UserID    string `json:"user_id"`
+	UserID    string `json:"auth0ID"`
 	Email     string `json:"email"`
 	Role      string `json:"role"`
 	OrgID     string `json:"orgID"`

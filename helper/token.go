@@ -25,6 +25,7 @@ func getAuth0APIToken(url string, auth0Config auth0) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {

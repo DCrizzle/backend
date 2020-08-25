@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const errIncorrectRequestBody  = "incorrect request body received"
+const errIncorrectRequestBody = "incorrect request body received"
 
 func usersHandler(secret, token, url string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -32,12 +32,12 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 			auth0ID = dgraphReqJSON.UserID
 		}
 
-		fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "user_id": "%s"}`, auth0ID))
+		fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID))
 	})
 }
 
 type dgraphRequest struct {
-	UserID    string `json:"user_id"`
+	UserID    string `json:"auth0ID"`
 	Email     string `json:"email"`
 	Role      string `json:"role"`
 	OrgID     string `json:"orgID"`

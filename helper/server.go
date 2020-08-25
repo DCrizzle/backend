@@ -18,7 +18,7 @@ func newServer(usersHandler http.HandlerFunc) *server {
 	subrouter.HandleFunc("/users", usersHandler)
 
 	helperServer := &http.Server{
-		Addr:         "127.0.0.1:8888",
+		Addr:         "127.0.0.1:4080",
 		Handler:      router,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
