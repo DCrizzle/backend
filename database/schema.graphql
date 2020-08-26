@@ -895,10 +895,10 @@ type Mutation {
 		body: "{ email: $email, firstName: $firstName, lastName: $lastName, role: $role, orgID: $org.id }"
 		forwardedHeaders: ["folivora-helper-secret"]
 	})
-	updateUser(auth0ID: String!, role: Role!): User @custom(http: {
+	updateUser(auth0ID: String!, password: String, role: Role): User @custom(http: {
 		url: "http://localhost:4080/auth0/users/$auth0ID"
 		method: "PATCH"
-		body: "{ role: $role }"
+		body: "{ role: $role, password: $password }"
 		forwardedHeaders: ["folivora-helper-secret"]
 	})
 	removeUser(auth0ID: String!): User @custom(http: {
