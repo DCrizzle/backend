@@ -27,9 +27,9 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 			hexID := hex.EncodeToString([]byte(id))
 			auth0ID = "auth0|" + hexID
 		} else if r.Method == http.MethodPatch {
-			auth0ID = dgraphReqJSON.UserID
+			auth0ID = dgraphReqJSON.Auth0ID
 		} else if r.Method == http.MethodDelete {
-			auth0ID = dgraphReqJSON.UserID
+			auth0ID = dgraphReqJSON.Auth0ID
 		}
 
 		fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID))
@@ -37,7 +37,7 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 }
 
 type dgraphRequest struct {
-	UserID    string `json:"auth0ID"`
+	Auth0ID   string `json:"auth0ID"`
 	Email     string `json:"email"`
 	Role      string `json:"role"`
 	OrgID     string `json:"orgID"`

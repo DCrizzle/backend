@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log" // TEMP
 	"net/http"
 )
 
@@ -26,17 +27,20 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 			http.Error(w, errIncorrectSecret, http.StatusBadRequest)
 			return
 		}
+		log.Println("secret:", secret)
 
 		var dgraphReqJSON dgraphRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {
 			http.Error(w, errIncorrectRequestBody, http.StatusBadRequest)
 			return
 		}
+		log.Printf("dgraph request json: %+v\n", dgraphReqJSON)
 
 		var auth0Req *http.Request
 		var auth0ReqErr error
 		if r.Method == http.MethodPost {
-			createUserJSON := createUser{
+			log.Println("post method")
+			createUserJSON := createUserRequest{
 				Email:    dgraphReqJSON.Email,
 				Password: dgraphReqJSON.Password,
 				AppMetadata: appMetadata{
@@ -53,6 +57,7 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 				http.Error(w, errMarshallingCreateJSON, http.StatusInternalServerError)
 				return
 			}
+			log.Println("create user request:", string(createUserByte))
 
 			auth0Req, auth0ReqErr = http.NewRequest(
 				http.MethodPost,
@@ -60,7 +65,7 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 				bytes.NewReader(createUserByte),
 			)
 		} else if r.Method == http.MethodPatch {
-			updateUserJSON := updateUser{}
+			updateUserJSON := updateUserRequest{}
 			if dgraphReqJSON.Password != "" {
 				updateUserJSON.Password = dgraphReqJSON.Password
 			}
@@ -78,13 +83,13 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 
 			auth0Req, auth0ReqErr = http.NewRequest(
 				http.MethodPatch,
-				url+"users/"+dgraphReqJSON.UserID,
+				url+"users/"+dgraphReqJSON.Auth0ID,
 				bytes.NewReader(updateUserByte),
 			)
 		} else if r.Method == http.MethodDelete {
 			auth0Req, auth0ReqErr = http.NewRequest(
 				http.MethodDelete,
-				url+"users/"+dgraphReqJSON.UserID,
+				url+"users/"+dgraphReqJSON.Auth0ID,
 				nil,
 			)
 		} else {
@@ -110,14 +115,14 @@ func usersHandler(secret, token, url string) http.HandlerFunc {
 		}
 
 		if r.Method == http.MethodDelete {
-			fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, dgraphReqJSON.UserID))
+			fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, dgraphReqJSON.Auth0ID))
 		} else {
 			var auth0RespJSON auth0Response
 			if err := json.NewDecoder(auth0Resp.Body).Decode(&auth0RespJSON); err != nil {
 				http.Error(w, errIncorrectResponseBody, http.StatusBadRequest)
 				return
 			}
-			fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0RespJSON.UserID))
+			fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0RespJSON.Auth0ID))
 		}
 	})
 }
@@ -127,7 +132,7 @@ func checkSuccess(status int) bool {
 }
 
 type dgraphRequest struct {
-	UserID    string `json:"auth0ID"`
+	Auth0ID   string `json:"auth0ID"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 	Role      string `json:"role"`
@@ -136,7 +141,7 @@ type dgraphRequest struct {
 	LastName  string `json:"lastName"`
 }
 
-type createUser struct {
+type createUserRequest struct {
 	Email       string      `json:"email"`
 	Password    string      `json:"password"`
 	AppMetadata appMetadata `json:"app_metadata"`
@@ -145,7 +150,7 @@ type createUser struct {
 	Connection  string      `json:"connection"`
 }
 
-type updateUser struct {
+type updateUserRequest struct {
 	AppMetadata appMetadata `json:"app_metadata,omitempty"`
 	Password    string      `json:"password,omitempty"`
 	Connection  string      `json:"connection,omitempty"`
@@ -157,5 +162,5 @@ type appMetadata struct {
 }
 
 type auth0Response struct {
-	UserID string `json:"user_id"`
+	Auth0ID string `json:"user_id"`
 }

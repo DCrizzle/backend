@@ -14,7 +14,7 @@ func Test_usersHandler(t *testing.T) {
 		description        string
 		mockAPIStatusCode  int
 		mockAPIPath        string
-		mockAPIUserID      string
+		mockAPIAuth0ID     string
 		mockAPIRequest     string
 		helperSecret       string
 		requestSecret      string
@@ -27,7 +27,7 @@ func Test_usersHandler(t *testing.T) {
 			description:        "incorrect secret provided in request to helper",
 			mockAPIStatusCode:  http.StatusTeapot,
 			mockAPIPath:        "/auth0/users",
-			mockAPIUserID:      "",
+			mockAPIAuth0ID:     "",
 			mockAPIRequest:     "",
 			helperSecret:       "correct_secret",
 			requestSecret:      "incorrect_secret",
@@ -40,7 +40,7 @@ func Test_usersHandler(t *testing.T) {
 			description:        "invalid json body received in request to helper",
 			mockAPIStatusCode:  http.StatusTeapot,
 			mockAPIPath:        "/auth0/users",
-			mockAPIUserID:      "",
+			mockAPIAuth0ID:     "",
 			mockAPIRequest:     "",
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
@@ -53,7 +53,7 @@ func Test_usersHandler(t *testing.T) {
 			description:        "unsupported http method in request to helper",
 			mockAPIStatusCode:  http.StatusTeapot,
 			mockAPIPath:        "/auth0/users",
-			mockAPIUserID:      "",
+			mockAPIAuth0ID:     "",
 			mockAPIRequest:     "",
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
@@ -66,7 +66,7 @@ func Test_usersHandler(t *testing.T) {
 			description:        "error received in response from auth0 server",
 			mockAPIStatusCode:  http.StatusBadRequest,
 			mockAPIPath:        "/auth0/users",
-			mockAPIUserID:      "",
+			mockAPIAuth0ID:     "",
 			mockAPIRequest:     `{"email":"masteroftheorder@jeditemple.edu","app_metadata":{"role":"","orgID":""},"given_name":"","family_name":"","connection":"Username-Password-Authentication"}`,
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
@@ -79,7 +79,7 @@ func Test_usersHandler(t *testing.T) {
 			description:        "successful create user request to helper server",
 			mockAPIStatusCode:  http.StatusOK,
 			mockAPIPath:        "/auth0/users",
-			mockAPIUserID:      "",
+			mockAPIAuth0ID:     "",
 			mockAPIRequest:     `{"email":"battlemaster@jeditemple.edu","app_metadata":{"role":"","orgID":""},"given_name":"","family_name":"","connection":"Username-Password-Authentication"}`,
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
@@ -92,7 +92,7 @@ func Test_usersHandler(t *testing.T) {
 			description:        "successful update user request to helper server",
 			mockAPIStatusCode:  http.StatusOK,
 			mockAPIPath:        "/auth0/users",
-			mockAPIUserID:      "/auth0|id",
+			mockAPIAuth0ID:     "/auth0|id",
 			mockAPIRequest:     `{"app_metadata":{"role":"USER_ADMIN","orgID":""}}`,
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
@@ -105,7 +105,7 @@ func Test_usersHandler(t *testing.T) {
 			description:        "successful delete user request to helper server",
 			mockAPIStatusCode:  http.StatusOK,
 			mockAPIPath:        "/auth0/users",
-			mockAPIUserID:      "/auth0|id",
+			mockAPIAuth0ID:     "/auth0|id",
 			mockAPIRequest:     "",
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
@@ -120,7 +120,7 @@ func Test_usersHandler(t *testing.T) {
 		var apiBodyReceived []byte
 
 		mux := http.NewServeMux()
-		mux.HandleFunc(test.mockAPIPath+test.mockAPIUserID, func(w http.ResponseWriter, r *http.Request) {
+		mux.HandleFunc(test.mockAPIPath+test.mockAPIAuth0ID, func(w http.ResponseWriter, r *http.Request) {
 			receivedBytes, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				http.Error(w, "error parsing received body", http.StatusBadRequest)
