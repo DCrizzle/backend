@@ -878,7 +878,7 @@ type User @auth(
 	lastName: String! @search(by: [exact])
 	role: Role!
 	org: Org! @hasInverse(field: users)
-	auth0ID: String!
+	auth0ID: String! @search(by: [exact])
 }
 
 enum Role {
@@ -889,21 +889,22 @@ enum Role {
 }
 
 type Mutation {
-	createUser(owner: OwnerOrg!, email: String!, firstName: String!, lastName: String!, role: Role!, org: Org!): User @custom(http: {
+	createUser(owner: String!, email: String!, firstName: String!, lastName: String!, role: Role!, org: String!): User @custom(http: {
 		url: "http://localhost:4080/auth0/users"
 		method: "POST"
-		body: "{ email: $email, firstName: $firstName, lastName: $lastName, role: $role, orgID: $org.id }"
+		body: "{ owner: $owner, email: $email, firstName: $firstName, lastName: $lastName, role: $role, org: $org }"
 		forwardedHeaders: ["folivora-helper-secret"]
 	})
-	updateUser(auth0ID: String!, password: String, role: Role): User @custom(http: {
-		url: "http://localhost:4080/auth0/users/$auth0ID"
+	editUser(auth0ID: String!, role: Role, password: String): User @custom(http: {
+		url: "http://localhost:4080/auth0/users"
 		method: "PATCH"
-		body: "{ role: $role, password: $password }"
+		body: "{ auth0ID: $auth0ID, role: $role, password: $password }"
 		forwardedHeaders: ["folivora-helper-secret"]
 	})
 	removeUser(auth0ID: String!): User @custom(http: {
-		url: "http://localhost:4080/auth0/users/$auth0ID"
+		url: "http://localhost:4080/auth0/users"
 		method: "DELETE"
+		body: "{ auth0ID: $auth0ID }"
 		forwardedHeaders: ["folivora-helper-secret"]
 	})
 }
