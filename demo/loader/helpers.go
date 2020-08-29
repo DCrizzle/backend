@@ -13,6 +13,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// NOTE: split all helpers into separate files
 type dgraphClient struct {
 	httpClient *http.Client
 	dgraphURL  string
@@ -160,7 +161,7 @@ func (dc *dgraphClient) addUsers(ownerID string, ownerIndex int, labIDs, storage
 			"lastName":  user.last,
 			"role":      user.role,
 			"org":       org,
-			"user_id":   user.userID,
+			"auth0ID":   user.userID,
 		}
 
 		inputs = append(inputs, input)

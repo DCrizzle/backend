@@ -10,6 +10,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// NOTE: rename this file to auth0.go
 type payload struct {
 	Query     string      `json:"query"`
 	Variables interface{} `json:"variables"`
