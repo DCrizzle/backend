@@ -75,6 +75,9 @@ func (ac *auth0Client) updateUserToken(userID, orgID, audience, managementToken 
 	if err != nil {
 		return err
 	}
+	if resp.StatusCode == http.StatusUnauthorized {
+		return fmt.Errorf("401 status received - management api token may be expired")
+	}
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("non-200 status received: %d", resp.StatusCode)
 	}
