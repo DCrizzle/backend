@@ -889,22 +889,23 @@ enum Role {
 }
 
 type Mutation {
+	# NOTE: the "authZeroID" is due to a current limitation of Dgraph
 	createUser(owner: String!, email: String!, password: String!, firstName: String!, lastName: String!, role: Role!, org: String!): User @custom(http: {
 		url: "http://localhost:4080/auth0/users",
 		method: "POST",
 		body: "{ owner: $owner, email: $email, password: $password, firstName: $firstName, lastName: $lastName, role: $role, org: $org }",
 		forwardedHeaders: ["folivora-helper-secret"]
 	})
-	editUser(auth0ID: String!, role: Role, password: String): User @custom(http: {
+	editUser(authZeroID: String!, role: Role, password: String): User @custom(http: {
 		url: "http://localhost:4080/auth0/users",
 		method: "PATCH",
-		body: "{ auth0ID: $auth0ID, role: $role, password: $password }",
+		body: "{ authZeroID: $authZeroID, role: $role, password: $password }",
 		forwardedHeaders: ["folivora-helper-secret"]
 	})
-	removeUser(auth0ID: String!): User @custom(http: {
+	removeUser(authZeroID: String!): User @custom(http: {
 		url: "http://localhost:4080/auth0/users",
 		method: "DELETE",
-		body: "{ auth0ID: $auth0ID }",
+		body: "{ authZeroID: $authZeroID }",
 		forwardedHeaders: ["folivora-helper-secret"]
 	})
 }
