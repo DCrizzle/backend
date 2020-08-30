@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -10,10 +11,11 @@ import (
 )
 
 func Test_usersHandler(t *testing.T) {
+	auth0ID := "auth0|id"
+
 	tests := []struct {
 		description        string
 		mockAPIStatusCode  int
-		mockAPIPath        string
 		mockAPIAuth0ID     string
 		mockAPIRequest     string
 		helperSecret       string
@@ -26,7 +28,6 @@ func Test_usersHandler(t *testing.T) {
 		{
 			description:        "incorrect secret provided in request to helper",
 			mockAPIStatusCode:  http.StatusTeapot,
-			mockAPIPath:        "/auth0/users",
 			mockAPIAuth0ID:     "",
 			mockAPIRequest:     "",
 			helperSecret:       "correct_secret",
@@ -39,7 +40,6 @@ func Test_usersHandler(t *testing.T) {
 		{
 			description:        "invalid json body received in request to helper",
 			mockAPIStatusCode:  http.StatusTeapot,
-			mockAPIPath:        "/auth0/users",
 			mockAPIAuth0ID:     "",
 			mockAPIRequest:     "",
 			helperSecret:       "correct_secret",
@@ -52,7 +52,6 @@ func Test_usersHandler(t *testing.T) {
 		{
 			description:        "unsupported http method in request to helper",
 			mockAPIStatusCode:  http.StatusTeapot,
-			mockAPIPath:        "/auth0/users",
 			mockAPIAuth0ID:     "",
 			mockAPIRequest:     "",
 			helperSecret:       "correct_secret",
@@ -65,62 +64,59 @@ func Test_usersHandler(t *testing.T) {
 		{
 			description:        "error received in response from auth0 server",
 			mockAPIStatusCode:  http.StatusBadRequest,
-			mockAPIPath:        "/auth0/users",
 			mockAPIAuth0ID:     "",
-			mockAPIRequest:     `{"email":"masteroftheorder@jeditemple.edu","app_metadata":{"role":"","orgID":""},"given_name":"","family_name":"","connection":"Username-Password-Authentication"}`,
+			mockAPIRequest:     `{"email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"mace","family_name":"windu","connection":"Username-Password-Authentication"}`,
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
 			requestMethod:      http.MethodPost,
-			requestBody:        []byte(`{"email":"masteroftheorder@jeditemple.edu","app_metadata":{"role":"","orgID":""},"given_name":"","family_name":"","connection":"Username-Password-Authentication"}`),
+			requestBody:        []byte(`{"owner":"jedi","email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"mace","lastName":"windu","role":"USER_ADMIN","org":"jedi"}`),
 			responseStatusCode: http.StatusInternalServerError,
 			responseBody:       errExecutingAuth0Request,
 		},
 		{
 			description:        "successful create user request to helper server",
 			mockAPIStatusCode:  http.StatusOK,
-			mockAPIPath:        "/auth0/users",
 			mockAPIAuth0ID:     "",
-			mockAPIRequest:     `{"email":"battlemaster@jeditemple.edu","app_metadata":{"role":"","orgID":""},"given_name":"","family_name":"","connection":"Username-Password-Authentication"}`,
+			mockAPIRequest:     `{"email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"cin","family_name":"dralling","connection":"Username-Password-Authentication"}`,
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
 			requestMethod:      http.MethodPost,
-			requestBody:        []byte(`{"email":"battlemaster@jeditemple.edu","app_metadata":{"role":"USER_ADMIN","orgID":"jedi-order"},"given_name":"","family_name":"","connection":"Username-Password-Authentication"}`),
+			requestBody:        []byte(`{"owner":"jedi","email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"cin","lastName":"dralling","role":"USER_ADMIN","org":"jedi"}`),
 			responseStatusCode: http.StatusOK,
-			responseBody:       `{"message": "success", "auth0ID": "auth0|id"}`,
+			responseBody:       fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
 		},
 		{
 			description:        "successful update user request to helper server",
 			mockAPIStatusCode:  http.StatusOK,
-			mockAPIPath:        "/auth0/users",
-			mockAPIAuth0ID:     "/auth0|id",
-			mockAPIRequest:     `{"app_metadata":{"role":"USER_ADMIN","orgID":""}}`,
+			mockAPIAuth0ID:     "/",
+			mockAPIRequest:     `{"app_metadata":{"role":"USER_LAB"}}`,
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
 			requestMethod:      http.MethodPatch,
-			requestBody:        []byte(`{"auth0ID":"auth0|id","role":"USER_ADMIN","orgID":""}`),
+			requestBody:        []byte(fmt.Sprintf(`{"authZeroID":"%s","role":"USER_LAB"}`, auth0ID)),
 			responseStatusCode: http.StatusOK,
-			responseBody:       `{"message": "success", "auth0ID": "auth0|id"}`,
+			responseBody:       fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
 		},
 		{
 			description:        "successful delete user request to helper server",
 			mockAPIStatusCode:  http.StatusOK,
-			mockAPIPath:        "/auth0/users",
-			mockAPIAuth0ID:     "/auth0|id",
+			mockAPIAuth0ID:     "/",
 			mockAPIRequest:     "",
 			helperSecret:       "correct_secret",
 			requestSecret:      "correct_secret",
 			requestMethod:      http.MethodDelete,
-			requestBody:        []byte(`{"auth0ID":"auth0|id"}`),
+			requestBody:        []byte(fmt.Sprintf(`{"authZeroID":"%s"}`, auth0ID)),
 			responseStatusCode: http.StatusOK,
-			responseBody:       `{"message": "success", "auth0ID": "auth0|id"}`,
+			responseBody:       fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
 		},
 	}
 
 	for _, test := range tests {
 		var apiBodyReceived []byte
 
-		mux := http.NewServeMux()
-		mux.HandleFunc(test.mockAPIPath+test.mockAPIAuth0ID, func(w http.ResponseWriter, r *http.Request) {
+		handlerURL := "/users" + test.mockAPIAuth0ID
+		auth0Mux := http.NewServeMux()
+		auth0Mux.HandleFunc(handlerURL, func(w http.ResponseWriter, r *http.Request) {
 			receivedBytes, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				http.Error(w, "error parsing received body", http.StatusBadRequest)
@@ -129,17 +125,25 @@ func Test_usersHandler(t *testing.T) {
 
 			apiBodyReceived = receivedBytes
 			w.WriteHeader(test.mockAPIStatusCode)
-			w.Write([]byte(`{"auth0ID": "auth0|id"}`))
+			w.Write([]byte(fmt.Sprintf(`{"user_id": "%s"}`, auth0ID)))
 		})
 
-		server := httptest.NewServer(mux)
-		url := server.URL + test.mockAPIPath
+		auth0Server := httptest.NewServer(auth0Mux)
+		auth0URL := auth0Server.URL
+
+		dgraphMux := http.NewServeMux()
+		dgraphMux.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
+
+		dgraphServer := httptest.NewServer(dgraphMux)
+		dgraphURL := dgraphServer.URL + "/graphql"
 
 		t.Run(test.description, func(t *testing.T) {
-			// mock request from dgraph to helper server/handler
+			// mock request from dgraph @custom directive to helper server/handler
 			req, err := http.NewRequest(
 				test.requestMethod,
-				test.mockAPIPath,
+				"/auth0/users",
 				bytes.NewReader(test.requestBody),
 			)
 			if err != nil {
@@ -150,7 +154,7 @@ func Test_usersHandler(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			// helper users handler wrapper function
-			handler := http.HandlerFunc(usersHandler(test.helperSecret, "test_token", url))
+			handler := http.HandlerFunc(usersHandler(test.helperSecret, "test_token", auth0URL, dgraphURL))
 
 			handler.ServeHTTP(rec, req)
 

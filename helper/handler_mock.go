@@ -13,7 +13,7 @@ import (
 
 const errIncorrectRequestBody = "incorrect request body received"
 
-func usersHandler(secret, token, url string) http.HandlerFunc {
+func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var dgraphReqJSON dgraphRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {

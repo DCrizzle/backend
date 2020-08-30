@@ -8,9 +8,12 @@ import (
 	"syscall"
 )
 
+// NOTE: move these consts into config.json
 const (
 	auth0TokenURL = "https://folivora.us.auth0.com/oauth/token"
-	auth0APIURL   = "https://folivora.us.auth0.com/api/v2/"
+	// NOTE: possibly remove trailing "/" for uniformity but this would require changing url processing logic/tests
+	auth0APIURL = "https://folivora.us.auth0.com/api/v2"
+	dgraphURL   = "http://localhost:8080/graphql"
 )
 
 func main() {
@@ -24,7 +27,7 @@ func main() {
 		log.Fatal("error getting auth0 management api token:", err.Error())
 	}
 
-	handler := usersHandler(cfg.Folivora.HelperSecret, token, auth0APIURL)
+	handler := usersHandler(cfg.Folivora.HelperSecret, token, auth0APIURL, dgraphURL)
 	server := newServer(handler)
 
 	ctx := context.Background()
