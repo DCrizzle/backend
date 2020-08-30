@@ -12,9 +12,9 @@ type Config struct {
 }
 
 type auth0 struct {
-	Domain          string          `json:"DOMAIN"`
-	Audience        string          `json:"AUDIENCE"`
-	Token           string          `json:"TOKEN"`
+	DomainURL       string          `json:"DOMAIN_URL"`
+	AudienceURL     string          `json:"AUDIENCE_URL"`
+	TokenURL        string          `json:"TOKEN_URL"`
 	Frontend        application     `json:"FRONTEND"`
 	Backend         application     `json:"BACKEND"`
 	Users           map[string]user `json:"USERS"`
