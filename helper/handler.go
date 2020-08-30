@@ -22,12 +22,6 @@ const (
 	errDgraphMutation        = "error executing dgraph mutation"
 )
 
-const createUserMutation = "mutation CreateUser($input: [AddUserInput!]!) { addUser(input: $input) { user { email } } }"
-
-const editUserMutation = "mutation EditUser($input: UpdateUserInput!) { updateUser(input: $input) { user { email } } }"
-
-const removeUserMutation = "mutation RemoveUser($filter: UserFilter!) { deleteUser(filter: $filter) { user { email } } }"
-
 func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if secret != r.Header.Get("folivora-helper-secret") {
