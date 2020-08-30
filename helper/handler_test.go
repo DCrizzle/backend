@@ -14,107 +14,107 @@ func Test_usersHandler(t *testing.T) {
 	auth0ID := "auth0|id"
 
 	tests := []struct {
-		description        string
-		mockAPIStatusCode  int
-		mockAPIAuth0ID     string
-		mockAPIRequest     string
-		helperSecret       string
-		requestSecret      string
-		requestMethod      string
-		requestBody        []byte
-		responseStatusCode int
-		responseBody       string
+		description         string
+		auth0RespStatusCode int
+		auth0RespID         string
+		auth0ReqReceived    string
+		helperSecret        string
+		requestSecret       string
+		requestMethod       string
+		requestBody         []byte
+		responseStatusCode  int
+		responseBody        string
 	}{
 		{
-			description:        "incorrect secret provided in request to helper",
-			mockAPIStatusCode:  http.StatusTeapot,
-			mockAPIAuth0ID:     "",
-			mockAPIRequest:     "",
-			helperSecret:       "correct_secret",
-			requestSecret:      "incorrect_secret",
-			requestMethod:      http.MethodPost,
-			requestBody:        []byte{},
-			responseStatusCode: http.StatusBadRequest,
-			responseBody:       errIncorrectSecret,
+			description:         "incorrect secret provided in request to helper",
+			auth0RespStatusCode: http.StatusTeapot,
+			auth0RespID:         "",
+			auth0ReqReceived:    "",
+			helperSecret:        "correct_secret",
+			requestSecret:       "incorrect_secret",
+			requestMethod:       http.MethodPost,
+			requestBody:         []byte{},
+			responseStatusCode:  http.StatusBadRequest,
+			responseBody:        errIncorrectSecret,
 		},
 		{
-			description:        "invalid json body received in request to helper",
-			mockAPIStatusCode:  http.StatusTeapot,
-			mockAPIAuth0ID:     "",
-			mockAPIRequest:     "",
-			helperSecret:       "correct_secret",
-			requestSecret:      "correct_secret",
-			requestMethod:      http.MethodPost,
-			requestBody:        []byte("---------"),
-			responseStatusCode: http.StatusBadRequest,
-			responseBody:       errIncorrectRequestBody,
+			description:         "invalid json body received in request to helper",
+			auth0RespStatusCode: http.StatusTeapot,
+			auth0RespID:         "",
+			auth0ReqReceived:    "",
+			helperSecret:        "correct_secret",
+			requestSecret:       "correct_secret",
+			requestMethod:       http.MethodPost,
+			requestBody:         []byte("---------"),
+			responseStatusCode:  http.StatusBadRequest,
+			responseBody:        errIncorrectRequestBody,
 		},
 		{
-			description:        "unsupported http method in request to helper",
-			mockAPIStatusCode:  http.StatusTeapot,
-			mockAPIAuth0ID:     "",
-			mockAPIRequest:     "",
-			helperSecret:       "correct_secret",
-			requestSecret:      "correct_secret",
-			requestMethod:      http.MethodPut,
-			requestBody:        []byte(`{"email": "grandmaster@jeditemple.edu"}`),
-			responseStatusCode: http.StatusBadRequest,
-			responseBody:       errIncorrectHTTPMethod,
+			description:         "unsupported http method in request to helper",
+			auth0RespStatusCode: http.StatusTeapot,
+			auth0RespID:         "",
+			auth0ReqReceived:    "",
+			helperSecret:        "correct_secret",
+			requestSecret:       "correct_secret",
+			requestMethod:       http.MethodPut,
+			requestBody:         []byte(`{"email": "grandmaster@jeditemple.edu"}`),
+			responseStatusCode:  http.StatusBadRequest,
+			responseBody:        errIncorrectHTTPMethod,
 		},
 		{
-			description:        "error received in response from auth0 server",
-			mockAPIStatusCode:  http.StatusBadRequest,
-			mockAPIAuth0ID:     "",
-			mockAPIRequest:     `{"email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"mace","family_name":"windu","connection":"Username-Password-Authentication"}`,
-			helperSecret:       "correct_secret",
-			requestSecret:      "correct_secret",
-			requestMethod:      http.MethodPost,
-			requestBody:        []byte(`{"owner":"jedi","email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"mace","lastName":"windu","role":"USER_ADMIN","org":"jedi"}`),
-			responseStatusCode: http.StatusInternalServerError,
-			responseBody:       errExecutingAuth0Request,
+			description:         "error received in response from auth0 server",
+			auth0RespStatusCode: http.StatusBadRequest,
+			auth0RespID:         "",
+			auth0ReqReceived:    `{"email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"mace","family_name":"windu","connection":"Username-Password-Authentication"}`,
+			helperSecret:        "correct_secret",
+			requestSecret:       "correct_secret",
+			requestMethod:       http.MethodPost,
+			requestBody:         []byte(`{"owner":"jedi","email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"mace","lastName":"windu","role":"USER_ADMIN","org":"jedi"}`),
+			responseStatusCode:  http.StatusInternalServerError,
+			responseBody:        errExecutingAuth0Request,
 		},
 		{
-			description:        "successful create user request to helper server",
-			mockAPIStatusCode:  http.StatusOK,
-			mockAPIAuth0ID:     "",
-			mockAPIRequest:     `{"email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"cin","family_name":"dralling","connection":"Username-Password-Authentication"}`,
-			helperSecret:       "correct_secret",
-			requestSecret:      "correct_secret",
-			requestMethod:      http.MethodPost,
-			requestBody:        []byte(`{"owner":"jedi","email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"cin","lastName":"dralling","role":"USER_ADMIN","org":"jedi"}`),
-			responseStatusCode: http.StatusOK,
-			responseBody:       fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
+			description:         "successful create user request to helper server",
+			auth0RespStatusCode: http.StatusOK,
+			auth0RespID:         "",
+			auth0ReqReceived:    `{"email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"cin","family_name":"dralling","connection":"Username-Password-Authentication"}`,
+			helperSecret:        "correct_secret",
+			requestSecret:       "correct_secret",
+			requestMethod:       http.MethodPost,
+			requestBody:         []byte(`{"owner":"jedi","email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"cin","lastName":"dralling","role":"USER_ADMIN","org":"jedi"}`),
+			responseStatusCode:  http.StatusOK,
+			responseBody:        fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
 		},
 		{
-			description:        "successful update user request to helper server",
-			mockAPIStatusCode:  http.StatusOK,
-			mockAPIAuth0ID:     "/",
-			mockAPIRequest:     `{"app_metadata":{"role":"USER_LAB"}}`,
-			helperSecret:       "correct_secret",
-			requestSecret:      "correct_secret",
-			requestMethod:      http.MethodPatch,
-			requestBody:        []byte(fmt.Sprintf(`{"authZeroID":"%s","role":"USER_LAB"}`, auth0ID)),
-			responseStatusCode: http.StatusOK,
-			responseBody:       fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
+			description:         "successful update user request to helper server",
+			auth0RespStatusCode: http.StatusOK,
+			auth0RespID:         "/",
+			auth0ReqReceived:    `{"app_metadata":{"role":"USER_LAB"}}`,
+			helperSecret:        "correct_secret",
+			requestSecret:       "correct_secret",
+			requestMethod:       http.MethodPatch,
+			requestBody:         []byte(fmt.Sprintf(`{"authZeroID":"%s","role":"USER_LAB"}`, auth0ID)),
+			responseStatusCode:  http.StatusOK,
+			responseBody:        fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
 		},
 		{
-			description:        "successful delete user request to helper server",
-			mockAPIStatusCode:  http.StatusOK,
-			mockAPIAuth0ID:     "/",
-			mockAPIRequest:     "",
-			helperSecret:       "correct_secret",
-			requestSecret:      "correct_secret",
-			requestMethod:      http.MethodDelete,
-			requestBody:        []byte(fmt.Sprintf(`{"authZeroID":"%s"}`, auth0ID)),
-			responseStatusCode: http.StatusOK,
-			responseBody:       fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
+			description:         "successful delete user request to helper server",
+			auth0RespStatusCode: http.StatusOK,
+			auth0RespID:         "/",
+			auth0ReqReceived:    "",
+			helperSecret:        "correct_secret",
+			requestSecret:       "correct_secret",
+			requestMethod:       http.MethodDelete,
+			requestBody:         []byte(fmt.Sprintf(`{"authZeroID":"%s"}`, auth0ID)),
+			responseStatusCode:  http.StatusOK,
+			responseBody:        fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
 		},
 	}
 
 	for _, test := range tests {
 		var apiBodyReceived []byte
 
-		handlerURL := "/users" + test.mockAPIAuth0ID
+		handlerURL := "/users" + test.auth0RespID
 		auth0Mux := http.NewServeMux()
 		auth0Mux.HandleFunc(handlerURL, func(w http.ResponseWriter, r *http.Request) {
 			receivedBytes, err := ioutil.ReadAll(r.Body)
@@ -124,7 +124,7 @@ func Test_usersHandler(t *testing.T) {
 			}
 
 			apiBodyReceived = receivedBytes
-			w.WriteHeader(test.mockAPIStatusCode)
+			w.WriteHeader(test.auth0RespStatusCode)
 			w.Write([]byte(fmt.Sprintf(`{"user_id": "%s"}`, auth0ID)))
 		})
 
@@ -168,8 +168,8 @@ func Test_usersHandler(t *testing.T) {
 
 			if apiBodyReceived != nil {
 				receivedString := string(apiBodyReceived)
-				if test.mockAPIRequest != receivedString {
-					t.Errorf("api body received: %s, expected: %s", receivedString, test.mockAPIRequest)
+				if test.auth0ReqReceived != receivedString {
+					t.Errorf("api body received: %s, expected: %s", receivedString, test.auth0ReqReceived)
 				}
 			}
 		})
