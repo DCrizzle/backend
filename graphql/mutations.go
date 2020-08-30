@@ -1,4 +1,4 @@
-package loader
+package graphql
 
 const addOwnerOrgsMutation = "mutation AddOwnerOrgs($input: [AddOwnerOrgInput!]!) { addOwnerOrg(input: $input) { ownerOrg { id } } }"
 
@@ -7,6 +7,10 @@ const addLabOrgsMutation = "mutation AddLabOrgs($input: [AddLabOrgInput!]!) { ad
 const addStorageOrgsMutation = "mutation AddStorageOrgs($input: [AddStorageOrgInput!]!) { addStorageOrg(input: $input) { storageOrg { id } } }"
 
 const addUsersMutation = "mutation AddUsers($input: [AddUserInput!]!) { addUser(input: $input) { user { email } } }"
+
+const updateUserMutation = "mutation EditUser($input: UpdateUserInput!) { updateUser(input: $input) { user { email } } }"
+
+const deleteUserMutation = "mutation RemoveUser($filter: UserFilter!) { deleteUser(filter: $filter) { user { email } } }"
 
 const addProtocolsMutation = "mutation AddProtocols($input: [AddProtocolInput!]!) { addProtocol(input: $input) { protocol { id } } }"
 
