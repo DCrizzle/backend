@@ -1,31 +1,48 @@
 package graphql
 
-const addOwnerOrgsMutation = "mutation AddOwnerOrgs($input: [AddOwnerOrgInput!]!) { addOwnerOrg(input: $input) { ownerOrg { id } } }"
+const (
+	// AddOwnerOrgsMutation is the GraphQL mutation that adds Org type objects to the Dgraph database.
+	AddOwnerOrgsMutation = "mutation AddOwnerOrgs($input: [AddOwnerOrgInput!]!) { addOwnerOrg(input: $input) { ownerOrg { id } } }"
 
-const addLabOrgsMutation = "mutation AddLabOrgs($input: [AddLabOrgInput!]!) { addLabOrg(input: $input) { labOrg { id } } }"
+	// AddLabOrgsMutation is the GraphQL mutation that adds Lab type objects to the Dgraph database.
+	AddLabOrgsMutation = "mutation AddLabOrgs($input: [AddLabOrgInput!]!) { addLabOrg(input: $input) { labOrg { id } } }"
 
-const addStorageOrgsMutation = "mutation AddStorageOrgs($input: [AddStorageOrgInput!]!) { addStorageOrg(input: $input) { storageOrg { id } } }"
+	// AddStorageOrgsMutation is the GraphQL mutation that adds Storage type objects to the Dgraph database.
+	AddStorageOrgsMutation = "mutation AddStorageOrgs($input: [AddStorageOrgInput!]!) { addStorageOrg(input: $input) { storageOrg { id } } }"
 
-const addUsersMutation = "mutation AddUsers($input: [AddUserInput!]!) { addUser(input: $input) { user { email } } }"
+	// AddUsersMutation is the GraphQL mutation that adds User type objects to the Dgraph database.
+	AddUsersMutation = "mutation AddUsers($input: [AddUserInput!]!) { addUser(input: $input) { user { email } } }"
 
-const updateUserMutation = "mutation EditUser($input: UpdateUserInput!) { updateUser(input: $input) { user { email } } }"
+	// UpdateUserMutation is the GraphQL mutation that updates User type objects to the Dgraph database.
+	UpdateUserMutation = "mutation EditUser($input: UpdateUserInput!) { updateUser(input: $input) { user { email } } }"
 
-const deleteUserMutation = "mutation RemoveUser($filter: UserFilter!) { deleteUser(filter: $filter) { user { email } } }"
+	// DeleteUserMutation is the GraphQL mutation that deletes User type objects to the Dgraph database.
+	DeleteUserMutation = "mutation RemoveUser($filter: UserFilter!) { deleteUser(filter: $filter) { user { email } } }"
 
-const addProtocolsMutation = "mutation AddProtocols($input: [AddProtocolInput!]!) { addProtocol(input: $input) { protocol { id } } }"
+	// AddProtocolsMutation is the GraphQL mutation that adds Protocol type objects to the Dgraph database.
+	AddProtocolsMutation = "mutation AddProtocols($input: [AddProtocolInput!]!) { addProtocol(input: $input) { protocol { id } } }"
 
-const addProtocolFormsMutation = "mutation AddProtocolForms($input: [AddProtocolFormInput!]!) { addProtocolForm(input: $input) { protocolForm { id } } }"
+	// AddProtocolFormsMutation is the GraphQL mutation that adds ProtocolForm type objects to the Dgraph database.
+	AddProtocolFormsMutation = "mutation AddProtocolForms($input: [AddProtocolFormInput!]!) { addProtocolForm(input: $input) { protocolForm { id } } }"
 
-const addPlansMutation = "mutation AddPlans($input: [AddPlanInput!]!) { addPlan(input: $input) { plan { id } } }"
+	// AddPlansMutation is the GraphQL mutation that adds Plan type objects to the Dgraph database.
+	AddPlansMutation = "mutation AddPlans($input: [AddPlanInput!]!) { addPlan(input: $input) { plan { id } } }"
 
-const addConsentFormsMutation = "mutation AddConsentForms($input: [AddConsentFormInput!]!) { addConsentForm(input: $input) { consentForm { id } } }"
+	// AddConsentFormsMutation is the GraphQL mutation that adds ConsentForm type objects to the Dgraph database.
+	AddConsentFormsMutation = "mutation AddConsentForms($input: [AddConsentFormInput!]!) { addConsentForm(input: $input) { consentForm { id } } }"
 
-const addDonorsMutation = "mutation AddDonors($input: [AddDonorInput!]!) { addDonor(input: $input) { donor { id } } }"
+	// AddDonorsMutation is the GraphQL mutation that adds Donor type objects to the Dgraph database.
+	AddDonorsMutation = "mutation AddDonors($input: [AddDonorInput!]!) { addDonor(input: $input) { donor { id } } }"
 
-const addConsentsMutation = "mutation AddConsent($input: [AddConsentInput!]!) { addConsent(input: $input) { consent { id } } }"
+	// AddConsentsMutation is the GraphQL mutation that adds Consetn type objects to the Dgraph database.
+	AddConsentsMutation = "mutation AddConsent($input: [AddConsentInput!]!) { addConsent(input: $input) { consent { id } } }"
 
-const addBloodSpecimensMutation = "mutation AddBloodSpecimens($input: [AddBloodSpecimenInput!]!) { addBloodSpecimen(input: $input) { bloodSpecimen { id } } }"
+	// AddBloodSpecimensMutation is the GraphQL mutation that adds BloodSpecimen type objects to the Dgraph database.
+	AddBloodSpecimensMutation = "mutation AddBloodSpecimens($input: [AddBloodSpecimenInput!]!) { addBloodSpecimen(input: $input) { bloodSpecimen { id } } }"
 
-const addTestsMutation = "mutation AddTests($input: [AddTestInput!]!) { addTest(input: $input) { test { id } } }"
+	// AddTestsMutation is the GraphQL mutation that adds Test type objects to the Dgraph database.
+	AddTestsMutation = "mutation AddTests($input: [AddTestInput!]!) { addTest(input: $input) { test { id } } }"
 
-const addResultsMutation = "mutation AddResults($input: [AddResultInput!]!) { addResult(input: $input) { result { id } } }"
+	// AddResultsMutation is the GraphQL mutation that adds Result type objects to the Dgraph database.
+	AddResultsMutation = "mutation AddResults($input: [AddResultInput!]!) { addResult(input: $input) { result { id } } }"
+)
