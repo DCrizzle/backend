@@ -1,30 +1,41 @@
 package graphql
 
+import (
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+)
+
 type payload struct {
 	Query     string      `json:"query"`
 	Variables interface{} `json:"variables"`
 }
 
+// Dgraph is the client struct for communicating with the Dgraph database.
 type Dgraph struct {
 	client *http.Client
-	url  string
+	url    string
 	token  string
 }
 
+// New generates a pointer Dgraph client instance.
 func New(client *http.Client, url, token string) *Dgraph {
 	return &Dgraph{
 		client: client,
-		url: url,
-		token: token,
+		url:    url,
+		token:  token,
 	}
 }
 
+// SendRequest executes the provided query and variables against the
+// Dgraph GraphQL database endpoint.
 func (d *Dgraph) SendRequest(query string, input interface{}) (string, error) {
 	variables := map[string]interface{}{
 		"input": input,
 	}
 
-	payload := struct{
+	payload := struct {
 		Query     string      `json:"query"`
 		Variables interface{} `json:"variables"`
 	}{
