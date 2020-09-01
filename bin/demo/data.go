@@ -1,4 +1,4 @@
-package loader
+package main
 
 var orgs = []string{
 	"owner_org_a",

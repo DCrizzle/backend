@@ -1,11 +1,11 @@
 package graphql
 
-var sex = []string{
+var Sex = []string{
 	"MALE",
 	"FEMALE",
 }
 
-var race = []string{
+var Race = []string{
 	"AMERICAN_INDIAN_OR_ALASKA_NATIVE",
 	"ASIAN",
 	"BLACK_OR_AFRICAN_AMERICAN",
@@ -13,15 +13,15 @@ var race = []string{
 	"WHITE",
 }
 
-var specimenType = []string{
+var SpecimenType = []string{
 	"BLOOD",
 }
 
-var container = []string{
+var Container = []string{
 	"VIAL",
 }
 
-var status = []string{
+var Status = []string{
 	"DESTROYED",
 	"EXHAUSTED",
 	"IN_INVENTORY",
@@ -31,7 +31,7 @@ var status = []string{
 	"TRANSFERRED",
 }
 
-var bloodType = []string{
+var BloodType = []string{
 	"O_NEG",
 	"O_POS",
 	"A_NEG",
@@ -40,11 +40,4 @@ var bloodType = []string{
 	"B_POS",
 	"AB_NEG",
 	"AB_POS",
-}
-
-var role = []string{
-	"USER_ADMIN",
-	"USER_INTERNAL",
-	"USER_LAB",
-	"USER_STORAGE",
 }

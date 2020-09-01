@@ -1,7 +1,7 @@
 # generated binaries
 backend
-demo/demo
-helper/helper
+bin/demo/demo
+bin/token/token
 
 # dgraph write-ahead log directories
 zw/

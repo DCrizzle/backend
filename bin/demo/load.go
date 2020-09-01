@@ -1,69 +1,77 @@
-package loader
+package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/google/uuid"
+
+	"github.com/forstmeier/backend/auth0"
+	"github.com/forstmeier/backend/config"
+	"github.com/forstmeier/backend/graphql"
 )
 
-type Config struct {
-	UserID          string `json:"USER_ID"`
-	ManagementToken string `json:"MANAGEMENT_TOKEN"`
-	Username        string `json:"USERNAME"`
-	Password        string `json:"PASSWORD"`
-	Domain          string `json:"DOMAIN"`
-	Audience        string `json:"AUDIENCE"`
-	ClientID        string `json:"CLIENT_ID"`
-	ClientSecret    string `json:"CLIENT_SECRET"`
-	DgraphURL       string `json:"DGRAPH_URL"`
+type dgraphClient struct {
+	*graphql.Dgraph
 }
 
-func LoadDemo(cfg Config) error {
+func loadDemo(cfg *config.Config) error {
 	results := make(map[string]map[string][]string)
 
-	ac := &auth0Client{
-		httpClient: &http.Client{},
+	cfg, err := config.New("../../etc/config/config.json")
+	if err != nil {
+		log.Fatal("error reading config file:", err.Error())
 	}
 
-	userToken, err := ac.getUserToken(cfg)
+	ac := auth0.New(cfg)
+
+	userToken, err := ac.GetUserToken("TEST_FORSTMEIER")
 	if err != nil {
-		return fmt.Errorf("error getting user token: %w", err)
+		log.Fatalf("error getting user token: %s", err.Error())
 	}
 
 	dc := &dgraphClient{
-		httpClient: &http.Client{},
-		dgraphURL:  cfg.DgraphURL,
-		userToken:  userToken,
+		graphql.New(
+			&http.Client{},
+			cfg.Folivora.DgraphURL,
+			userToken,
+		),
 	}
 
 	ownerIDs, err := dc.addOwnerOrgs()
 	if err != nil {
-		return fmt.Errorf("add owner orgs error: %w", err)
+		log.Fatalf("add owner orgs error: %s", err.Error())
 	}
 
 	helperCount := 10 // number of helper methods being called without owner orgs
 	bar := pb.StartNew(helperCount * len(ownerIDs))
 
 	for ownerIndex, ownerID := range ownerIDs {
-		if err := ac.updateUserToken(cfg.UserID, ownerID, cfg.Audience, cfg.ManagementToken); err != nil {
-			return fmt.Errorf("error updating user token: %w", err)
+		if err := ac.UpdateUserToken("TEST_FORSTMEIER", ownerID); err != nil {
+			log.Fatalf("error updating user token: %s", err.Error())
 		}
 
-		userToken, err := ac.getUserToken(cfg)
+		userToken, err := ac.GetUserToken("TEST_FORSTMEIER")
 		if err != nil {
-			return fmt.Errorf("error getting updated user token: %w", err)
+			log.Fatalf("error getting updated user token: %s", err.Error())
 		}
-		dc.userToken = userToken
+
+		dc = &dgraphClient{
+			graphql.New(
+				&http.Client{},
+				cfg.Folivora.DgraphURL,
+				userToken,
+			),
+		}
 
 		results[ownerID] = make(map[string][]string)
 		labIDs, storageIDs, err := dc.addLabAndStorageOrgs(ownerID)
 		if err != nil {
-			return fmt.Errorf("add lab/storage orgs error: %w", err)
+			log.Fatalf("add lab/storage orgs error: %s", err.Error())
 		}
 		bar.Increment()
 
@@ -72,7 +80,7 @@ func LoadDemo(cfg Config) error {
 
 		userIDs, err := dc.addUsers(ownerID, ownerIndex, labIDs, storageIDs)
 		if err != nil {
-			return fmt.Errorf("add users error: %w", err)
+			log.Fatalf("add users error: %s", err.Error())
 		}
 		bar.Increment()
 
@@ -80,7 +88,7 @@ func LoadDemo(cfg Config) error {
 
 		protocolIDs, planIDs, err := dc.addProtocolsAndPlans(ownerID, labIDs, storageIDs)
 		if err != nil {
-			return fmt.Errorf("add protocols/plans error: %w", err)
+			log.Fatalf("add protocols/plans error: %s", err.Error())
 		}
 		bar.Increment()
 
@@ -94,7 +102,7 @@ func LoadDemo(cfg Config) error {
 
 		protocolFormIDs, err := dc.addProtocolForms(ownerID, protocolIDs, externalIDs)
 		if err != nil {
-			return fmt.Errorf("add protocol forms error: %w", err)
+			log.Fatalf("add protocol forms error: %s", err.Error())
 		}
 		bar.Increment()
 
@@ -102,7 +110,7 @@ func LoadDemo(cfg Config) error {
 
 		consentFormIDs, err := dc.addConsentForms(ownerID, len(protocolIDs))
 		if err != nil {
-			return fmt.Errorf("add consent forms error: %w", err)
+			log.Fatalf("add consent forms error: %s", err.Error())
 		}
 		bar.Increment()
 
@@ -110,14 +118,14 @@ func LoadDemo(cfg Config) error {
 
 		donorIDs, err := dc.addDonor(ownerID)
 		if err != nil {
-			return fmt.Errorf("add donors error: %w", err)
+			log.Fatalf("add donors error: %s", err.Error())
 		}
 		bar.Increment()
 
 		results[ownerID]["donors"] = donorIDs
 
 		if len(protocolIDs) != len(consentFormIDs) {
-			return fmt.Errorf("inequal protocol and consent form count, protocols: %d, consent forms: %d\n", len(protocolIDs), len(consentFormIDs))
+			log.Fatalf("inequal protocol and consent form count, protocols: %d, consent forms: %d\n", len(protocolIDs), len(consentFormIDs))
 		}
 
 		consentIDs := []string{}
@@ -131,7 +139,7 @@ func LoadDemo(cfg Config) error {
 				protocolIDs[i],
 			)
 			if err != nil {
-				return fmt.Errorf("add consent error: %w", err)
+				log.Fatalf("add consent error: %s", err.Error())
 			}
 
 			consentIDs = append(consentIDs, consentID)
@@ -143,7 +151,7 @@ func LoadDemo(cfg Config) error {
 				protocolIDs[i],
 			)
 			if err != nil {
-				return fmt.Errorf("add blood specimens error: %w", err)
+				log.Fatalf("add blood specimens error: %s", err.Error())
 			}
 
 			bloodSpecimenIDs = append(bloodSpecimenIDs, donorSpecimenIDs...)
@@ -165,14 +173,14 @@ func LoadDemo(cfg Config) error {
 				chunkSpecimenIDs,
 			)
 			if err != nil {
-				return fmt.Errorf("add test error: %w", err)
+				log.Fatalf("add test error: %s", err.Error())
 			}
 
 			testIDs = append(testIDs, testID)
 
 			resultID, err := dc.addResult(ownerID, testID)
 			if err != nil {
-				return fmt.Errorf("add result error: %w", err)
+				log.Fatalf("add result error: %s", err.Error())
 			}
 
 			resultIDs = append(resultIDs, resultID)
@@ -188,11 +196,11 @@ func LoadDemo(cfg Config) error {
 
 	jsonData, err := json.Marshal(results)
 	if err != nil {
-		return fmt.Errorf("error marshalling results data: %w", err)
+		log.Fatalf("error marshalling results data: %s", err.Error())
 	}
 
 	if err := ioutil.WriteFile("results.json", jsonData, 0644); err != nil {
-		return fmt.Errorf("error writing results to file: %w", err)
+		log.Fatalf("error writing results to file: %s", err.Error())
 	}
 
 	return nil
