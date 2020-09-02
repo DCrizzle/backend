@@ -129,7 +129,7 @@ func Test_usersHandler(t *testing.T) {
 		})
 
 		auth0Server := httptest.NewServer(auth0Mux)
-		auth0URL := auth0Server.URL
+		auth0URL := auth0Server.URL + "/"
 
 		dgraphMux := http.NewServeMux()
 		dgraphMux.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {

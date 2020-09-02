@@ -11,11 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const (
-	errIncorrectRequestBody = "incorrect request body received"
-	errDgraphMutation       = "error executing dgraph mutation"
-)
-
 func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var dgraphReqJSON dgraphRequest
@@ -36,36 +31,36 @@ func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 			dgraphMutation = createUserMutation
 			dgraphVariables = map[string]interface{}{
 				"owner": map[string]string{
-					"id": dgraphReqJSON.Owner,
+					"id": *dgraphReqJSON.Owner,
 				},
-				"email":     dgraphReqJSON.Email,
-				"password":  dgraphReqJSON.Password,
-				"firstName": dgraphReqJSON.FirstName,
-				"lastName":  dgraphReqJSON.LastName,
-				"role":      dgraphReqJSON.Role,
+				"email":     *dgraphReqJSON.Email,
+				"password":  *dgraphReqJSON.Password,
+				"firstName": *dgraphReqJSON.FirstName,
+				"lastName":  *dgraphReqJSON.LastName,
+				"role":      *dgraphReqJSON.Role,
 				"org": map[string]string{
-					"id": dgraphReqJSON.Org,
+					"id": *dgraphReqJSON.Org,
 				},
 				"auth0ID": auth0ID,
 			}
 		} else if r.Method == http.MethodPatch {
-			auth0ID = dgraphReqJSON.Auth0ID
+			auth0ID = *dgraphReqJSON.Auth0ID
 
 			dgraphMutation = editUserMutation
 			userUpdates := make(map[string]interface{})
-			if dgraphReqJSON.Role != "" {
-				userUpdates["role"] = dgraphReqJSON.Role
+			if *dgraphReqJSON.Role != "" {
+				userUpdates["role"] = *dgraphReqJSON.Role
 			}
 			userUpdates["owner"] = map[string]string{
-				"id": dgraphReqJSON.Owner,
+				"id": *dgraphReqJSON.Owner,
 			}
 			dgraphVariables = userUpdates
 		} else if r.Method == http.MethodDelete {
-			auth0ID = dgraphReqJSON.Auth0ID
+			auth0ID = *dgraphReqJSON.Auth0ID
 
 			dgraphMutation = removeUserMutation
 			dgraphVariables = map[string]interface{}{
-				"id": dgraphReqJSON.Owner,
+				"id": *dgraphReqJSON.Owner,
 			}
 		}
 
@@ -81,15 +76,4 @@ func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 
 		fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID))
 	})
-}
-
-type dgraphRequest struct {
-	Owner     string `json:"owner,omitempty"`
-	Auth0ID   string `json:"authZeroID,omitempty"` // NOTE: "authZeroID" field name is necessary due to a Dgraph limitation
-	Email     string `json:"email,omitempty"`
-	Password  string `json:"password,omitempty"`
-	Role      string `json:"role,omitempty"`
-	Org       string `json:"org,omitempty"`
-	FirstName string `json:"firstName,omitempty"`
-	LastName  string `json:"lastName,omitempty"`
 }
