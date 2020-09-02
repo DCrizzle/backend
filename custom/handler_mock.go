@@ -9,6 +9,8 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+
+	"github.com/forstmeier/backend/graphql"
 )
 
 func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
@@ -28,7 +30,7 @@ func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 			hexID := hex.EncodeToString([]byte(id))
 			auth0ID = "auth0|" + hexID
 
-			dgraphMutation = createUserMutation
+			dgraphMutation = graphql.AddUsersMutation
 			dgraphVariables = map[string]interface{}{
 				"owner": map[string]string{
 					"id": *dgraphReqJSON.Owner,
@@ -46,30 +48,36 @@ func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 		} else if r.Method == http.MethodPatch {
 			auth0ID = *dgraphReqJSON.Auth0ID
 
-			dgraphMutation = editUserMutation
+			dgraphMutation = graphql.UpdateUserMutation
 			userUpdates := make(map[string]interface{})
 			if *dgraphReqJSON.Role != "" {
-				userUpdates["role"] = *dgraphReqJSON.Role
-			}
-			userUpdates["owner"] = map[string]string{
-				"id": *dgraphReqJSON.Owner,
+				userUpdates["filter"] = map[string]interface{}{
+					"auth0ID": *dgraphReqJSON.Auth0ID,
+				}
+				userUpdates["set"] = map[string]interface{}{
+					"role": *dgraphReqJSON.Role,
+				}
 			}
 			dgraphVariables = userUpdates
 		} else if r.Method == http.MethodDelete {
 			auth0ID = *dgraphReqJSON.Auth0ID
 
-			dgraphMutation = removeUserMutation
+			dgraphMutation = graphql.DeleteUserMutation
 			dgraphVariables = map[string]interface{}{
-				"id": *dgraphReqJSON.Owner,
+				"filter": map[string]interface{}{
+					"auth0ID": *dgraphReqJSON.Auth0ID,
+				},
 			}
 		}
 
-		if err := sendDgraphRequest(
+		dgraphClient := graphql.New(
+			&http.Client{},
 			dgraphURL,
 			r.Header.Get("X-Auth0-Token"),
-			dgraphMutation,
-			dgraphVariables,
-		); err != nil {
+		)
+
+		_, err := dgraphClient.SendRequest(dgraphMutation, dgraphVariables)
+		if err != nil {
 			http.Error(w, errDgraphMutation, http.StatusBadRequest)
 			return
 		}
