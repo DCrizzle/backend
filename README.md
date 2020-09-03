@@ -38,16 +38,17 @@ To interact with the Dgraph database and schema, follow the steps below.
 	- run `dgraph zero --my=localhost:5080` in a command line tab
 	- run `dgraph alpha --lru_mb=2048 --my=localhost:7080` in another command line tab
 	- navigate to the root of the `backend` repository and run `curl -X POST localhost:8080/admin/schema --data-binary '@database/schema.graphql'` in another tab
+- run `chmod +x ./bin/get_token && chmod +x ./bin/load_demo` from the root of the `backend` repo
 - build and run the **`demo`** package
-	- run `cd bin/demo && go build && ./demo` to begin loading demo data into the running Dgraph database
+	- run `./bin/load_demo` from the root of the `backend` repo
 		- if an error saying `"401 status received - management api token may be expired"` the Auth0 Management API Token needs to be updated
-		- go to the Auth0 Dashboard and click **APIs** -> **Auth0 Management API** -> **Test**
-		- from the **Response** field, copy the value of `"access_token"`, starting with `"ey..."`
-		- open the `backend/etc/config/config.json` file and paste the token value into the `AUTH0.MANAGEMENT_TOKEN` field
+			- go to the Auth0 Dashboard and click **APIs** -> **Auth0 Management API** -> **Test**
+			- from the **Response** field, copy the value of `"access_token"`, starting with `"ey..."`
+			- open the `backend/etc/config/config.json` file and paste the token value into the `AUTH0.MANAGEMENT_TOKEN` field
 	- a progress bar will display as data is loaded into Dgraph - once complete the database may be used
 - setup and use **Postman**
 	- launch Postman and click **Import** -> **Choose Files** then find, select, and upload the `backend/etc/postman/collection.json` file
-	- run `cd ../token && go run main.go` in the command line and copy the output token value
+	- run `./bin/get_token` from the root of the `backend` repo and copy the output token value
 	- in each of your Postman requests, under the **Headers** tab, add a `Key` with the value "`Authorization`" and a `Value` with a value of the copied token and the requests are now authorized to communicate with the Dgraph database
 
 **NOTE**: the Management API key fetched from Auth0 is **_sensitive data_** and should not be shared publicly

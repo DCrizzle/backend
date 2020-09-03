@@ -1,7 +1,7 @@
 # generated binaries
 custom/custom
-bin/demo/demo
-bin/token/token
+util/demo/demo
+util/token/token
 
 # dgraph write-ahead log directories
 zw/
