@@ -1,1 +1,49 @@
 #!/bin/bash
+
+function dgraph_cleanup()
+{
+	echo
+	kill -9 $ZERO_ID
+	kill -9 $ALPHA_ID
+	echo "|> stopping dgraph"
+	exit
+}
+
+trap dgraph_cleanup SIGINT
+
+echo "|> starting dgraph"
+
+echo "|> started dgraph zero"
+dgraph zero --my=localhost:5080 &
+ZERO_ID=$!
+echo "|> dgraph zero process id" $ZERO_ID
+
+while ! curl http://localhost:6080/state > /dev/null
+do
+	echo "|> retrying zero state"
+	sleep 2
+done
+echo "|> dgraph zero started"
+
+echo "|> starting dgraph alpha"
+dgraph alpha --lru_mb=2048 --my=localhost:7080 --zero=localhost:5080 &
+ALPHA_ID=$!
+echo "|> dgraph alpha process id" $ALPHA_ID
+
+while ! curl http://localhost:8080/state > /dev/null
+do
+	echo "|> retrying alpha state"
+	sleep 2
+done
+echo "|> dgraph alpha started"
+
+sleep 10
+
+echo "|> uploading dgraph schema"
+curl -X POST localhost:8080/admin/schema --data-binary '@database/schema.graphql' > /dev/null
+echo "|> dgraph running and serving schema"
+
+while true
+do
+	sleep 10
+done
