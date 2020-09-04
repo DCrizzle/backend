@@ -31,7 +31,10 @@ func usersHandler(folivoraSecret, managementToken, auth0URL, dgraphURL string) h
 		var dgraphMutation string
 		var dgraphVariables interface{}
 
-		// NOTE: split into helper functions
+		// outline:
+		// [ ] note: split into helper functions
+		// [ ] "create auth0 request"
+		// [ ] "create dgraph inputs"
 		if r.Method == http.MethodPost {
 			createUserJSON := createUserRequest{
 				Email:    *dgraphReqJSON.Email,
@@ -60,7 +63,13 @@ func usersHandler(folivoraSecret, managementToken, auth0URL, dgraphURL string) h
 			dgraphMutation = graphql.AddUsersMutation
 		} else if r.Method == http.MethodPatch {
 			updateUserJSON := updateUserRequest{}
-			updateUserVariables := make(map[string]interface{})
+			updateUserVariables := map[string]interface{}{
+				"filter": map[string]interface{}{
+					"auth0ID": map[string]interface{}{
+						"eq": *dgraphReqJSON.Auth0ID,
+					},
+				},
+			}
 
 			if dgraphReqJSON.Password != nil {
 				updateUserJSON.Password = dgraphReqJSON.Password
@@ -70,7 +79,9 @@ func usersHandler(folivoraSecret, managementToken, auth0URL, dgraphURL string) h
 					Role: dgraphReqJSON.Role,
 				}
 				updateUserVariables["filter"] = map[string]interface{}{
-					"auth0ID": *dgraphReqJSON.Auth0ID,
+					"auth0ID": map[string]interface{}{
+						"eq": *dgraphReqJSON.Auth0ID,
+					},
 				}
 				updateUserVariables["set"] = map[string]interface{}{
 					"role": *dgraphReqJSON.Role,
@@ -101,8 +112,8 @@ func usersHandler(folivoraSecret, managementToken, auth0URL, dgraphURL string) h
 
 			dgraphMutation = graphql.DeleteUserMutation
 			dgraphVariables = map[string]interface{}{
-				"filter": map[string]interface{}{
-					"auth0ID": *dgraphReqJSON.Auth0ID,
+				"auth0ID": map[string]interface{}{
+					"eq": *dgraphReqJSON.Auth0ID,
 				},
 			}
 		} else {
@@ -134,19 +145,20 @@ func usersHandler(folivoraSecret, managementToken, auth0URL, dgraphURL string) h
 				return
 			}
 
-			dgraphVariables = map[string]interface{}{
-				"owner": map[string]string{
-					"id": *dgraphReqJSON.Owner,
+			dgraphVariables = []map[string]interface{}{
+				map[string]interface{}{
+					"owner": map[string]string{
+						"id": *dgraphReqJSON.Owner,
+					},
+					"email":     *dgraphReqJSON.Email,
+					"firstName": *dgraphReqJSON.FirstName,
+					"lastName":  *dgraphReqJSON.LastName,
+					"role":      *dgraphReqJSON.Role,
+					"org": map[string]string{
+						"id": *dgraphReqJSON.Org,
+					},
+					"auth0ID": auth0RespJSON.Auth0ID,
 				},
-				"email":     *dgraphReqJSON.Email,
-				"password":  *dgraphReqJSON.Password,
-				"firstName": *dgraphReqJSON.FirstName,
-				"lastName":  *dgraphReqJSON.LastName,
-				"role":      *dgraphReqJSON.Role,
-				"org": map[string]string{
-					"id": *dgraphReqJSON.Org,
-				},
-				"auth0ID": auth0RespJSON.Auth0ID,
 			}
 		}
 

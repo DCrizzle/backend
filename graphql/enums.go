@@ -1,10 +1,12 @@
 package graphql
 
+// Sex is the enum defined for Donor fields in the schema.
 var Sex = []string{
 	"MALE",
 	"FEMALE",
 }
 
+// Race is the enum defined for Donor fields in the schema.
 var Race = []string{
 	"AMERICAN_INDIAN_OR_ALASKA_NATIVE",
 	"ASIAN",
@@ -13,14 +15,17 @@ var Race = []string{
 	"WHITE",
 }
 
+// SpecimenType is the enum defined for Specimen fields in the schema.
 var SpecimenType = []string{
 	"BLOOD",
 }
 
+// Container is the enum defined for Specimen fields in the schema.
 var Container = []string{
 	"VIAL",
 }
 
+// Status is the enum defined for Specimen fields in the schema.
 var Status = []string{
 	"DESTROYED",
 	"EXHAUSTED",
@@ -31,6 +36,7 @@ var Status = []string{
 	"TRANSFERRED",
 }
 
+// BloodType is the enum defined for BloodSpecimen fields in the schema.
 var BloodType = []string{
 	"O_NEG",
 	"O_POS",

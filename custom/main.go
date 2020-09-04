@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -12,10 +13,16 @@ import (
 )
 
 func main() {
-	cfg, err := config.New("../etc/config/config.json")
+	log.Println("starting custom directive handler")
+
+	configPath := flag.String("config", "../etc/config/config.json", "path to config json file")
+
+	flag.Parse()
+
+	cfg, err := config.New(*configPath)
 	if err != nil {
+		log.Fatal("error reading config:", err.Error())
 	}
-	log.Fatal("error reading config:", err.Error())
 
 	auth0Client := auth0.New(cfg)
 
@@ -24,7 +31,6 @@ func main() {
 		log.Fatal("error getting auth0 management api token:", err.Error())
 	}
 
-	// NOTE: fix reference to URL with "/" at end - adjust function processing
 	handler := usersHandler(
 		cfg.Folivora.HelperSecret,
 		managementToken,
@@ -48,4 +54,6 @@ func main() {
 
 	<-done
 	server.stop(ctx)
+
+	log.Println("stopping custom directive handler")
 }

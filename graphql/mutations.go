@@ -17,7 +17,7 @@ const (
 	UpdateUserMutation = "mutation EditUser($input: UpdateUserInput!) { updateUser(input: $input) { user { email } } }"
 
 	// DeleteUserMutation is the GraphQL mutation that deletes User type objects to the Dgraph database.
-	DeleteUserMutation = "mutation RemoveUser($filter: UserFilter!) { deleteUser(filter: $filter) { user { email } } }"
+	DeleteUserMutation = "mutation RemoveUser($input: UserFilter!) { deleteUser(filter: $input) { user { email } } }"
 
 	// AddProtocolsMutation is the GraphQL mutation that adds Protocol type objects to the Dgraph database.
 	AddProtocolsMutation = "mutation AddProtocols($input: [AddProtocolInput!]!) { addProtocol(input: $input) { protocol { id } } }"
