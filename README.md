@@ -1,5 +1,7 @@
 # backend
 
+> The API and database :sloth:
+
 ## general
 
 Several prerequisites are needed in order to run the `backend` package locally. Follow the installation/download instructions for your local operating system.
@@ -11,6 +13,8 @@ Several prerequisites are needed in order to run the `backend` package locally. 
 - install [Dgraph](https://github.com/dgraph-io/dgraph#install-from-source)
 	- run `git clone git@github.com:dgraph-io/dgraph.git` in the command line
 	- run the **Install from Source** instructions in the link above
+
+These should be the minimum resources needed to get up and running with `backend`! :thumbsup:
 
 **NOTE**: the `master` branch version of Dgraph is being used to accommodate pre-release features
 
