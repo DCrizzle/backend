@@ -83,7 +83,7 @@ func Test_usersHandler(t *testing.T) {
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte(`{"owner":"jedi","email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"cin","lastName":"dralling","role":"USER_ADMIN","org":"jedi"}`),
 			responseStatusCode:  http.StatusOK,
-			responseBody:        fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
+			responseBody:        fmt.Sprintf(`{"auth0ID":"%s","email":"battlemaster@jeditemple.edu","firstName":"cin","lastName":"dralling","org":{"id":"jedi"},"owner":{"id":"jedi"},"role":"USER_ADMIN"}`, auth0ID),
 		},
 		{
 			description:         "successful update user request to helper server",
@@ -95,7 +95,7 @@ func Test_usersHandler(t *testing.T) {
 			requestMethod:       http.MethodPatch,
 			requestBody:         []byte(fmt.Sprintf(`{"authZeroID":"%s","role":"USER_LAB"}`, auth0ID)),
 			responseStatusCode:  http.StatusOK,
-			responseBody:        fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
+			responseBody:        fmt.Sprintf(`{"owner": {"id": ""}, "email": "", "firstName": "", "lastName": "", "role": "", "org": {"id": ""}, "auth0ID": "%s"}`, auth0ID),
 		},
 		{
 			description:         "successful delete user request to helper server",
@@ -107,7 +107,7 @@ func Test_usersHandler(t *testing.T) {
 			requestMethod:       http.MethodDelete,
 			requestBody:         []byte(fmt.Sprintf(`{"authZeroID":"%s"}`, auth0ID)),
 			responseStatusCode:  http.StatusOK,
-			responseBody:        fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0ID),
+			responseBody:        fmt.Sprintf(`{"owner": {"id": ""}, "email": "", "firstName": "", "lastName": "", "role": "", "org": {"id": ""}, "auth0ID": "%s"}`, auth0ID),
 		},
 	}
 
