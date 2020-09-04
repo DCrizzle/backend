@@ -10,4 +10,5 @@ const (
 	errExecutingAuth0Request = "error executing auth0 request"
 	errIncorrectResponseBody = "incorrect response body received"
 	errDgraphMutation        = "error executing dgraph mutation"
+	errMarshallingDgraphJSON = "error marshalling dgraph json"
 )

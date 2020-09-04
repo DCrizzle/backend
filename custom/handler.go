@@ -175,9 +175,17 @@ func usersHandler(folivoraSecret, managementToken, auth0URL, dgraphURL string) h
 		}
 
 		if r.Method == http.MethodPost {
-			fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, auth0RespJSON.Auth0ID))
+			dgraphResponseBytes, err := json.Marshal(dgraphVariables.([]map[string]interface{})[0])
+			if err != nil {
+				http.Error(w, errMarshallingDgraphJSON, http.StatusBadRequest)
+				return
+			}
+			fmt.Fprintf(w, string(dgraphResponseBytes))
 		} else {
-			fmt.Fprintf(w, fmt.Sprintf(`{"message": "success", "auth0ID": "%s"}`, *dgraphReqJSON.Auth0ID))
+			// outline:
+			// [ ] add in values from auth0 response / received dgraph request
+			responseBody := fmt.Sprintf(`{"owner": {"id": ""}, "email": "", "firstName": "", "lastName": "", "role": "", "org": {"id": ""}, "auth0ID": "%s"}`, *dgraphReqJSON.Auth0ID)
+			fmt.Fprintf(w, responseBody)
 		}
 	})
 }
