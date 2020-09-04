@@ -34,16 +34,16 @@ Several prerequisites are needed in order to run the `backend` package locally. 
 
 To interact with the Dgraph database and schema, follow the steps below.
 
-- run `chmod +x ./bin/get_token && chmod +x ./bin/load_demo && chmod +x ./bin/start_dgraph` from the root of the `backend` repository
-- launch **Dgraph** locally
+1. run `chmod +x ./bin/get_token && chmod +x ./bin/load_demo && chmod +x ./bin/start_dgraph` from the root of the `backend` repository
+2. launch **Dgraph** locally
 	- run `./bin/start_dgraph` in the command line from the root of the `backend` repository
-- build and run the **`demo`** package
+3. build and run the **`demo`** package
 	- run `./bin/load_demo` from the root of the `backend` repository
 	- a progress bar will display as data is loaded into Dgraph - once complete the database may be used
-- setup and use **Postman**
+4. setup and use **Postman**
 	- launch Postman and click **Import** -> **Choose Files** then find, select, and upload the `backend/etc/postman/collection.json` file
 	- run `./bin/get_token` from the root of the `backend` repository and copy the output token value
-	- in each of your Postman requests, under the **Headers** tab, add a `Key` with the value "`Authorization`" and a `Value` with a value of the copied token and the requests are now authorized to communicate with the Dgraph database
+	- in each of your Postman requests, under the **Headers** tab, add a `Key` with the value "`X-Auth0-Token`" and a `Value` with a value of the copied token and the requests are now authorized to communicate with the Dgraph database
 
 **NOTE**: the Management API key fetched from Auth0 is **_sensitive data_** and should not be shared publicly
 **NOTE**: currently the user JWT issued from the `token` package is configured to `john.forstmeier@gmail.com` in Auth0
