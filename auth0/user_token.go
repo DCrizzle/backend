@@ -51,7 +51,7 @@ func (a *Auth0) GetUserToken(user string) (string, error) {
 // UpdateUserToken sets the "orgID" field on the user app_metadata.
 //
 // Auth0 docs reference: https://auth0.com/docs/api/management/v2#!/Users/patch_users_by_id
-func (a *Auth0) UpdateUserToken(user, orgID string) error {
+func (a *Auth0) UpdateUserToken(user, orgID, managementToken string) error {
 	encodedUserID := url.QueryEscape(a.config.Auth0.Users[user].ID)
 	data := fmt.Sprintf(`{
 		"app_metadata": {
@@ -65,7 +65,7 @@ func (a *Auth0) UpdateUserToken(user, orgID string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", a.config.Auth0.ManagementToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", managementToken))
 
 	resp, err := a.client.Do(req)
 	if err != nil {

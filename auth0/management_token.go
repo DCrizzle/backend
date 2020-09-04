@@ -41,6 +41,6 @@ func (a *Auth0) GetManagementAPIToken() (string, error) {
 		return "", err
 	}
 
-	managementToken := gjson.Get(string(bodyBytes), "id_token")
+	managementToken := gjson.Get(string(bodyBytes), "access_token")
 	return managementToken.String(), nil
 }

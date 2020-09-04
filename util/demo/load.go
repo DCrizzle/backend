@@ -24,7 +24,7 @@ func loadDemo(cfg *config.Config) error {
 
 	cfg, err := config.New("../../etc/config/config.json")
 	if err != nil {
-		log.Fatal("error reading config file:", err.Error())
+		log.Fatalf("error reading config file: %s", err.Error())
 	}
 
 	ac := auth0.New(cfg)
@@ -47,11 +47,16 @@ func loadDemo(cfg *config.Config) error {
 		log.Fatalf("add owner orgs error: %s", err.Error())
 	}
 
+	managementToken, err := ac.GetManagementAPIToken()
+	if err != nil {
+		log.Fatalf("get management token error: %s", err.Error())
+	}
+
 	helperCount := 10 // number of helper methods being called without owner orgs
 	bar := pb.StartNew(helperCount * len(ownerIDs))
 
 	for ownerIndex, ownerID := range ownerIDs {
-		if err := ac.UpdateUserToken("TEST_FORSTMEIER", ownerID); err != nil {
+		if err := ac.UpdateUserToken("TEST_FORSTMEIER", ownerID, managementToken); err != nil {
 			log.Fatalf("error updating user token: %s", err.Error())
 		}
 

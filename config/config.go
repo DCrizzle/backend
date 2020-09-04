@@ -18,7 +18,6 @@ type auth0 struct {
 	Frontend        application     `json:"FRONTEND"`
 	Backend         application     `json:"BACKEND"`
 	Users           map[string]user `json:"USERS"`
-	ManagementToken string          `json:"MANAGEMENT_TOKEN"`
 }
 
 type application struct {
