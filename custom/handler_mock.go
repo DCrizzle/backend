@@ -31,28 +31,38 @@ func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 			auth0ID = "auth0|" + hexID
 
 			dgraphMutation = graphql.AddUsersMutation
-			dgraphVariables = map[string]interface{}{
-				"owner": map[string]string{
-					"id": *dgraphReqJSON.Owner,
+			dgraphVariables = []map[string]interface{}{
+				map[string]interface{}{
+					"owner": map[string]string{
+						"id": *dgraphReqJSON.Owner,
+					},
+					"email":     *dgraphReqJSON.Email,
+					"firstName": *dgraphReqJSON.FirstName,
+					"lastName":  *dgraphReqJSON.LastName,
+					"role":      *dgraphReqJSON.Role,
+					"org": map[string]string{
+						"id": *dgraphReqJSON.Org,
+					},
+					"auth0ID": auth0ID,
 				},
-				"email":     *dgraphReqJSON.Email,
-				"password":  *dgraphReqJSON.Password,
-				"firstName": *dgraphReqJSON.FirstName,
-				"lastName":  *dgraphReqJSON.LastName,
-				"role":      *dgraphReqJSON.Role,
-				"org": map[string]string{
-					"id": *dgraphReqJSON.Org,
-				},
-				"auth0ID": auth0ID,
 			}
 		} else if r.Method == http.MethodPatch {
 			auth0ID = *dgraphReqJSON.Auth0ID
 
 			dgraphMutation = graphql.UpdateUserMutation
-			userUpdates := make(map[string]interface{})
-			if *dgraphReqJSON.Role != "" {
+			userUpdates := map[string]interface{}{
+				"filter": map[string]interface{}{
+					"auth0ID": map[string]interface{}{
+						"eq": *dgraphReqJSON.Auth0ID,
+					},
+				},
+			}
+
+			if dgraphReqJSON.Role != nil {
 				userUpdates["filter"] = map[string]interface{}{
-					"auth0ID": *dgraphReqJSON.Auth0ID,
+					"auth0ID": map[string]interface{}{
+						"eq": *dgraphReqJSON.Auth0ID,
+					},
 				}
 				userUpdates["set"] = map[string]interface{}{
 					"role": *dgraphReqJSON.Role,
@@ -64,8 +74,8 @@ func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 
 			dgraphMutation = graphql.DeleteUserMutation
 			dgraphVariables = map[string]interface{}{
-				"filter": map[string]interface{}{
-					"auth0ID": *dgraphReqJSON.Auth0ID,
+				"auth0ID": map[string]interface{}{
+					"eq": *dgraphReqJSON.Auth0ID,
 				},
 			}
 		}
