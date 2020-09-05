@@ -1,6 +1,7 @@
 package auth0
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -30,18 +31,18 @@ func (a *Auth0) GetUserToken(user string) (string, error) {
 	tokenURL := "https://" + a.config.Auth0.DomainURL + "/oauth/token"
 	req, err := http.NewRequest(http.MethodPost, tokenURL, strings.NewReader(data))
 	if err != nil {
-		return "", err
+		return "", errAuth0(err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := a.client.Do(req)
 	if err != nil {
-		return "", err
+		return "", errAuth0(err)
 	}
 
 	bodyData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", errAuth0(err)
 	}
 
 	userToken := gjson.Get(string(bodyData), "id_token")
@@ -62,20 +63,22 @@ func (a *Auth0) UpdateUserToken(user, orgID, managementToken string) error {
 	userURL := a.config.Auth0.AudienceURL + "users/" + encodedUserID
 	req, err := http.NewRequest(http.MethodPatch, userURL, strings.NewReader(data))
 	if err != nil {
-		return err
+		return errAuth0(err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", managementToken))
 
 	resp, err := a.client.Do(req)
 	if err != nil {
-		return err
+		return errAuth0(err)
 	}
 	if resp.StatusCode == http.StatusUnauthorized {
-		return fmt.Errorf("401 status received - management api token may be expired")
+		err := errors.New("401 status received - management api token may be expired")
+		return errAuth0(err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("non-200 status received: %d", resp.StatusCode)
+		err := fmt.Errorf("non-200 status received: %d", resp.StatusCode)
+		return errAuth0(err)
 	}
 
 	return nil
