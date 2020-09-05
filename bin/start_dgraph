@@ -3,8 +3,7 @@
 function dgraph_cleanup()
 {
 	echo
-	kill -9 $ZERO_ID
-	kill -9 $ALPHA_ID
+	kill -SIGKILL $ZERO_ID $ALPHA_ID
 	echo "|> stopping dgraph"
 	exit
 }

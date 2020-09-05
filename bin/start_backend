@@ -1,0 +1,27 @@
+#!/bin/bash
+
+function backend_cleanup()
+{
+	echo
+	kill -SIGINT $CUSTOM_ID
+	kill -SIGINT $DGRAPH_ID
+	echo "|> stopping backend"
+	exit
+}
+
+trap backend_cleanup SIGINT
+
+echo "|> starting backend"
+
+./bin/start_custom &
+CUSTOM_ID=$!
+echo "CUSTOM_ID:" $CUSTOM_ID
+
+./bin/start_dgraph &
+DGRAPH_ID=$!
+echo "DGRAPH_ID:" $DGRAPH_ID
+
+while true
+do
+	sleep 10
+done

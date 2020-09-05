@@ -5,21 +5,12 @@ ENV GO111MODULE=on \
     GOOS=linux \
 		GOARCH=amd64
 
-WORKDIR /build
+WORKDIR /backend
 
-COPY helper/ .
+COPY . .
 
-RUN go mod init helper
+RUN go mod download
 
-RUN go mod download > /dev/null
+EXPOSE 8080
 
-RUN go build -o helper .
-
-WORKDIR /app
-
-RUN cp /build/helper .
-RUN cp /build/config.json .
-
-EXPOSE 4080
-
-CMD ["./helper"]
+CMD ["./bin/start_backend"]
