@@ -287,7 +287,7 @@ type ProtocolForm implements Form @auth(
 interface Org {
 	id: ID!
 	name: String! @search(by: [hash])
-	users: [User!]! @hasInverse(field: org)
+	users: [User] @hasInverse(field: org)
 	createdOn: DateTime!
 	updatedOn: DateTime!
 }
@@ -343,8 +343,8 @@ type LabOrg implements Org & Location @auth(
 	]},
 ) {
 	owner: OwnerOrg!
-	specimens: [Specimen!]! @hasInverse(field: lab)
-	plans: [Plan!]! @hasInverse(field: labs)
+	specimens: [Specimen] @hasInverse(field: lab)
+	plans: [Plan] @hasInverse(field: labs)
 }
 
 type OwnerOrg implements Org & Location @auth(
@@ -383,8 +383,8 @@ type OwnerOrg implements Org & Location @auth(
 		}"""},
 	]},
 ) {
-	labs: [LabOrg!]! @hasInverse(field: owner)
-	storages: [StorageOrg!]! @hasInverse(field: owner)
+	labs: [LabOrg] @hasInverse(field: owner)
+	storages: [StorageOrg] @hasInverse(field: owner)
 }
 
 type StorageOrg implements Org & Location @auth(
@@ -438,8 +438,8 @@ type StorageOrg implements Org & Location @auth(
 	]},
 ) {
 	owner: OwnerOrg!
-	specimens: [Specimen!]! @hasInverse(field: storage)
-	plans: [Plan!]! @hasInverse(field: storages)
+	specimens: [Specimen] @hasInverse(field: storage)
+	plans: [Plan] @hasInverse(field: storages)
 }
 
 type Plan @auth(
