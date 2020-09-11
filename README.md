@@ -49,8 +49,8 @@ To interact with the Dgraph database and schema, follow the steps below.
 	- run `./bin/get_token` from the root of the `backend` repository and copy the output token value
 	- in each of your Postman requests, under the **Headers** tab, add a `Key` with the value "`X-Auth0-Token`" and a `Value` with a value of the copied token and the requests are now authorized to communicate with the Dgraph database
 
-**NOTE**: the Management API key fetched from Auth0 is **_sensitive data_** and should not be shared publicly
-**NOTE**: currently the user JWT issued from the `token` package is configured to `john.forstmeier@gmail.com` in Auth0
+**NOTE**: the Management API key fetched from Auth0 is **_sensitive data_** and should not be shared publicly  
+**NOTE**: currently the user JWT issued from the `token` package is configured to `john.forstmeier@gmail.com` in Auth0  
 
 ## helper
 
