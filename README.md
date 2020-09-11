@@ -20,6 +20,8 @@ These should be the minimum resources needed to get up and running with `backend
 
 ## docker
 
+- [ ] tbd
+
 ## dgraph
 
 - [ ] `delete*` payload responses include a `msg` field that can be used as a default
@@ -36,16 +38,12 @@ These should be the minimum resources needed to get up and running with `backend
 
 ## demo
 
-To interact with the Dgraph database and schema, follow the steps below.
+To interact with the Dgraph database and schema, follow the steps below with all commands being run in the command line from the root of the `backend` repository.
 
-1. run `chmod +x ./bin/get_token && chmod +x ./bin/load_demo && chmod +x ./bin/start_dgraph` from the root of the `backend` repository
-2. launch **Dgraph** locally
-	- run `./bin/start_dgraph` in the command line from the root of the `backend` repository
-3. build and run the **`demo`** package
-	- run `./bin/load_demo` from the root of the `backend` repository
-	- a progress bar will display as data is loaded into Dgraph - once complete the database may be used
-4. setup and use **Postman**
-	- launch Postman and click **Import** -> **Choose Files** then find, select, and upload the `backend/etc/postman/collection.json` file
+1. run `chmod -R +x ./bin/`
+2. launch **Dgraph** locally by running `./bin/start_dgraph`
+3. build and run the **`demo`** package by running `./bin/load_demo`; a progress bar will display as data is loaded into Dgraph and once complete the database may be used
+4. launch **Postman** and click **Import** -> **Choose Files** then find, select, and upload the `backend/etc/postman/collection.json` file
 	- run `./bin/get_token` from the root of the `backend` repository and copy the output token value
 	- in each of your Postman requests, under the **Headers** tab, add a `Key` with the value "`X-Auth0-Token`" and a `Value` with a value of the copied token and the requests are now authorized to communicate with the Dgraph database
 
@@ -70,7 +68,8 @@ To interact with the Dgraph database and schema, follow the steps below.
 
 ## notes
 
-- [ ] ports
-	- [ ] dgraph zero: 5080/6080
-	- [ ] dgraph alpha: 7080/8080/9080
-	- [ ] helper: 4080
+#### Ports currently used
+
+- Dgraph Zero: 5080 and 6080
+- Dgraph Alpha: 7080 and 9080
+- custom server: 4080
