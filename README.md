@@ -71,5 +71,5 @@ To interact with the Dgraph database and schema, follow the steps below with all
 #### Ports currently used
 
 - Dgraph Zero: 5080 and 6080
-- Dgraph Alpha: 7080 and 9080
+- Dgraph Alpha: 7080, 8080, and 9080
 - custom server: 4080
