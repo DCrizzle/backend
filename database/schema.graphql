@@ -663,8 +663,8 @@ interface Specimen {
 	owner: OwnerOrg!
 	lab: LabOrg @hasInverse(field: specimens)
 	storage: StorageOrg @hasInverse(field: specimens)
-	protocol: Protocol! @hasInverse(field: specimens)
-	tests: [Test!]! @hasInverse(field: specimens)
+	protocol: Protocol @hasInverse(field: specimens)
+	tests: [Test] @hasInverse(field: specimens)
 }
 
 enum SpecimenType {
