@@ -132,11 +132,11 @@ func usersHandler(folivoraSecret, managementToken, auth0URL, dgraphURL string) h
 		httpClient := &http.Client{}
 
 		auth0Resp, err := httpClient.Do(auth0Req)
-		defer auth0Resp.Body.Close()
 		if err != nil || !checkSuccess(auth0Resp.StatusCode) {
 			http.Error(w, errExecutingAuth0Request, http.StatusInternalServerError)
 			return
 		}
+		defer auth0Resp.Body.Close()
 
 		var auth0RespJSON auth0Response
 		if r.Method == http.MethodPost {

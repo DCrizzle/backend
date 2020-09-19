@@ -1,4 +1,4 @@
-package auth0
+package auth
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ import (
 // the config.json file.
 //
 // Auth0 docs reference: https://auth0.com/docs/api/authentication?shell#resource-owner-password
-func (a *Auth0) GetUserToken(user string) (string, error) {
+func (a *Auth) GetUserToken(user string) (string, error) {
 	grantType := "http://auth0.com/oauth/grant-type/password-realm"
 	realm := "Username-Password-Authentication"
 	cfgUser := a.config.Auth0.Users[user]
@@ -31,18 +31,18 @@ func (a *Auth0) GetUserToken(user string) (string, error) {
 	tokenURL := "https://" + a.config.Auth0.DomainURL + "/oauth/token"
 	req, err := http.NewRequest(http.MethodPost, tokenURL, strings.NewReader(data))
 	if err != nil {
-		return "", errAuth0(err)
+		return "", errAuth(err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := a.client.Do(req)
 	if err != nil {
-		return "", errAuth0(err)
+		return "", errAuth(err)
 	}
 
 	bodyData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", errAuth0(err)
+		return "", errAuth(err)
 	}
 
 	userToken := gjson.Get(string(bodyData), "id_token")
@@ -52,7 +52,7 @@ func (a *Auth0) GetUserToken(user string) (string, error) {
 // UpdateUserToken sets the "orgID" field on the user app_metadata.
 //
 // Auth0 docs reference: https://auth0.com/docs/api/management/v2#!/Users/patch_users_by_id
-func (a *Auth0) UpdateUserToken(user, orgID, managementToken string) error {
+func (a *Auth) UpdateUserToken(user, orgID, managementToken string) error {
 	encodedUserID := url.QueryEscape(a.config.Auth0.Users[user].ID)
 	data := fmt.Sprintf(`{
 		"app_metadata": {
@@ -63,22 +63,22 @@ func (a *Auth0) UpdateUserToken(user, orgID, managementToken string) error {
 	userURL := a.config.Auth0.AudienceURL + "users/" + encodedUserID
 	req, err := http.NewRequest(http.MethodPatch, userURL, strings.NewReader(data))
 	if err != nil {
-		return errAuth0(err)
+		return errAuth(err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", managementToken))
 
 	resp, err := a.client.Do(req)
 	if err != nil {
-		return errAuth0(err)
+		return errAuth(err)
 	}
 	if resp.StatusCode == http.StatusUnauthorized {
 		err := errors.New("401 status received - management api token may be expired")
-		return errAuth0(err)
+		return errAuth(err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		err := fmt.Errorf("non-200 status received: %d", resp.StatusCode)
-		return errAuth0(err)
+		return errAuth(err)
 	}
 
 	return nil

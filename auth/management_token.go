@@ -1,4 +1,4 @@
-package auth0
+package auth
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type responseJSON struct {
 }
 
 // GetManagementAPIToken fetches a token for the Auth0 Management API.
-func (a *Auth0) GetManagementAPIToken() (string, error) {
+func (a *Auth) GetManagementAPIToken() (string, error) {
 	backend := a.config.Auth0.Backend
 	payloadString := fmt.Sprintf(
 		"grant_type=client_credentials&client_id=%s&client_secret=%s&audience=%s",
@@ -26,19 +26,19 @@ func (a *Auth0) GetManagementAPIToken() (string, error) {
 	payload := strings.NewReader(payloadString)
 	req, err := http.NewRequest("POST", a.config.Auth0.TokenURL, payload)
 	if err != nil {
-		return "", errAuth0(err)
+		return "", errAuth(err)
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := a.client.Do(req)
 	if err != nil {
-		return "", errAuth0(err)
+		return "", errAuth(err)
 	}
 	defer resp.Body.Close()
 
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", errAuth0(err)
+		return "", errAuth(err)
 	}
 
 	managementToken := gjson.Get(string(bodyBytes), "access_token")

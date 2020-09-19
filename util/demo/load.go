@@ -10,7 +10,7 @@ import (
 	"github.com/cheggaaa/pb/v3"
 	"github.com/google/uuid"
 
-	"github.com/forstmeier/backend/auth0"
+	"github.com/forstmeier/backend/auth"
 	"github.com/forstmeier/backend/config"
 	"github.com/forstmeier/backend/graphql"
 )
@@ -27,7 +27,7 @@ func loadDemo(cfg *config.Config) error {
 		log.Fatalf("error reading config file: %s", err.Error())
 	}
 
-	ac := auth0.New(cfg)
+	ac := auth.New(cfg)
 
 	userToken, err := ac.GetUserToken("TEST_FORSTMEIER")
 	if err != nil {

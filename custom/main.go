@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/forstmeier/backend/auth0"
+	"github.com/forstmeier/backend/auth"
 	"github.com/forstmeier/backend/config"
 )
 
@@ -24,9 +24,9 @@ func main() {
 		log.Fatal("error reading config:", err.Error())
 	}
 
-	auth0Client := auth0.New(cfg)
+	ac := auth.New(cfg)
 
-	managementToken, err := auth0Client.GetManagementAPIToken()
+	managementToken, err := ac.GetManagementAPIToken()
 	if err != nil {
 		log.Fatal("error getting auth0 management api token:", err.Error())
 	}

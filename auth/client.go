@@ -1,4 +1,4 @@
-package auth0
+package auth
 
 import (
 	"net/http"
@@ -6,16 +6,16 @@ import (
 	"github.com/forstmeier/backend/config"
 )
 
-// Auth0 is the client struct hosting helper methods for interacting with
+// Auth is the client struct hosting helper methods for interacting with
 // the Auth0 API specifically for token management and metadata updates.
-type Auth0 struct {
+type Auth struct {
 	client *http.Client
 	config *config.Config
 }
 
-// New generates a pointer instance of the Auth0 client.
-func New(cfg *config.Config) *Auth0 {
-	return &Auth0{
+// New generates a pointer instance of the Auth client.
+func New(cfg *config.Config) *Auth {
+	return &Auth{
 		client: &http.Client{},
 		config: cfg,
 	}
