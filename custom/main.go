@@ -13,8 +13,6 @@ import (
 )
 
 func main() {
-	log.Println("starting custom directive handler")
-
 	configPath := flag.String("config", "../etc/config/config.json", "path to config json file")
 
 	flag.Parse()
@@ -54,6 +52,4 @@ func main() {
 
 	<-done
 	server.stop(ctx)
-
-	log.Println("stopping custom directive handler")
 }
