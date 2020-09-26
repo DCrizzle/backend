@@ -18,27 +18,11 @@ These should be the minimum resources needed to get up and running with `backend
 
 **NOTE**: the `master` branch version of Dgraph is being used to accommodate pre-release features
 
-## docker
+## packages
 
-- [ ] tbd
+### demo
 
-## dgraph
-
-- [ ] `delete*` payload responses include a `msg` field that can be used as a default
-- [ ] deleting any object from dgraph will remove all references to that object on other objects
-- [ ] [graphql cheatsheet](https://devhints.io/graphql)
-- [ ] include an "attribute mapping" type on the Lab entities (?)
-- - [ ] possibly to show individual Lab header/field names for attributes within the "root" type
-- - [ ] this would be added/updated as Lab nodes are added/updated
-- [ ] general notes:
-- - [ ] update relationships using "set"/"remove" keywords in queries
-- - [ ] searching: https://dgraph.io/docs/query-language/#indexing
-- - [ ] "query*"
-- - - [ ] "filter" field contains fields tagged with "@search" directive
-
-## demo
-
-To interact with the Dgraph database and schema, follow the steps below with all commands being run in the command line from the root of the `backend` repository.
+`demo` is responsible for loading demo data into the Dgraph database. Follow the instructions below to get setup and execute all commands in the terminal from the root of the `backend` repository.
 
 1. run `chmod -R +x ./bin/`
 2. launch **Dgraph** locally by running `./bin/start_dgraph`
@@ -50,25 +34,20 @@ To interact with the Dgraph database and schema, follow the steps below with all
 **NOTE**: the Management API key fetched from Auth0 is **_sensitive data_** and should not be shared publicly  
 **NOTE**: currently the user JWT issued from the `token` package is configured to `john.forstmeier@gmail.com` in Auth0  
 
-## helper
+### custom
 
-- [ ] outline:
-- [ ] holds server for intercepting dgraph @custom requests
-- [ ] responsible for enriching/handling requests
-- [ ] also servers as a way to mock/isolate dgraph @custom directives
-- [ ] available configurations/states:
-- [ ] production - running fully connected to external resources (e.g. auth0)
-- [ ] mocking - running dgraph live but not unit testing (e.g. manually testing database/api)
-	- [ ] build command: `go build -tags mock`
-- [ ] testing - running isolated for code testing purposes (e.g. "go test")
-- [ ] docker:
-	- [ ] build with `docker build .`
-	- [ ] copy result output ID
-	- [ ] run with `docker run -p 4080:4080 <ID>`
+`custom` intercepts and processes all Dgraph `@custom` directive requests. This is to provided the additional GraphQL logic to fulfill the operations and provide a base for local mocking. **No "smarts"** will be built into this package and it will _only be an intermediary_.
+
+The server can be built in two configurations:
+
+- production: `go build`
+- mock: `go build -tags mock`
+
+In both cases calling `./bin/start_custom` would start the server.
 
 ## notes
 
-### ports currently used
+### ports
 
 - Dgraph Zero: 5080 and 6080
 - Dgraph Alpha: 7080, 8080, and 9080
