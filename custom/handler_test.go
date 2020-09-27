@@ -18,7 +18,7 @@ func Test_usersHandler(t *testing.T) {
 		auth0RespStatusCode int
 		auth0RespID         string
 		auth0ReqReceived    string
-		helperSecret        string
+		customSecret        string
 		requestSecret       string
 		requestMethod       string
 		requestBody         []byte
@@ -26,11 +26,11 @@ func Test_usersHandler(t *testing.T) {
 		responseBody        string
 	}{
 		{
-			description:         "incorrect secret provided in request to helper",
+			description:         "incorrect secret provided in request to custom",
 			auth0RespStatusCode: http.StatusTeapot,
 			auth0RespID:         "",
 			auth0ReqReceived:    "",
-			helperSecret:        "correct_secret",
+			customSecret:        "correct_secret",
 			requestSecret:       "incorrect_secret",
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte{},
@@ -38,11 +38,11 @@ func Test_usersHandler(t *testing.T) {
 			responseBody:        errIncorrectSecret,
 		},
 		{
-			description:         "invalid json body received in request to helper",
+			description:         "invalid json body received in request to custom",
 			auth0RespStatusCode: http.StatusTeapot,
 			auth0RespID:         "",
 			auth0ReqReceived:    "",
-			helperSecret:        "correct_secret",
+			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte("---------"),
@@ -50,11 +50,11 @@ func Test_usersHandler(t *testing.T) {
 			responseBody:        errIncorrectRequestBody,
 		},
 		{
-			description:         "unsupported http method in request to helper",
+			description:         "unsupported http method in request to custom",
 			auth0RespStatusCode: http.StatusTeapot,
 			auth0RespID:         "",
 			auth0ReqReceived:    "",
-			helperSecret:        "correct_secret",
+			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodPut,
 			requestBody:         []byte(`{"email": "grandmaster@jeditemple.edu"}`),
@@ -66,7 +66,7 @@ func Test_usersHandler(t *testing.T) {
 			auth0RespStatusCode: http.StatusBadRequest,
 			auth0RespID:         "",
 			auth0ReqReceived:    `{"email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"mace","family_name":"windu","connection":"Username-Password-Authentication"}`,
-			helperSecret:        "correct_secret",
+			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte(`{"owner":"jedi","email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"mace","lastName":"windu","role":"USER_ADMIN","org":"jedi"}`),
@@ -74,11 +74,11 @@ func Test_usersHandler(t *testing.T) {
 			responseBody:        errExecutingAuth0Request,
 		},
 		{
-			description:         "successful create user request to helper server",
+			description:         "successful create user request to custom server",
 			auth0RespStatusCode: http.StatusOK,
 			auth0RespID:         "",
 			auth0ReqReceived:    `{"email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"cin","family_name":"dralling","connection":"Username-Password-Authentication"}`,
-			helperSecret:        "correct_secret",
+			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte(`{"owner":"jedi","email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"cin","lastName":"dralling","role":"USER_ADMIN","org":"jedi"}`),
@@ -86,11 +86,11 @@ func Test_usersHandler(t *testing.T) {
 			responseBody:        fmt.Sprintf(`{"auth0ID":"%s","email":"battlemaster@jeditemple.edu","firstName":"cin","lastName":"dralling","org":{"id":"jedi"},"owner":{"id":"jedi"},"role":"USER_ADMIN"}`, auth0ID),
 		},
 		{
-			description:         "successful update user request to helper server",
+			description:         "successful update user request to custom server",
 			auth0RespStatusCode: http.StatusOK,
 			auth0RespID:         "/",
 			auth0ReqReceived:    `{"app_metadata":{"role":"USER_LAB"}}`,
-			helperSecret:        "correct_secret",
+			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodPatch,
 			requestBody:         []byte(fmt.Sprintf(`{"authZeroID":"%s","role":"USER_LAB"}`, auth0ID)),
@@ -98,11 +98,11 @@ func Test_usersHandler(t *testing.T) {
 			responseBody:        fmt.Sprintf(`{"owner": {"id": ""}, "email": "", "firstName": "", "lastName": "", "role": "", "org": {"id": ""}, "auth0ID": "%s"}`, auth0ID),
 		},
 		{
-			description:         "successful delete user request to helper server",
+			description:         "successful delete user request to custom server",
 			auth0RespStatusCode: http.StatusOK,
 			auth0RespID:         "/",
 			auth0ReqReceived:    "",
-			helperSecret:        "correct_secret",
+			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodDelete,
 			requestBody:         []byte(fmt.Sprintf(`{"authZeroID":"%s"}`, auth0ID)),
@@ -140,7 +140,7 @@ func Test_usersHandler(t *testing.T) {
 		dgraphURL := dgraphServer.URL + "/graphql"
 
 		t.Run(test.description, func(t *testing.T) {
-			// mock request from dgraph @custom directive to helper server/handler
+			// mock request from dgraph @custom directive to custom server/handler
 			req, err := http.NewRequest(
 				test.requestMethod,
 				"/auth0/users",
@@ -149,12 +149,12 @@ func Test_usersHandler(t *testing.T) {
 			if err != nil {
 				t.Fatal("error creating request:", err.Error())
 			}
-			req.Header.Set("folivora-helper-secret", test.requestSecret)
+			req.Header.Set("folivora-custom-secret", test.requestSecret)
 
 			rec := httptest.NewRecorder()
 
-			// helper users handler wrapper function
-			handler := http.HandlerFunc(usersHandler(test.helperSecret, "test_token", auth0URL, dgraphURL))
+			// custom users handler wrapper function
+			handler := http.HandlerFunc(usersHandler(test.customSecret, "test_token", auth0URL, dgraphURL))
 
 			handler.ServeHTTP(rec, req)
 

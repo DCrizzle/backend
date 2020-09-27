@@ -894,19 +894,19 @@ type Mutation {
 		url: "http://localhost:4080/auth0/users",
 		method: "POST",
 		body: "{ owner: $owner, email: $email, password: $password, firstName: $firstName, lastName: $lastName, role: $role, org: $org }",
-		forwardHeaders: ["folivora-helper-secret", "X-Auth0-Token"]
+		forwardHeaders: ["folivora-custom-secret", "X-Auth0-Token"]
 	})
 	editUser(authZeroID: String!, role: Role, password: String): User @custom(http: {
 		url: "http://localhost:4080/auth0/users",
 		method: "PATCH",
 		body: "{ authZeroID: $authZeroID, role: $role, password: $password }",
-		forwardHeaders: ["folivora-helper-secret", "X-Auth0-Token"]
+		forwardHeaders: ["folivora-custom-secret", "X-Auth0-Token"]
 	})
 	removeUser(authZeroID: String!): User @custom(http: {
 		url: "http://localhost:4080/auth0/users",
 		method: "DELETE",
 		body: "{ authZeroID: $authZeroID }",
-		forwardHeaders: ["folivora-helper-secret", "X-Auth0-Token"]
+		forwardHeaders: ["folivora-custom-secret", "X-Auth0-Token"]
 	})
 }
 

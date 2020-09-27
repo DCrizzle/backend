@@ -17,7 +17,7 @@ func newServer(usersHandler http.HandlerFunc) *server {
 	subrouter := router.PathPrefix("/auth0").Subrouter()
 	subrouter.HandleFunc("/users", usersHandler)
 
-	helperServer := &http.Server{
+	customServer := &http.Server{
 		Addr:         "127.0.0.1:4080",
 		Handler:      router,
 		ReadTimeout:  10 * time.Second,
@@ -25,7 +25,7 @@ func newServer(usersHandler http.HandlerFunc) *server {
 	}
 
 	return &server{
-		httpServer: helperServer,
+		httpServer: customServer,
 	}
 }
 

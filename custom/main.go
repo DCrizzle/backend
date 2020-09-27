@@ -30,7 +30,7 @@ func main() {
 	}
 
 	handler := usersHandler(
-		cfg.Folivora.HelperSecret,
+		cfg.Folivora.CustomSecret,
 		managementToken,
 		cfg.Auth0.AudienceURL, // same as the api url
 		cfg.Folivora.DgraphURL,

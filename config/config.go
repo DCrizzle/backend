@@ -32,8 +32,8 @@ type user struct {
 }
 
 type folivora struct {
-	HelperURL    string `json:"HELPER_URL"`
-	HelperSecret string `json:"HELPER_SECRET"`
+	CustomURL    string `json:"CUSTOM_URL"`
+	CustomSecret string `json:"CUSTOM_SECRET"`
 	DgraphURL    string `json:"DGRAPH_URL"`
 }
 
