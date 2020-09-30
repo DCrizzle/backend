@@ -10,6 +10,8 @@ import (
 
 	"github.com/forstmeier/backend/auth"
 	"github.com/forstmeier/backend/config"
+	"github.com/forstmeier/backend/custom/handlers/users"
+	"github.com/forstmeier/backend/custom/server"
 )
 
 func main() {
@@ -29,13 +31,13 @@ func main() {
 		log.Fatal("error getting auth0 management api token:", err.Error())
 	}
 
-	handler := usersHandler(
+	handler := users.Handler(
 		cfg.Folivora.CustomSecret,
 		managementToken,
 		cfg.Auth0.AudienceURL, // same as the api url
 		cfg.Folivora.DgraphURL,
 	)
-	server := newServer(handler)
+	customServer := server.New(handler)
 
 	ctx := context.Background()
 
@@ -44,12 +46,12 @@ func main() {
 
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
-	go server.start()
+	go customServer.Start()
 	go func() {
 		<-sigs
 		done <- true
 	}()
 
 	<-done
-	server.stop(ctx)
+	customServer.Stop(ctx)
 }

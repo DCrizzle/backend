@@ -1,6 +1,6 @@
 // +build mock
 
-package main
+package users
 
 import (
 	"encoding/hex"
@@ -10,14 +10,15 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/forstmeier/backend/custom/handlers"
 	"github.com/forstmeier/backend/graphql"
 )
 
-func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
+func Handler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var dgraphReqJSON dgraphRequest
+		var dgraphReqJSON handlers.DgraphRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {
-			http.Error(w, errIncorrectRequestBody, http.StatusBadRequest)
+			http.Error(w, handlers.ErrIncorrectRequestBody, http.StatusBadRequest)
 			return
 		}
 
@@ -88,14 +89,14 @@ func usersHandler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
 
 		_, err := dgraphClient.SendRequest(dgraphMutation, dgraphVariables)
 		if err != nil {
-			http.Error(w, errDgraphMutation, http.StatusBadRequest)
+			http.Error(w, handlers.ErrDgraphMutation, http.StatusBadRequest)
 			return
 		}
 
 		if r.Method == http.MethodPost {
 			dgraphResponseBytes, err := json.Marshal(dgraphVariables.([]map[string]interface{})[0])
 			if err != nil {
-				http.Error(w, errMarshallingDgraphJSON, http.StatusBadRequest)
+				http.Error(w, handlers.ErrMarshallingDgraphJSON, http.StatusBadRequest)
 				return
 			}
 			fmt.Fprintf(w, string(dgraphResponseBytes))

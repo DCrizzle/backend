@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"context"
@@ -8,11 +8,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type server struct {
+// Server holds the custom server router and exposes the
+// required helper methods
+type Server struct {
 	httpServer *http.Server
 }
 
-func newServer(usersHandler http.HandlerFunc) *server {
+// New generates a pointer instance of the Server object
+func New(usersHandler http.HandlerFunc) *Server {
 	router := mux.NewRouter()
 	subrouter := router.PathPrefix("/auth0").Subrouter()
 	subrouter.HandleFunc("/users", usersHandler)
@@ -24,15 +27,17 @@ func newServer(usersHandler http.HandlerFunc) *server {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	return &server{
+	return &Server{
 		httpServer: customServer,
 	}
 }
 
-func (s *server) start() {
+// Start starts the configured server
+func (s *Server) Start() {
 	s.httpServer.ListenAndServe()
 }
 
-func (s *server) stop(ctx context.Context) {
+// Stop stops the configured server
+func (s *Server) Stop(ctx context.Context) {
 	s.httpServer.Shutdown(ctx)
 }

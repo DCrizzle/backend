@@ -1,4 +1,4 @@
-package main
+package users
 
 import (
 	"bytes"
@@ -8,6 +8,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/forstmeier/backend/custom/handlers"
 )
 
 func Test_usersHandler(t *testing.T) {
@@ -35,7 +37,7 @@ func Test_usersHandler(t *testing.T) {
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte{},
 			responseStatusCode:  http.StatusBadRequest,
-			responseBody:        errIncorrectSecret,
+			responseBody:        handlers.ErrIncorrectSecret,
 		},
 		{
 			description:         "invalid json body received in request to custom",
@@ -47,7 +49,7 @@ func Test_usersHandler(t *testing.T) {
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte("---------"),
 			responseStatusCode:  http.StatusBadRequest,
-			responseBody:        errIncorrectRequestBody,
+			responseBody:        handlers.ErrIncorrectRequestBody,
 		},
 		{
 			description:         "unsupported http method in request to custom",
@@ -59,7 +61,7 @@ func Test_usersHandler(t *testing.T) {
 			requestMethod:       http.MethodPut,
 			requestBody:         []byte(`{"email": "grandmaster@jeditemple.edu"}`),
 			responseStatusCode:  http.StatusBadRequest,
-			responseBody:        errIncorrectHTTPMethod,
+			responseBody:        handlers.ErrIncorrectHTTPMethod,
 		},
 		{
 			description:         "error received in response from auth0 server",
@@ -71,7 +73,7 @@ func Test_usersHandler(t *testing.T) {
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte(`{"owner":"jedi","email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"mace","lastName":"windu","role":"USER_ADMIN","org":"jedi"}`),
 			responseStatusCode:  http.StatusInternalServerError,
-			responseBody:        errExecutingAuth0Request,
+			responseBody:        handlers.ErrExecutingAuth0Request,
 		},
 		{
 			description:         "successful create user request to custom server",
@@ -154,7 +156,7 @@ func Test_usersHandler(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			// custom users handler wrapper function
-			handler := http.HandlerFunc(usersHandler(test.customSecret, "test_token", auth0URL, dgraphURL))
+			handler := http.HandlerFunc(Handler(test.customSecret, "test_token", auth0URL, dgraphURL))
 
 			handler.ServeHTTP(rec, req)
 
