@@ -220,6 +220,7 @@ type ConsentForm implements Form @auth(
 	]},
 ) {
 	consents: [Consent] @hasInverse(field: form)
+	entities: [Entities]
 }
 
 type ProtocolForm implements Form @auth(
@@ -282,6 +283,69 @@ type ProtocolForm implements Form @auth(
 ) {
 	protocolID: String! @search(by: [hash])
 	protocols: [Protocol!]! @hasInverse(field: form)
+}
+
+type Entities @auth(
+	add: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryEntities {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	query: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryEntities {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	update: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryEntities {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+	delete: { and: [
+		{ rule: "{ $isAuthenticated: { eq: \"true\" } }" },
+		{ or: [
+			{ rule: "{ $role: { eq: \"USER_ADMIN\" } }"},
+			{ rule: "{ $role: { eq: \"USER_INTERNAL\" } }"},
+		]},
+		{ rule: """query($orgID: ID!) {
+			queryEntities {
+				owner( filter: { id: [$orgID] } ) {
+					id
+				}
+			}
+		}"""},
+	]},
+) {
+	id: ID!
+	owner: OwnerOrg!
+	person: [String]
 }
 
 interface Org {
