@@ -12,7 +12,7 @@ import (
 	"github.com/forstmeier/backend/custom/handlers"
 )
 
-func Test_usersHandler(t *testing.T) {
+func TestHandler(t *testing.T) {
 	auth0ID := "auth0|id"
 
 	tests := []struct {
