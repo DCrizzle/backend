@@ -41,3 +41,16 @@ type AppMetadata struct {
 type Auth0Response struct {
 	Auth0ID string `json:"user_id"`
 }
+
+// DgraphEntitiesRequest is a request to identify entities in a text blob
+type DgraphEntitiesRequest struct {
+	Owner   string `json:"owner"`
+	Form    string `json:"form"`
+	DocType string `json:"docType"`
+	Blob    string `json:"blob"`
+}
+
+// EntitiesResponse is a response from entities classification
+type EntitiesResponse struct {
+	Data map[string][]string `json:"data"`
+}

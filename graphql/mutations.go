@@ -45,4 +45,7 @@ const (
 
 	// AddResultsMutation is the GraphQL mutation that adds Result type objects to the Dgraph database.
 	AddResultsMutation = "mutation AddResults($input: [AddResultInput!]!) { addResult(input: $input) { result { id } } }"
+
+	// AddEntitiesMutation is the GraphQL mutation that adds Entities type objects to the Dgraph database.
+	AddEntitiesMutation = "mutation AddEntities($input: [AddEntitiesInput!]!) { addEntities(input: $input) { entities { id } } }"
 )
