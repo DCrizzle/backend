@@ -1,19 +1,19 @@
 package entities
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/forstmeier/backend/custom/handlers"
 	"github.com/forstmeier/backend/graphql"
+
+	entint "github.com/forstmeier/internal/nlp/entities"
 )
 
 // Handler is an HTTP listener for classify entity @custom directive events
-func Handler(folivoraSecret, internalSecret, entitiesURL, dgraphURL string) http.HandlerFunc {
+func Handler(folivoraSecret, internalSecret, dgraphURL string, classifier entint.Classifier) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		if folivoraSecret != r.Header.Get("folivora-custom-secret") {
 			http.Error(w, handlers.ErrIncorrectSecret, http.StatusBadRequest)
 			return
@@ -25,41 +25,14 @@ func Handler(folivoraSecret, internalSecret, entitiesURL, dgraphURL string) http
 			return
 		}
 
-		payload, err := json.Marshal(map[string]string{
-			"blob":    dgraphReqJSON.Blob,
-			"docType": dgraphReqJSON.DocType,
-		})
+		entitiesData, err := classifier.ClassifyEntities(dgraphReqJSON.Blob, dgraphReqJSON.DocType)
 		if err != nil {
-			http.Error(w, handlers.ErrMarshallingEntitiesJSON, http.StatusInternalServerError)
-			return
-		}
-
-		entitiesReq, err := http.NewRequest(http.MethodPost, entitiesURL, bytes.NewReader(payload))
-		if err != nil {
-			http.Error(w, handlers.ErrCreatingEntitiesRequest, http.StatusInternalServerError)
-			return
-		}
-
-		entitiesReq.Header.Set("folivora-internal-secret", internalSecret)
-		entitiesReq.Header.Set("Content-Type", "application/json")
-
-		httpClient := &http.Client{}
-
-		entitiesResp, err := httpClient.Do(entitiesReq)
-		if entitiesResp.StatusCode != http.StatusOK {
-			http.Error(w, handlers.ErrExecutingEntitiesRequest, http.StatusInternalServerError)
-			return
-		}
-		defer entitiesResp.Body.Close()
-
-		entitiesRespJSON := handlers.EntitiesResponse{}
-		if err := json.NewDecoder(entitiesResp.Body).Decode(&entitiesRespJSON); err != nil {
-			http.Error(w, handlers.ErrUnmarshallingResponseBody, http.StatusInternalServerError)
+			http.Error(w, handlers.ErrClassifyingEntities, http.StatusInternalServerError)
 			return
 		}
 
 		dgraphClient := graphql.New(
-			httpClient,
+			&http.Client{},
 			dgraphURL,
 			r.Header.Get("X-Auth0-Token"),
 		)
@@ -69,7 +42,6 @@ func Handler(folivoraSecret, internalSecret, entitiesURL, dgraphURL string) http
 			"form":  dgraphReqJSON.Form,
 		}
 
-		entitiesData := entitiesRespJSON.Data
 		if _, ok := entitiesData["person"]; ok {
 			dgraphVariables["person"] = entitiesData["person"]
 		}

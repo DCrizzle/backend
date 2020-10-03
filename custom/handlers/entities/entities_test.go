@@ -2,6 +2,7 @@ package entities
 
 import (
 	"bytes"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,11 +11,20 @@ import (
 	"github.com/forstmeier/backend/custom/handlers"
 )
 
+type mockClassifier struct {
+	mockClassifierResp map[string][]string
+	mockClassifierErr  error
+}
+
+func (mc *mockClassifier) ClassifyEntities(blob string, docType string) (map[string][]string, error) {
+	return mc.mockClassifierResp, mc.mockClassifierErr
+}
+
 func TestHandler(t *testing.T) {
 	tests := []struct {
 		description        string
-		entitiesStatusCode int
-		entitiesBody       string
+		entitiesResp       map[string][]string
+		entitiesErr        error
 		requestBody        string
 		requestSecret      string
 		customSecret       string
@@ -23,8 +33,8 @@ func TestHandler(t *testing.T) {
 	}{
 		{
 			description:        "incorrect secret provided in request to custom",
-			entitiesStatusCode: http.StatusTeapot,
-			entitiesBody:       "",
+			entitiesResp:       nil,
+			entitiesErr:        nil,
 			requestBody:        "",
 			requestSecret:      "incorrect_secret",
 			customSecret:       "correct_secret",
@@ -33,8 +43,8 @@ func TestHandler(t *testing.T) {
 		},
 		{
 			description:        "invalid json body received in request to custom",
-			entitiesStatusCode: http.StatusTeapot,
-			entitiesBody:       "",
+			entitiesResp:       nil,
+			entitiesErr:        nil,
 			requestBody:        "",
 			requestSecret:      "correct_secret",
 			customSecret:       "correct_secret",
@@ -42,19 +52,21 @@ func TestHandler(t *testing.T) {
 			responseBody:       handlers.ErrIncorrectRequestBody,
 		},
 		{
-			description:        "error received in response from classify entities server",
-			entitiesStatusCode: http.StatusInternalServerError,
-			entitiesBody:       "",
+			description:        "error received in response from classify entities",
+			entitiesResp:       nil,
+			entitiesErr:        errors.New("mock classify entities error"),
 			requestBody:        `{"owner": "", "form": "", "docType": "", "blob": ""}`,
 			requestSecret:      "correct_secret",
 			customSecret:       "correct_secret",
 			responseStatusCode: http.StatusInternalServerError,
-			responseBody:       handlers.ErrExecutingEntitiesRequest,
+			responseBody:       handlers.ErrClassifyingEntities,
 		},
 		{
-			description:        "successful classify entities invocation",
-			entitiesStatusCode: http.StatusOK,
-			entitiesBody:       `{"data": {"person": ["test_person"]}}`,
+			description: "successful classify entities invocation",
+			entitiesResp: map[string][]string{
+				"person": []string{"test_person"},
+			},
+			entitiesErr:        nil,
 			requestBody:        `{"owner": "", "form": "", "docType": "", "blob": ""}`,
 			requestSecret:      "correct_secret",
 			customSecret:       "correct_secret",
@@ -64,16 +76,10 @@ func TestHandler(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		entitiesPath := "/nlp/entities"
-
-		entitiesMux := http.NewServeMux()
-		entitiesMux.HandleFunc(entitiesPath, func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(test.entitiesStatusCode)
-			w.Write([]byte(test.entitiesBody))
-		})
-
-		entitiesServer := httptest.NewServer(entitiesMux)
-		entitiesURL := entitiesServer.URL + entitiesPath
+		mc := &mockClassifier{
+			mockClassifierResp: test.entitiesResp,
+			mockClassifierErr:  test.entitiesErr,
+		}
 
 		dgraphMux := http.NewServeMux()
 		dgraphMux.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +92,7 @@ func TestHandler(t *testing.T) {
 		t.Run(test.description, func(t *testing.T) {
 			req, err := http.NewRequest(
 				http.MethodPost,
-				entitiesPath,
+				"/nlp/entities",
 				bytes.NewReader([]byte(test.requestBody)),
 			)
 			if err != nil {
@@ -96,7 +102,7 @@ func TestHandler(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			handler := http.HandlerFunc(Handler(test.customSecret, "internal_secret", entitiesURL, dgraphURL))
+			handler := http.HandlerFunc(Handler(test.customSecret, "internal_secret", dgraphURL, mc))
 
 			handler.ServeHTTP(rec, req)
 

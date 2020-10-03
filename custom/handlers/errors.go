@@ -21,10 +21,6 @@ const (
 	ErrDgraphMutation = "error executing dgraph mutation"
 	// ErrMarshallingDgraphJSON is an error marshalling a Dgraph response
 	ErrMarshallingDgraphJSON = "error marshalling dgraph json"
-	// ErrMarshallingEntitiesJSON is an error marshalling entities classification JSON
-	ErrMarshallingEntitiesJSON = "error marshalling entities json"
-	// ErrCreatingEntitiesRequest is an error creating an entities classification request
-	ErrCreatingEntitiesRequest = "error creating auth0 request"
-	// ErrExecutingEntitiesRequest is an error executing an entities classification request
-	ErrExecutingEntitiesRequest = "error executing entities classification request"
+	// ErrClassifyingEntities is an error invoking the classifier
+	ErrClassifyingEntities = "error classifying entities"
 )
