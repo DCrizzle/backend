@@ -102,7 +102,7 @@ func TestHandler(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			handler := http.HandlerFunc(Handler(test.customSecret, "internal_secret", dgraphURL, mc))
+			handler := http.HandlerFunc(Handler(test.customSecret, dgraphURL, mc))
 
 			handler.ServeHTTP(rec, req)
 

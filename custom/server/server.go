@@ -15,10 +15,13 @@ type Server struct {
 }
 
 // New generates a pointer instance of the Server object
-func New(usersHandler http.HandlerFunc) *Server {
+func New(usersHandler, entitiesHandler http.HandlerFunc) *Server {
 	router := mux.NewRouter()
-	subrouter := router.PathPrefix("/auth0").Subrouter()
-	subrouter.HandleFunc("/users", usersHandler)
+	auth0Subrouter := router.PathPrefix("/auth0").Subrouter()
+	auth0Subrouter.HandleFunc("/users", usersHandler)
+
+	nlpSubrouter := router.PathPrefix("/nlp").Subrouter()
+	nlpSubrouter.HandleFunc("/entities", entitiesHandler)
 
 	customServer := &http.Server{
 		Addr:         "127.0.0.1:4080",

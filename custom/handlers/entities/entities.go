@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"net/http"
 
+	entint "github.com/forstmeier/internal/nlp/entities"
+
 	"github.com/forstmeier/backend/custom/handlers"
 	"github.com/forstmeier/backend/graphql"
-
-	entint "github.com/forstmeier/internal/nlp/entities"
 )
 
 // Handler is an HTTP listener for classify entity @custom directive events
-func Handler(folivoraSecret, internalSecret, dgraphURL string, classifier entint.Classifier) http.HandlerFunc {
+func Handler(folivoraSecret, dgraphURL string, classifier entint.Classifier) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if folivoraSecret != r.Header.Get("folivora-custom-secret") {
 			http.Error(w, handlers.ErrIncorrectSecret, http.StatusBadRequest)
