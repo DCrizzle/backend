@@ -3,18 +3,17 @@
 package entities
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
+	"github.com/forstmeier/backend/custom/handlers"
+	"github.com/forstmeier/backend/graphql"
 	entint "github.com/forstmeier/internal/nlp/entities"
 )
 
-func Handler(folivoraSecret, internalSecret, dgraphURL string, classifier entint.Classifier) http.HandlerFunc {
+func Handler(internalSecret, dgraphURL string, classifier entint.Classifier) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if folivoraSecret != r.Header.Get("folivora-custom-secret") {
-			http.Error(w, handlers.ErrIncorrectSecret, http.StatusBadRequest)
-			return
-		}
-
 		var dgraphReqJSON handlers.DgraphRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {
 			http.Error(w, handlers.ErrIncorrectRequestBody, http.StatusBadRequest)
@@ -40,5 +39,5 @@ func Handler(folivoraSecret, internalSecret, dgraphURL string, classifier entint
 
 		responseBody := fmt.Sprintf(`{"owner": {"id": ""}, "form": {"id": ""}, "person": []}`)
 		fmt.Fprintf(w, responseBody)
-	}
+	})
 }

@@ -27,27 +27,15 @@ func TestHandler(t *testing.T) {
 		entitiesErr        error
 		requestBody        string
 		requestSecret      string
-		customSecret       string
 		responseStatusCode int
 		responseBody       string
 	}{
-		{
-			description:        "incorrect secret provided in request to custom",
-			entitiesResp:       nil,
-			entitiesErr:        nil,
-			requestBody:        "",
-			requestSecret:      "incorrect_secret",
-			customSecret:       "correct_secret",
-			responseStatusCode: http.StatusBadRequest,
-			responseBody:       handlers.ErrIncorrectSecret,
-		},
 		{
 			description:        "invalid json body received in request to custom",
 			entitiesResp:       nil,
 			entitiesErr:        nil,
 			requestBody:        "",
 			requestSecret:      "correct_secret",
-			customSecret:       "correct_secret",
 			responseStatusCode: http.StatusBadRequest,
 			responseBody:       handlers.ErrIncorrectRequestBody,
 		},
@@ -57,7 +45,6 @@ func TestHandler(t *testing.T) {
 			entitiesErr:        errors.New("mock classify entities error"),
 			requestBody:        `{"owner": "", "form": "", "docType": "", "blob": ""}`,
 			requestSecret:      "correct_secret",
-			customSecret:       "correct_secret",
 			responseStatusCode: http.StatusInternalServerError,
 			responseBody:       handlers.ErrClassifyingEntities,
 		},
@@ -69,7 +56,6 @@ func TestHandler(t *testing.T) {
 			entitiesErr:        nil,
 			requestBody:        `{"owner": "", "form": "", "docType": "", "blob": ""}`,
 			requestSecret:      "correct_secret",
-			customSecret:       "correct_secret",
 			responseStatusCode: http.StatusOK,
 			responseBody:       `{"owner": {"id": ""}, "form": {"id": ""}, "person": []}`,
 		},
@@ -102,7 +88,7 @@ func TestHandler(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			handler := http.HandlerFunc(Handler(test.customSecret, dgraphURL, mc))
+			handler := http.HandlerFunc(Handler(dgraphURL, mc))
 
 			handler.ServeHTTP(rec, req)
 

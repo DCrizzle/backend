@@ -14,6 +14,7 @@ import (
 	"github.com/forstmeier/backend/config"
 	"github.com/forstmeier/backend/custom/handlers/entities"
 	"github.com/forstmeier/backend/custom/handlers/users"
+	"github.com/forstmeier/backend/custom/middleware"
 	"github.com/forstmeier/backend/custom/server"
 )
 
@@ -34,8 +35,9 @@ func main() {
 		log.Fatalf("error getting auth0 management api token: %s\n", err.Error())
 	}
 
+	root := middleware.New(cfg.Folivora.CustomSecret)
+
 	userHandler := users.Handler(
-		cfg.Folivora.CustomSecret,
 		managementToken,
 		cfg.Auth0.AudienceURL, // same as the api url
 		cfg.Folivora.DgraphURL,
@@ -47,12 +49,11 @@ func main() {
 	}
 
 	entitiesHandler := entities.Handler(
-		cfg.Folivora.CustomSecret,
 		cfg.Folivora.DgraphURL,
 		classifier,
 	)
 
-	customServer := server.New(userHandler, entitiesHandler)
+	customServer := server.New(root.Middleware, userHandler, entitiesHandler)
 
 	ctx := context.Background()
 

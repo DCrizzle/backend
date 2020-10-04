@@ -6,8 +6,11 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	testMiddleware := func(http.Handler) http.Handler {
+		return nil
+	}
 	testHandler := func(w http.ResponseWriter, r *http.Request) {}
-	server := New(testHandler, testHandler)
+	server := New(testMiddleware, testHandler, testHandler)
 	if server == nil {
 		t.Error("error creating server")
 	}

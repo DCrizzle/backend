@@ -14,13 +14,8 @@ import (
 )
 
 // Handler is an HTTP listener for classify entity @custom directive events
-func Handler(folivoraSecret, dgraphURL string, classifier entint.Classifier) http.HandlerFunc {
+func Handler(dgraphURL string, classifier entint.Classifier) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if folivoraSecret != r.Header.Get("folivora-custom-secret") {
-			http.Error(w, handlers.ErrIncorrectSecret, http.StatusBadRequest)
-			return
-		}
-
 		var dgraphReqJSON handlers.DgraphEntitiesRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {
 			http.Error(w, handlers.ErrIncorrectRequestBody, http.StatusBadRequest)

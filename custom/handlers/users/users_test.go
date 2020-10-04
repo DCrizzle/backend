@@ -20,7 +20,6 @@ func TestHandler(t *testing.T) {
 		auth0RespStatusCode int
 		auth0RespID         string
 		auth0ReqReceived    string
-		customSecret        string
 		requestSecret       string
 		requestMethod       string
 		requestBody         []byte
@@ -28,23 +27,10 @@ func TestHandler(t *testing.T) {
 		responseBody        string
 	}{
 		{
-			description:         "incorrect secret provided in request to custom",
-			auth0RespStatusCode: http.StatusTeapot,
-			auth0RespID:         "",
-			auth0ReqReceived:    "",
-			customSecret:        "correct_secret",
-			requestSecret:       "incorrect_secret",
-			requestMethod:       http.MethodPost,
-			requestBody:         []byte{},
-			responseStatusCode:  http.StatusBadRequest,
-			responseBody:        handlers.ErrIncorrectSecret,
-		},
-		{
 			description:         "invalid json body received in request to custom",
 			auth0RespStatusCode: http.StatusTeapot,
 			auth0RespID:         "",
 			auth0ReqReceived:    "",
-			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte("---------"),
@@ -56,7 +42,6 @@ func TestHandler(t *testing.T) {
 			auth0RespStatusCode: http.StatusTeapot,
 			auth0RespID:         "",
 			auth0ReqReceived:    "",
-			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodPut,
 			requestBody:         []byte(`{"email": "grandmaster@jeditemple.edu"}`),
@@ -68,7 +53,6 @@ func TestHandler(t *testing.T) {
 			auth0RespStatusCode: http.StatusBadRequest,
 			auth0RespID:         "",
 			auth0ReqReceived:    `{"email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"mace","family_name":"windu","connection":"Username-Password-Authentication"}`,
-			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte(`{"owner":"jedi","email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"mace","lastName":"windu","role":"USER_ADMIN","org":"jedi"}`),
@@ -80,7 +64,6 @@ func TestHandler(t *testing.T) {
 			auth0RespStatusCode: http.StatusOK,
 			auth0RespID:         "",
 			auth0ReqReceived:    `{"email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"cin","family_name":"dralling","connection":"Username-Password-Authentication"}`,
-			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte(`{"owner":"jedi","email":"battlemaster@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"cin","lastName":"dralling","role":"USER_ADMIN","org":"jedi"}`),
@@ -92,7 +75,6 @@ func TestHandler(t *testing.T) {
 			auth0RespStatusCode: http.StatusOK,
 			auth0RespID:         "/",
 			auth0ReqReceived:    `{"app_metadata":{"role":"USER_LAB"}}`,
-			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodPatch,
 			requestBody:         []byte(fmt.Sprintf(`{"authZeroID":"%s","role":"USER_LAB"}`, auth0ID)),
@@ -104,7 +86,6 @@ func TestHandler(t *testing.T) {
 			auth0RespStatusCode: http.StatusOK,
 			auth0RespID:         "/",
 			auth0ReqReceived:    "",
-			customSecret:        "correct_secret",
 			requestSecret:       "correct_secret",
 			requestMethod:       http.MethodDelete,
 			requestBody:         []byte(fmt.Sprintf(`{"authZeroID":"%s"}`, auth0ID)),
@@ -156,7 +137,7 @@ func TestHandler(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			// custom users handler wrapper function
-			handler := http.HandlerFunc(Handler(test.customSecret, "test_token", auth0URL, dgraphURL))
+			handler := http.HandlerFunc(Handler("test_token", auth0URL, dgraphURL))
 
 			handler.ServeHTTP(rec, req)
 

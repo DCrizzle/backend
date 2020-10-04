@@ -18,13 +18,8 @@ import (
 // createUser: adds a user to Auth0 and to Dgraph with the Auth0 ID field
 // editUser: updates an Auth0 user role or password in Auth0 and Dgraph
 // removeUser: deletes an Auth0 user from Auth0 and Dgraph
-func Handler(folivoraSecret, managementToken, auth0URL, dgraphURL string) http.HandlerFunc {
+func Handler(managementToken, auth0URL, dgraphURL string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if folivoraSecret != r.Header.Get("folivora-custom-secret") {
-			http.Error(w, handlers.ErrIncorrectSecret, http.StatusBadRequest)
-			return
-		}
-
 		var dgraphReqJSON handlers.DgraphRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {
 			http.Error(w, handlers.ErrIncorrectRequestBody, http.StatusBadRequest)

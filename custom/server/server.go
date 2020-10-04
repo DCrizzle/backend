@@ -15,8 +15,11 @@ type Server struct {
 }
 
 // New generates a pointer instance of the Server object
-func New(usersHandler, entitiesHandler http.HandlerFunc) *Server {
+func New(middlware mux.MiddlewareFunc, usersHandler, entitiesHandler http.HandlerFunc) *Server {
 	router := mux.NewRouter()
+
+	router.Use(middlware)
+
 	auth0Subrouter := router.PathPrefix("/auth0").Subrouter()
 	auth0Subrouter.HandleFunc("/users", usersHandler)
 
