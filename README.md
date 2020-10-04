@@ -52,3 +52,8 @@ In both cases calling `./bin/start_custom` would start the server.
 - Dgraph Zero: 5080 and 6080
 - Dgraph Alpha: 7080, 8080, and 9080
 - custom server: 4080
+
+### design
+
+- `struct`s should be used for all request/response objects
+- `map`s should be used for Dgraph GraphQL mutation variables
