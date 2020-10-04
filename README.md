@@ -9,7 +9,7 @@ Several prerequisites are needed in order to run the `backend` package locally. 
 - install [Git](https://git-scm.com/downloads)
 	- [additional installation information](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - install [Go](https://golang.org/doc/install)
-- install [Postman](https://www.postman.com/downloads/)
+- install [Insomnia](https://insomnia.rest/download/core/?&ref=https%3A%2F%2Fgraphql.dgraph.io%2Fdocs%2Fquick-start%2F)
 - install [Dgraph](https://github.com/dgraph-io/dgraph#install-from-source)
 	- run `git clone git@github.com:dgraph-io/dgraph.git` in the command line
 	- run the **Install from Source** instructions in the link above
@@ -27,9 +27,9 @@ These should be the minimum resources needed to get up and running with `backend
 1. run `chmod -R +x ./bin/`
 2. launch **Dgraph** locally by running `./bin/start_dgraph`
 3. build and run the **`demo`** package by running `./bin/load_demo`; a progress bar will display as data is loaded into Dgraph and once complete the database may be used
-4. launch **Postman** and click **Import** -> **Choose Files** then find, select, and upload the `backend/etc/postman/collection.json` file
+4. launch **Insomnia** and contact the repo maintainer for the requests collection file
 	- run `./bin/get_token` from the root of the `backend` repository and copy the output token value
-	- in each of your Postman requests, under the **Headers** tab, add a `Key` with the value "`X-Auth0-Token`" and a `Value` with a value of the copied token and the requests are now authorized to communicate with the Dgraph database
+	- in each of your Insomnia requests, under the **Headers** tab, add a `Key` with the value "`X-Auth0-Token`" and a `Value` with a value of the copied token and the requests are now authorized to communicate with the Dgraph database
 
 **NOTE**: the Management API key fetched from Auth0 is **_sensitive data_** and should not be shared publicly  
 **NOTE**: currently the user JWT issued from the `token` package is configured to `john.forstmeier@gmail.com` in Auth0  
