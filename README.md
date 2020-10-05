@@ -31,6 +31,15 @@ The server can be built in two configurations:
 
 In both cases calling `./bin/start_custom` would start the server.
 
+### subscription (tbd)
+
+- intercepts `@withSubscription` directives
+- configures/establishes GraphQL subscription link
+- calls external APIs/internal packages as needed
+- exposes webhook listener configuration endpoints
+- manages/stores webhook listeners in database (schema likely requires update)
+- emits received GraphQL subscription events on webhook listeners
+
 ### demo
 
 `demo` is responsible for loading demo data into the Dgraph database. Follow the instructions below to get setup and execute all commands in the terminal from the root of the `backend` repository.
