@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	entint "github.com/forstmeier/internal/nlp/entities"
+	// entint "github.com/forstmeier/internal/nlp/entities"
 
 	"github.com/forstmeier/backend/auth"
 	"github.com/forstmeier/backend/config"
@@ -17,6 +17,13 @@ import (
 	"github.com/forstmeier/backend/custom/middleware"
 	"github.com/forstmeier/backend/custom/server"
 )
+
+// NOTE: this is temporary while there are no trained models available
+type mockClassifier struct{}
+
+func (mc *mockClassifier) ClassifyEntities(blob string, docType string) (map[string][]string, error) {
+	return map[string][]string{}, nil
+}
 
 func main() {
 	configPath := flag.String("config", "../etc/config/config.json", "path to config json file")
@@ -43,14 +50,15 @@ func main() {
 		cfg.Folivora.DgraphURL,
 	)
 
-	classifier, err := entint.New()
+	// classifier, err := pkgent.New("custom/handlers/entities/config.json", "custom/handlers/entities/models/")
+	mc := &mockClassifier{}
 	if err != nil {
 		log.Fatalf("error creating entities classifier: %s\n", err.Error())
 	}
 
 	entitiesHandler := entities.Handler(
 		cfg.Folivora.DgraphURL,
-		classifier,
+		mc,
 	)
 
 	customServer := server.New(root.Middleware, userHandler, entitiesHandler)

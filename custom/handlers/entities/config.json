@@ -1,0 +1,10 @@
+[
+    {
+        "docType": "consent",
+        "trainedEntities": [],
+        "providedEntities": [
+            "NNP",
+            "GPE"
+        ]
+    }
+]

@@ -11,7 +11,7 @@ w/
 p/
 
 # config resources
-config.json
+etc/config/config.json
 
 # demo output
 results.json
