@@ -2,7 +2,7 @@
 
 > The API and database :sloth:
 
-## general
+## General
 
 Several prerequisites are needed in order to run the `backend` package locally. Follow the installation/download instructions for your local operating system.
 
@@ -18,9 +18,9 @@ These should be the minimum resources needed to get up and running with `backend
 
 **NOTE**: the `master` branch version of Dgraph is being used to accommodate pre-release features
 
-## packages
+## Packages
 
-### custom
+### `custom`
 
 `custom` intercepts and processes all Dgraph `@custom` directive requests. This is to allow the additional preprocessing ahead of the main GraphQL logic and to provide a base for local mocking. **No "smarts"** will be built into this package and it will _only be an intermediary_ responsible for invoking external APIs (e.g. Auth0) and internal packages (e.g. `entities`) to fulfill the required logic. Most or all of the internal packages will be housed in the private `internal` repository.
 
@@ -31,7 +31,7 @@ The server can be built in two configurations:
 
 In both cases calling `./bin/start_custom` would start the server.
 
-### subscription (tbd)
+### `subscription` (tbd)
 
 - intercepts `@withSubscription` directives
 - configures/establishes GraphQL subscription link
@@ -40,7 +40,7 @@ In both cases calling `./bin/start_custom` would start the server.
 - manages/stores webhook listeners in database (schema likely requires update)
 - emits received GraphQL subscription events on webhook listeners
 
-### demo
+### `demo`
 
 `demo` is responsible for loading demo data into the Dgraph database. Follow the instructions below to get setup and execute all commands in the terminal from the root of the `backend` repository.
 
@@ -54,15 +54,19 @@ In both cases calling `./bin/start_custom` would start the server.
 **NOTE**: the Management API key fetched from Auth0 is **_sensitive data_** and should not be shared publicly  
 **NOTE**: currently the user JWT issued from the `token` package is configured to `john.forstmeier@gmail.com` in Auth0  
 
-## notes
+## Notes
 
-### ports
+### Ports
+
+These are the ports that are currently configured for use across the `backend` package.
 
 - Dgraph Zero: `5080` and `6080`
 - Dgraph Alpha: `7080`, `8080`, and `9080`
 - custom server: `4080`
 
-### design
+### Design
+
+Below are a couple of points regarding specific code and design choices.
 
 - `struct` should be used for all request/response objects - specific `struct` objects with appropriate fields and JSON tags should be defined
 - `map` should be used for Dgraph GraphQL mutation variables - a more flexible `map[string]interface{}` can be used when processing mutations
