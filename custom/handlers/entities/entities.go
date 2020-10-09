@@ -13,7 +13,7 @@ import (
 	"github.com/forstmeier/backend/graphql"
 )
 
-// Handler is an HTTP listener for classify entity @custom directive events
+// Handler is an HTTP listener for classify entity @custom directive events.
 func Handler(dgraphURL string, classifier entint.Classifier) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var dgraphReqJSON handlers.DgraphEntitiesRequest

@@ -2,7 +2,7 @@ package auth
 
 import "fmt"
 
-// ErrAuth provides a wrap around low-level Go errors for the auth package
+// ErrAuth provides a wrap around low-level Go errors for the auth package.
 type ErrAuth struct {
 	wrapped error
 }

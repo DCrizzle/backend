@@ -13,7 +13,7 @@ import (
 	"github.com/forstmeier/backend/graphql"
 )
 
-// Handler is an HTTP listener for User type @custom directive events
+// Handler is an HTTP listener for User type @custom directive events.
 //
 // createUser: adds a user to Auth0 and to Dgraph with the Auth0 ID field
 // editUser: updates an Auth0 user role or password in Auth0 and Dgraph

@@ -9,12 +9,12 @@ import (
 )
 
 // Server holds the custom server router and exposes the
-// required helper methods
+// required helper methods.
 type Server struct {
 	httpServer *http.Server
 }
 
-// New generates a pointer instance of the Server object
+// New generates a pointer instance of the Server object.
 func New(middlware mux.MiddlewareFunc, usersHandler, entitiesHandler http.HandlerFunc) *Server {
 	router := mux.NewRouter()
 
@@ -38,12 +38,12 @@ func New(middlware mux.MiddlewareFunc, usersHandler, entitiesHandler http.Handle
 	}
 }
 
-// Start starts the configured server
+// Start starts the configured server.
 func (s *Server) Start() {
 	s.httpServer.ListenAndServe()
 }
 
-// Stop stops the configured server
+// Stop stops the configured server.
 func (s *Server) Stop(ctx context.Context) {
 	s.httpServer.Shutdown(ctx)
 }

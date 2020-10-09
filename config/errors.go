@@ -2,7 +2,7 @@ package config
 
 import "fmt"
 
-// ErrConfig provides a wrap around low-level Go errors for the config package
+// ErrConfig provides a wrap around low-level Go errors for the config package.
 type ErrConfig struct {
 	wrapped error
 }
