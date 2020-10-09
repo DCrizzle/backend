@@ -976,7 +976,7 @@ type Mutation {
 	addFormEntities(owner: String!, form: String!, docType: String!, blob: String!): Entities @custom(http: {
 		url: "http://localhost:4080/nlp/entities",
 		method: "POST",
-		body: "{ form: $form, docType: $docType, blob: $blob }",
+		body: "{ owner: $owner, form: $form, docType: $docType, blob: $blob }",
 		forwardHeaders: ["folivora-custom-secret", "X-Auth0-Token"]
 	})
 }
