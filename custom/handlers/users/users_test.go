@@ -10,8 +10,6 @@ import (
 	"testing"
 
 	internal "github.com/forstmeier/internal/auth0/users"
-
-	"github.com/forstmeier/backend/custom/handlers"
 )
 
 func TestHandler(t *testing.T) {
@@ -37,7 +35,7 @@ func TestHandler(t *testing.T) {
 			requestMethod:       http.MethodPost,
 			requestBody:         []byte("---------"),
 			responseStatusCode:  http.StatusBadRequest,
-			responseBody:        handlers.ErrIncorrectRequestBody,
+			responseBody:        errorIncorrectRequestBody,
 		},
 		{
 			description:         "unsupported http method in request to custom",
@@ -48,7 +46,7 @@ func TestHandler(t *testing.T) {
 			requestMethod:       http.MethodPut,
 			requestBody:         []byte(`{"email": "grandmaster@jeditemple.edu"}`),
 			responseStatusCode:  http.StatusBadRequest,
-			responseBody:        handlers.ErrIncorrectHTTPMethod,
+			responseBody:        errorIncorrectHTTPMethod,
 		},
 		{
 			description:         "successful create user request to custom server",

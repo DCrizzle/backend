@@ -19,7 +19,7 @@ func Handler(auth0URL, dgraphURL string, client internal.Client) http.HandlerFun
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var dgraphReqJSON handlers.DgraphRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {
-			http.Error(w, handlers.ErrIncorrectRequestBody, http.StatusBadRequest)
+			http.Error(w, errorIncorrectRequestBody, http.StatusBadRequest)
 			return
 		}
 
@@ -90,14 +90,14 @@ func Handler(auth0URL, dgraphURL string, client internal.Client) http.HandlerFun
 
 		_, err := dgraphClient.SendRequest(dgraphMutation, dgraphVariables)
 		if err != nil {
-			http.Error(w, handlers.ErrDgraphMutation, http.StatusBadRequest)
+			http.Error(w, errorDgraphMutation, http.StatusBadRequest)
 			return
 		}
 
 		if r.Method == http.MethodPost {
 			dgraphResponseBytes, err := json.Marshal(dgraphVariables.([]map[string]interface{})[0])
 			if err != nil {
-				http.Error(w, handlers.ErrMarshallingDgraphJSON, http.StatusBadRequest)
+				http.Error(w, errorMarshallingDgraphJSON, http.StatusBadRequest)
 				return
 			}
 			fmt.Fprintf(w, string(dgraphResponseBytes))
