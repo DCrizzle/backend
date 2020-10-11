@@ -16,7 +16,7 @@ func Handler(internalSecret, dgraphURL string, classifier entint.Classifier) htt
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var dgraphReqJSON handlers.DgraphRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {
-			http.Error(w, handlers.ErrIncorrectRequestBody, http.StatusBadRequest)
+			http.Error(w, errorIncorrectRequestBody, http.StatusBadRequest)
 			return
 		}
 
@@ -33,7 +33,7 @@ func Handler(internalSecret, dgraphURL string, classifier entint.Classifier) htt
 
 		_, err = dgraphClient.SendRequest(graphql.AddEntitiesMutation, dgraphVariables)
 		if err != nil {
-			http.Error(w, handlers.ErrDgraphMutation, http.StatusInternalServerError)
+			http.Error(w, errorDgraphMutation, http.StatusInternalServerError)
 			return
 		}
 

@@ -7,8 +7,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"github.com/forstmeier/backend/custom/handlers"
 )
 
 type mockClassifier struct {
@@ -37,7 +35,7 @@ func TestHandler(t *testing.T) {
 			requestBody:        "",
 			requestSecret:      "correct_secret",
 			responseStatusCode: http.StatusBadRequest,
-			responseBody:       handlers.ErrIncorrectRequestBody,
+			responseBody:       errorIncorrectRequestBody,
 		},
 		{
 			description:        "error received in response from classify entities",
@@ -46,7 +44,7 @@ func TestHandler(t *testing.T) {
 			requestBody:        `{"owner": "", "form": "", "docType": "", "blob": ""}`,
 			requestSecret:      "correct_secret",
 			responseStatusCode: http.StatusInternalServerError,
-			responseBody:       handlers.ErrClassifyingEntities,
+			responseBody:       errorClassifyingEntities,
 		},
 		{
 			description: "successful classify entities invocation",

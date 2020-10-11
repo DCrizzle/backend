@@ -18,13 +18,13 @@ func Handler(dgraphURL string, classifier internal.Classifier) http.HandlerFunc 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var dgraphReqJSON handlers.DgraphEntitiesRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {
-			http.Error(w, handlers.ErrIncorrectRequestBody, http.StatusBadRequest)
+			http.Error(w, errorIncorrectRequestBody, http.StatusBadRequest)
 			return
 		}
 
 		entitiesData, err := classifier.ClassifyEntities(dgraphReqJSON.Blob, dgraphReqJSON.DocType)
 		if err != nil {
-			http.Error(w, handlers.ErrClassifyingEntities, http.StatusInternalServerError)
+			http.Error(w, errorClassifyingEntities, http.StatusInternalServerError)
 			return
 		}
 
@@ -45,7 +45,7 @@ func Handler(dgraphURL string, classifier internal.Classifier) http.HandlerFunc 
 
 		_, err = dgraphClient.SendRequest(graphql.AddEntitiesMutation, dgraphVariables)
 		if err != nil {
-			http.Error(w, handlers.ErrDgraphMutation, http.StatusInternalServerError)
+			http.Error(w, errorDgraphMutation, http.StatusInternalServerError)
 			return
 		}
 
