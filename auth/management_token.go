@@ -26,19 +26,19 @@ func (a *Auth) GetManagementAPIToken() (string, error) {
 	payload := strings.NewReader(payloadString)
 	req, err := http.NewRequest("POST", a.config.Auth0.TokenURL, payload)
 	if err != nil {
-		return "", errAuth(err)
+		return "", newErrorNewRequest(err)
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := a.client.Do(req)
 	if err != nil {
-		return "", errAuth(err)
+		return "", newErrorClientDo(err)
 	}
 	defer resp.Body.Close()
 
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", errAuth(err)
+		return "", newErrorReadResponseBody(err)
 	}
 
 	managementToken := gjson.Get(string(bodyBytes), "access_token")
