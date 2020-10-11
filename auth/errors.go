@@ -1,8 +1,6 @@
 package auth
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // ErrorNewRequest wraps errors returned by http.NewRequest in the Auth struct methods.
 type ErrorNewRequest struct {

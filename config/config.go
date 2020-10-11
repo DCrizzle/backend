@@ -42,12 +42,12 @@ type folivora struct {
 func New(path string) (*Config, error) {
 	configBytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, errConfig(err)
+		return nil, newErrorReadFile(err)
 	}
 
 	config := &Config{}
 	if err := json.Unmarshal(configBytes, config); err != nil {
-		return nil, errConfig(err)
+		return nil, newErrorUnmarshalConfig(err)
 	}
 
 	return config, nil
