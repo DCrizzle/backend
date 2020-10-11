@@ -1,10 +1,6 @@
 package middleware
 
-import (
-	"net/http"
-
-	"github.com/forstmeier/backend/custom/handlers"
-)
+import "net/http"
 
 // Root hosts middleware logic and passes variables in as fields.
 type Root struct {
@@ -22,7 +18,7 @@ func New(folivoraSecret string) *Root {
 func (root *Root) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if root.folivoraSecret != r.Header.Get("folivora-custom-secret") {
-			http.Error(w, handlers.ErrIncorrectSecret, http.StatusBadRequest)
+			http.Error(w, errorIncorrectSecret, http.StatusBadRequest)
 			return
 		}
 

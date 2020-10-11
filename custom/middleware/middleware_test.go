@@ -7,8 +7,6 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-
-	"github.com/forstmeier/backend/custom/handlers"
 )
 
 func testHandler(w http.ResponseWriter, r *http.Request) {}
@@ -24,7 +22,7 @@ func TestMiddlware(t *testing.T) {
 			description:        "incorrect request secret provided",
 			requestSecret:      "incorrect_secret",
 			responseStatusCode: http.StatusBadRequest,
-			responseBody:       handlers.ErrIncorrectSecret,
+			responseBody:       errorIncorrectSecret,
 		},
 		{
 			description:        "correct request secret provided",
