@@ -45,25 +45,25 @@ func (d *Dgraph) SendRequest(query string, input interface{}) (string, error) {
 
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		return "", err
+		return "", newErrorMarshalConfig(err)
 	}
 
 	req, err := http.NewRequest("POST", d.url, bytes.NewBuffer(payloadBytes))
 	if err != nil {
-		return "", err
+		return "", newErrorNewRequest(err)
 	}
 	req.Header.Set("X-Auth0-Token", d.token)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := d.client.Do(req)
 	if err != nil {
-		return "", err
+		return "", newErrorClientDo(err)
 	}
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", newErrorReadAll(err)
 	}
 
 	return string(data), nil
