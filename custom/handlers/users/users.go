@@ -3,11 +3,11 @@
 package users
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
+
+	internal "github.com/forstmeier/internal/auth0/users"
 
 	"github.com/forstmeier/backend/custom/handlers"
 	"github.com/forstmeier/backend/graphql"
@@ -18,7 +18,7 @@ import (
 // createUser: adds a user to Auth0 and to Dgraph with the Auth0 ID field
 // editUser: updates an Auth0 user role or password in Auth0 and Dgraph
 // removeUser: deletes an Auth0 user from Auth0 and Dgraph
-func Handler(managementToken, auth0URL, dgraphURL string) http.HandlerFunc {
+func Handler(dgraphURL string, client internal.Client) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var dgraphReqJSON handlers.DgraphRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {
@@ -26,20 +26,45 @@ func Handler(managementToken, auth0URL, dgraphURL string) http.HandlerFunc {
 			return
 		}
 
-		var auth0Req *http.Request
-		var auth0Err error
+		var resp *internal.Response
 
 		var dgraphMutation string
 		var dgraphVariables interface{}
 
 		if r.Method == http.MethodPost {
-			auth0CreateURL := auth0URL + "users"
-			auth0Req, auth0Err = createUserAuth0Req(dgraphReqJSON, auth0CreateURL)
+			createRequest := internal.Request{
+				Owner:     dgraphReqJSON.Owner,
+				Email:     dgraphReqJSON.Email,
+				Password:  dgraphReqJSON.Password,
+				Role:      dgraphReqJSON.Role,
+				Org:       dgraphReqJSON.Org,
+				FirstName: dgraphReqJSON.FirstName,
+				LastName:  dgraphReqJSON.LastName,
+			}
+
+			createResp, err := client.CreateUser(createRequest)
+			if err != nil {
+				http.Error(w, handlers.ErrIncorrectRequestBody, http.StatusBadRequest)
+				return
+			}
+			resp = createResp
 
 			dgraphMutation = graphql.AddUsersMutation
+			dgraphVariables = createUserDgraphReq(dgraphReqJSON, resp.Auth0ID)
 		} else if r.Method == http.MethodPatch {
-			auth0UpdateURL := auth0URL + "users/" + url.PathEscape(*dgraphReqJSON.Auth0ID)
-			auth0Req, auth0Err = updateUserAuth0Req(dgraphReqJSON, auth0UpdateURL)
+			updateRequest := internal.Request{
+				Auth0ID:  dgraphReqJSON.Auth0ID,
+				Owner:    dgraphReqJSON.Owner,
+				Password: dgraphReqJSON.Password,
+				Role:     dgraphReqJSON.Role,
+			}
+
+			updateResp, err := client.UpdateUser(updateRequest)
+			if err != nil {
+				// outline:
+				// [ ] handle error
+			}
+			resp = updateResp
 
 			updateUserVariables := map[string]interface{}{
 				"filter": map[string]interface{}{
@@ -63,8 +88,16 @@ func Handler(managementToken, auth0URL, dgraphURL string) http.HandlerFunc {
 			dgraphMutation = graphql.UpdateUserMutation
 			dgraphVariables = updateUserVariables
 		} else if r.Method == http.MethodDelete {
-			auth0DeleteURL := auth0URL + "users/" + url.PathEscape(*dgraphReqJSON.Auth0ID)
-			auth0Req, auth0Err = deleteUserAuth0Req(auth0DeleteURL)
+			deleteRequest := internal.Request{
+				Auth0ID: dgraphReqJSON.Auth0ID,
+			}
+
+			deleteResp, err := client.DeleteUser(deleteRequest)
+			if err != nil {
+				// outline:
+				// [ ] handle error
+			}
+			resp = deleteResp
 
 			dgraphMutation = graphql.DeleteUserMutation
 			dgraphVariables = map[string]interface{}{
@@ -77,32 +110,7 @@ func Handler(managementToken, auth0URL, dgraphURL string) http.HandlerFunc {
 			return
 		}
 
-		if auth0Err != nil {
-			http.Error(w, handlers.ErrCreatingAuth0Request, http.StatusInternalServerError)
-			return
-		}
-
-		auth0Req.Header.Set("Authorization", "Bearer "+managementToken)
-		auth0Req.Header.Set("Content-Type", "application/json")
-
 		httpClient := &http.Client{}
-
-		auth0Resp, err := httpClient.Do(auth0Req)
-		if err != nil || !checkSuccess(auth0Resp.StatusCode) {
-			http.Error(w, handlers.ErrExecutingAuth0Request, http.StatusInternalServerError)
-			return
-		}
-		defer auth0Resp.Body.Close()
-
-		var auth0RespJSON handlers.Auth0Response
-		if r.Method == http.MethodPost {
-			if err := json.NewDecoder(auth0Resp.Body).Decode(&auth0RespJSON); err != nil {
-				http.Error(w, handlers.ErrUnmarshallingResponseBody, http.StatusBadRequest)
-				return
-			}
-
-			dgraphVariables = createUserDgraphReq(dgraphReqJSON, auth0RespJSON.Auth0ID)
-		}
 
 		dgraphClient := graphql.New(
 			httpClient,
@@ -110,7 +118,7 @@ func Handler(managementToken, auth0URL, dgraphURL string) http.HandlerFunc {
 			r.Header.Get("X-Auth0-Token"),
 		)
 
-		_, err = dgraphClient.SendRequest(dgraphMutation, dgraphVariables)
+		_, err := dgraphClient.SendRequest(dgraphMutation, dgraphVariables)
 		if err != nil {
 			http.Error(w, handlers.ErrDgraphMutation, http.StatusBadRequest)
 			return
@@ -131,54 +139,6 @@ func Handler(managementToken, auth0URL, dgraphURL string) http.HandlerFunc {
 			fmt.Fprintf(w, responseBody)
 		}
 	})
-}
-
-func createUserAuth0Req(dgraphReqJSON handlers.DgraphRequest, url string) (*http.Request, error) {
-	createUserJSON := handlers.CreateUserRequest{
-		Email:    *dgraphReqJSON.Email,
-		Password: *dgraphReqJSON.Password,
-		AppMetadata: handlers.AppMetadata{
-			Role:  dgraphReqJSON.Role,
-			OrgID: dgraphReqJSON.Owner,
-		},
-		FirstName:  *dgraphReqJSON.FirstName,
-		LastName:   *dgraphReqJSON.LastName,
-		Connection: "Username-Password-Authentication",
-	}
-
-	createUserByte, err := json.Marshal(createUserJSON)
-	if err != nil {
-		return nil, err
-	}
-
-	return http.NewRequest(http.MethodPost, url, bytes.NewReader(createUserByte))
-}
-
-func updateUserAuth0Req(dgraphReqJSON handlers.DgraphRequest, url string) (*http.Request, error) {
-	updateUserJSON := handlers.UpdateUserRequest{}
-	if dgraphReqJSON.Password != nil {
-		updateUserJSON.Password = dgraphReqJSON.Password
-	}
-	if dgraphReqJSON.Role != nil {
-		updateUserJSON.AppMetadata = handlers.AppMetadata{
-			Role: dgraphReqJSON.Role,
-		}
-	}
-
-	updateUserByte, err := json.Marshal(updateUserJSON)
-	if err != nil {
-		return nil, err
-	}
-
-	return http.NewRequest(http.MethodPatch, url, bytes.NewReader(updateUserByte))
-}
-
-func deleteUserAuth0Req(url string) (*http.Request, error) {
-	return http.NewRequest(http.MethodDelete, url, nil)
-}
-
-func checkSuccess(status int) bool {
-	return status == http.StatusOK || status == http.StatusCreated || status == http.StatusNoContent
 }
 
 func createUserDgraphReq(dgraphReqJSON handlers.DgraphRequest, auth0ID string) []map[string]interface{} {

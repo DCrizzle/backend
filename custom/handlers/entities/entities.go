@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"net/http"
 
-	entint "github.com/forstmeier/internal/nlp/entities"
+	internal "github.com/forstmeier/internal/nlp/entities"
 
 	"github.com/forstmeier/backend/custom/handlers"
 	"github.com/forstmeier/backend/graphql"
 )
 
 // Handler is an HTTP listener for classify entity @custom directive events.
-func Handler(dgraphURL string, classifier entint.Classifier) http.HandlerFunc {
+func Handler(dgraphURL string, classifier internal.Classifier) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var dgraphReqJSON handlers.DgraphEntitiesRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {

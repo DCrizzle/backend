@@ -8,13 +8,14 @@ import (
 	"fmt"
 	"net/http"
 
+	internal "github.com/forstmeier/internal/auth0/users"
 	"github.com/google/uuid"
 
 	"github.com/forstmeier/backend/custom/handlers"
 	"github.com/forstmeier/backend/graphql"
 )
 
-func Handler(secret, token, auth0URL, dgraphURL string) http.HandlerFunc {
+func Handler(auth0URL, dgraphURL string, client internal.Client) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var dgraphReqJSON handlers.DgraphRequest
 		if err := json.NewDecoder(r.Body).Decode(&dgraphReqJSON); err != nil {

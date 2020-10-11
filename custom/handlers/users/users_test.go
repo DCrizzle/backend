@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	internal "github.com/forstmeier/internal/auth0/users"
+
 	"github.com/forstmeier/backend/custom/handlers"
 )
 
@@ -47,17 +49,6 @@ func TestHandler(t *testing.T) {
 			requestBody:         []byte(`{"email": "grandmaster@jeditemple.edu"}`),
 			responseStatusCode:  http.StatusBadRequest,
 			responseBody:        handlers.ErrIncorrectHTTPMethod,
-		},
-		{
-			description:         "error received in response from auth0 server",
-			auth0RespStatusCode: http.StatusBadRequest,
-			auth0RespID:         "",
-			auth0ReqReceived:    `{"email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","app_metadata":{"role":"USER_ADMIN","orgID":"jedi"},"given_name":"mace","family_name":"windu","connection":"Username-Password-Authentication"}`,
-			requestSecret:       "correct_secret",
-			requestMethod:       http.MethodPost,
-			requestBody:         []byte(`{"owner":"jedi","email":"masteroftheorder@jeditemple.edu","password":"may-the-force-be-with-you","firstName":"mace","lastName":"windu","role":"USER_ADMIN","org":"jedi"}`),
-			responseStatusCode:  http.StatusInternalServerError,
-			responseBody:        handlers.ErrExecutingAuth0Request,
 		},
 		{
 			description:         "successful create user request to custom server",
@@ -122,6 +113,8 @@ func TestHandler(t *testing.T) {
 		dgraphServer := httptest.NewServer(dgraphMux)
 		dgraphURL := dgraphServer.URL + "/graphql"
 
+		client := internal.New(auth0URL, "managementToken")
+
 		t.Run(test.description, func(t *testing.T) {
 			// mock request from dgraph @custom directive to custom server/handler
 			req, err := http.NewRequest(
@@ -137,7 +130,7 @@ func TestHandler(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			// custom users handler wrapper function
-			handler := http.HandlerFunc(Handler("test_token", auth0URL, dgraphURL))
+			handler := http.HandlerFunc(Handler(dgraphURL, client))
 
 			handler.ServeHTTP(rec, req)
 
